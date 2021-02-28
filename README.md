@@ -1,5 +1,5 @@
 # thesis-device-app
-The device application 
+The device application asdasdasd
 ## Directory structure
 ![Alt text](./docs/images/directory_structure.png "File Structure")
 
