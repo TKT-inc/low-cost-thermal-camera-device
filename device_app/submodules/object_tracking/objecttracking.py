@@ -3,6 +3,12 @@ from scipy.spatial import distance as dist
 from collections import OrderedDict
 import numpy as np
 
+class ObjectInfo():
+	def __init__(self, coor, name = "None", temperature = "None"):
+		self.coor = coor
+		self.name = name
+		self.temperature = temperature
+
 class CentroidTracker():
 	def __init__(self, maxDisappeared=10):
 		# initialize the next unique object ID along with two ordered
@@ -26,7 +32,8 @@ class CentroidTracker():
 	def register(self, coor):
 		# when registering an object we use the next available object
 		# ID to store the centroid
-		self.objects[self.nextObjectID] = coor
+		obj = ObjectInfo(coor)
+		self.objects[self.nextObjectID] = obj
 		self.disappeared[self.nextObjectID] = 0
 		self.nextObjectID += 1
 	
@@ -75,7 +82,10 @@ class CentroidTracker():
 		else:
 			# grab the set of object IDs and corresponding centroids
 			objectIDs = list(self.objects.keys())
-			objectCoors = list(self.objects.values())
+			arr = list(self.objects.values())
+			objectCoors = list()
+			for i in range(len(arr)):
+				objectCoors.append(arr[i].coor)
 			objectCentroids = list()
 			for (i, (startX, startY, endX, endY)) in enumerate(objectCoors):
 				(cX, cY) = self.getCentroid((startX, startY, endX, endY))
@@ -117,7 +127,7 @@ class CentroidTracker():
 				# set its new centroid, and reset the disappeared
 				# counter
 				objectID = objectIDs[row]
-				self.objects[objectID] = rects[col]
+				self.objects[objectID].coor = rects[col]
 				self.disappeared[objectID] = 0
 
 				# indicate that we have examined each of the row and
