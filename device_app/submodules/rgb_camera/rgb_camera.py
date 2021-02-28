@@ -19,3 +19,5 @@ class RgbCam:
                 self.frame = cv2.resize(self.ori, (self.width, self.height))
     def getFrame(self):
         return self.frame
+    def getOriginFrame(self):
+        return self.ori

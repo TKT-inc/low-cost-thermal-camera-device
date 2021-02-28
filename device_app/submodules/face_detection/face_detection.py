@@ -24,7 +24,7 @@ class FaceDetection:
             # extract the confidence and prediction
             confidence = detections[0, 0, i, 2]
             # filter detections by confidence greater than the minimum confidence
-            if confidence < 0.8 :
+            if confidence < 0.9 :
                 continue
             # Determine the (x, y)-coordinates of the bounding box for the
 

@@ -13,10 +13,11 @@ def convertRGBToThermalCoor(x, y, H_raw):
         convert_y = MAX_HEIGHT - 1
     return convert_x, convert_y 
 
-def measureTemperature(frame,color,temp, objects,objectID, coordinates):
-    H = [[ 9.65618052e-01,  1.64519945e-02, -2.23755740e+01],
-    [-1.42094632e-02,  1.26760427e+00, -2.37487801e+01],
-    [ 7.58731430e-05, -3.62088057e-05,  1.00000000e+00]]
+def measureTemperature(color,temp, objects,objectID, coordinates):
+    H = [[ 3.27462156e+00, 7.23169874e-01, -6.78237088e+02],
+    [-3.69846362e-01,  5.45383143e+00, -1.36312869e+03],
+     [-2.37831103e-04,  4.22887587e-03,  1.00000000e+00]]
+
     thermal_start_x, thermal_start_y = convertRGBToThermalCoor(coordinates[0], coordinates[1], H)
     thermal_end_x, thermal_end_y = convertRGBToThermalCoor(coordinates[2], coordinates[3], H)
     cv2.rectangle(color, (int(thermal_start_x), int(thermal_start_y)), (int(thermal_end_x), int(thermal_end_y)), (0, 0, 255), 2)
