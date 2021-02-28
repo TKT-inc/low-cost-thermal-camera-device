@@ -1,1 +1,2 @@
-configuration: asdasd
+iotHub:
+    msgFormat: '{{"personID": "{personID}","temperature":"{temperature}","embedding": "{embedding}"}}'
