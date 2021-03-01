@@ -6,7 +6,7 @@ from collections import OrderedDict
 from threading import Thread
 from submodules.rgb_camera.rgb_camera import RgbCam
 from submodules.thermal_camera.thermal_camera import ThermalCam
-from submodules.face_detection.face_detection import FaceDetection
+from submodules.face_detection.face_detection import FaceDetection, LightFaceDetection, FaceDetectionLightRfb
 from submodules.object_tracking.objecttracking import CentroidTracker
 from submodules.object_tracking.Tracker import TrackableObject
 from submodules.measure_temperature.measure_temperature import measureTemperature
@@ -71,15 +71,20 @@ CONNECTION_STRING = "HostName=thesis.azure-devices.net;DeviceId=device-test;Shar
 
 RGB_SOURCE = "nvarguscamerasrc ! video/x-raw(memory:NVMM), " \
 	"width=(int)1920, height=(int)1080,format=(string)NV12, " \
-	"framerate=(fraction)30/1 ! nvvidconv flip-method=2 ! video/x-raw, " \
+	"framerate=(fraction)29/1 ! nvvidconv flip-method=2 ! video/x-raw, " \
 	"format=(string)BGRx ! videoconvert ! video/x-raw, " \
 	"format=(string)BGR ! appsink" 
 CAFFEMODEL = "./submodules/face_detection/models/res10_300x300_ssd_iter_140000.caffemodel"
 PROTOTEXTPATH = "./submodules/face_detection/models/deploy.prototxt.txt"
+MODEL = "./submodules/face_detection/models/slim-320.caffemodel"
+PROTO = "./submodules/face_detection/models/slim-320.prototxt"
+ONNX = "./submodules/face_detection/models/version-slim-320_simplified.onnx"
 
 rgb = RgbCam(RGB_SOURCE,768, 432)
 lep = ThermalCam(640, 480)
-faceDetect = FaceDetection(model = CAFFEMODEL, proto = PROTOTEXTPATH)
+#faceDetect = LightFaceDetection(PROTO, MODEL)
+faceDetect = FaceDetection(CAFFEMODEL, PROTOTEXTPATH)
+#faceDetect = FaceDetectionLightRfb()
 ct = CentroidTracker()
 trackableObjects = {}
 objects = ct.update([])
@@ -90,11 +95,14 @@ while (1):
     raw = thermal
     thermal = cv2.resize(thermal,(640,480))
     color = cv2.applyColorMap(thermal, cv2.COLORMAP_JET)
+    #start = time.time()
     rects = faceDetect.detectFaces(frame)
+    #end = time.time()
     objects = ct.update(rects)
     face_checking(frame,color,temp, objects, trackableObjects, rects, conn)
     cv2.imshow('frame', frame)
     cv2.imshow('heat', color)
+    print('Inference: {:.6f}s'.format(end-start))
     key = cv2.waitKey(1) & 0xFF
     # if the `q` key was pressed, break from the loop
     if key == ord("q"):
