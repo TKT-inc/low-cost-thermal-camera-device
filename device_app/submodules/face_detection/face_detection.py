@@ -2,14 +2,14 @@ import cv2
 import sys
 import numpy as np
 from math import ceil
-from vision.ssd.config.fd_config import define_img_size
+from submodules.face_detection.vision.ssd.config.fd_config import define_img_size
 CAFFEMODEL = "/models/res10_300x300_ssd_iter_140000.caffemodel"
 PROTOTEXTPATH = "/models/deploy.prototxt.txt"
 input_img_size = 480
 define_img_size(input_img_size)
-from vision.ssd.mb_tiny_fd import create_mb_tiny_fd, create_mb_tiny_fd_predictor
-from vision.ssd.mb_tiny_RFB_fd import create_Mb_Tiny_RFB_fd, create_Mb_Tiny_RFB_fd_predictor
-from vision.utils.misc import Timer
+from submodules.face_detection.vision.ssd.mb_tiny_fd import create_mb_tiny_fd, create_mb_tiny_fd_predictor
+from submodules.face_detection.vision.ssd.mb_tiny_RFB_fd import create_Mb_Tiny_RFB_fd, create_Mb_Tiny_RFB_fd_predictor
+from submodules.face_detection.vision.utils.misc import Timer
 
 
 
@@ -34,7 +34,7 @@ class FaceDetection:
             # extract the confidence and prediction
             confidence = detections[0, 0, i, 2]
             # filter detections by confidence greater than the minimum confidence
-            if confidence < 0.9 :
+            if confidence < 0.7 :
                 continue
             # Determine the (x, y)-coordinates of the bounding box for the
 

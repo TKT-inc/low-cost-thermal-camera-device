@@ -28,18 +28,18 @@ def faceRec(frame, faceTuple):
 
 def create_measure_thread(objects, personID):
     while personID in objects:
-        temperature = measureTemperature(lep.getFrame()[0],lep.getFrame()[1], objects, personID, objects[personID].coor)
+        temperature = measureTemperature(color,lep.getFrame()[1], objects, personID, objects[personID].coor)
         time.sleep(1)
-    print('KILLED MEASURE')
+    #print('KILLED MEASURE')
 
 def create_send_thread(conn,objects, personID):
         while personID in objects:
-            print('send: ' + str(personID))
+            #print('send: ' + str(personID) + " " + str(objects[personID].coor))
             coor = objects[personID].coor
             embedding = faceRec(rgb.getOriginFrame(), (int(coor[1]*2.5), int(coor[2]*2.5), int(coor[3]*2.5), int(coor[0]*2.5)))
             conn.message_sending(personID, embedding, objects[personID])
-            time.sleep(3)
-        print('KILLED')
+            time.sleep(2)
+        #print('KILLED')
 
 def face_checking(frame,color,temp, objects,trackableObjects, rects, conn):
     for (objectID, obj) in objects.items():
@@ -82,8 +82,8 @@ ONNX = "./submodules/face_detection/models/version-slim-320_simplified.onnx"
 
 rgb = RgbCam(RGB_SOURCE,768, 432)
 lep = ThermalCam(640, 480)
-#faceDetect = LightFaceDetection(PROTO, MODEL)
-faceDetect = FaceDetection(CAFFEMODEL, PROTOTEXTPATH)
+faceDetect = LightFaceDetection(PROTO, MODEL)
+#faceDetect = FaceDetection(CAFFEMODEL, PROTOTEXTPATH)
 #faceDetect = FaceDetectionLightRfb()
 ct = CentroidTracker()
 trackableObjects = {}
@@ -102,7 +102,7 @@ while (1):
     face_checking(frame,color,temp, objects, trackableObjects, rects, conn)
     cv2.imshow('frame', frame)
     cv2.imshow('heat', color)
-    print('Inference: {:.6f}s'.format(end-start))
+    #print('Inference: {:.6f}s'.format(end-start))
     key = cv2.waitKey(1) & 0xFF
     # if the `q` key was pressed, break from the loop
     if key == ord("q"):
