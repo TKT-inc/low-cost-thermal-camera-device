@@ -39,7 +39,7 @@ def face_checking(frame,color,temp, objects,trackableObjects, rects, conn):
     for (objectID, obj) in objects.items():
         text = "ID {}".format(objectID)
         centroid = obj.coor
-        temperature =  measureTemperature(frame,color,temp, objects, objectID, centroid)
+        temperature =  measureTemperature(color,temp, objects, objectID, centroid)
         y = centroid[1] - 10 if centroid[1] - 10 > 10 else centroid[1] + 10
         cv2.putText(frame, str(temperature), (centroid[0], y), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
         center = centroid_detect(centroid[0], centroid[1], centroid[2]-centroid[0], centroid[3]-centroid[1])
