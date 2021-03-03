@@ -26,11 +26,26 @@ def faceRec(frame, faceTuple):
     embedding = ' '.join(map(str,encodings[0]))
     return embedding
 
-def create_measure_thread(objects, personID):
-    while personID in objects:
-        temperature = measureTemperature(color,lep.getFrame()[1], objects, personID, objects[personID].coor)
+
+def create_measure_thread(rgb, lep, faceDetect, objects):
+    time.sleep(1)
+    while (1):
+        objects_measurement = objects
+        ct_temp = ct
+        gp_temp = rgb.getFrame()
+        thermal, temp = lep.getFrame()        
+        raw = thermal
+        thermal = cv2.resize(thermal,(640,480))
+        color = cv2.applyColorMap(thermal, cv2.COLORMAP_JET)
+        rgp_temp = rgb.getFrame()
+        rects_measurement = faceDetect.detectFaces(rgp_temp)
+        objects_measurement = ct_temp.update(rects_measurement)
+        
+        measureTemperature(color, temp, objects, objects_measurement)
+        cv2.imshow('temp_rgp', color)
+        cv2.imshow('temp_thermal',rgp_temp )
         time.sleep(1)
-    #print('KILLED MEASURE')
+
 
 def create_send_thread(conn,objects, personID):
         while personID in objects:
@@ -41,7 +56,7 @@ def create_send_thread(conn,objects, personID):
             time.sleep(2)
         #print('KILLED')
 
-def face_checking(frame,color,temp, objects,trackableObjects, rects, conn):
+def face_checking(frame, objects,trackableObjects, rects, conn):
     for (objectID, obj) in objects.items():
         text = "ID {}".format(objectID)
         centroid = obj.coor
@@ -57,8 +72,8 @@ def face_checking(frame,color,temp, objects,trackableObjects, rects, conn):
         # if there is no existing trackable object, create one
         if to is None:
             to = TrackableObject(objectID, centroid)
-            measure_thread = Thread(target=create_measure_thread, args=(objects, objectID,),daemon=True).start()
             send_thread = Thread(target=create_send_thread, args=(conn, objects, objectID,),daemon=True).start()
+            # measureTemperature()
         elif (not to.counted):
             to.counted = True
         cv2.putText(frame, str(obj.temperature), (centroid[0], y), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
@@ -83,33 +98,30 @@ ONNX = "./submodules/face_detection/models/version-slim-320_simplified.onnx"
 rgb = RgbCam(RGB_SOURCE,768, 432)
 lep = ThermalCam(640, 480)
 faceDetect = LightFaceDetection(PROTO, MODEL)
-#faceDetect = FaceDetection(CAFFEMODEL, PROTOTEXTPATH)
+faceDetectTemp = LightFaceDetection(PROTO, MODEL)
+# faceDetect = FaceDetection(CAFFEMODEL, PROTOTEXTPATH)
 #faceDetect = FaceDetectionLightRfb()
 ct = CentroidTracker()
+ct_temp = CentroidTracker()
 trackableObjects = {}
 objects = ct.update([])
 conn = IotConn(CONNECTION_STRING, objects)
+
+measure_thread = Thread(target=create_measure_thread, args=(rgb, lep, faceDetectTemp, objects,),daemon=True).start()
+
 while (1):
+    start = time.time()
     frame = rgb.getFrame()
-    thermal, temp = lep.getFrame()
-    raw = thermal
-    thermal = cv2.resize(thermal,(640,480))
-    color = cv2.applyColorMap(thermal, cv2.COLORMAP_JET)
-    #start = time.time()
     rects = faceDetect.detectFaces(frame)
-    #end = time.time()
     objects = ct.update(rects)
-    face_checking(frame,color,temp, objects, trackableObjects, rects, conn)
+    face_checking(frame, objects, trackableObjects, rects, conn)
     cv2.imshow('frame', frame)
-    cv2.imshow('heat', color)
-    #print('Inference: {:.6f}s'.format(end-start))
+    # cv2.imshow('heat', color)
+    end = time.time()
+    print('Inference: {:.6f}s'.format(end-start))
     key = cv2.waitKey(1) & 0xFF
     # if the `q` key was pressed, break from the loop
     if key == ord("q"):
         rgb.capture.release()
-        #cv2.imwrite('thermal.png',thermal)
-        #cv2.imwrite('rgb.png', frame)
-        #cv2.imwrite('raw.png', raw)
-        #lep.thread.join()
         cv2.destroyAllWindows()
         break

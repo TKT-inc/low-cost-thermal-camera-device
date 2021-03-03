@@ -13,15 +13,19 @@ def convertRGBToThermalCoor(x, y, H_raw):
         convert_y = MAX_HEIGHT - 1
     return convert_x, convert_y 
 
-def measureTemperature(color,temp, objects,objectID, coordinates):
+def measureTemperature(color,temp, objects, object_measurement):
     H = [[ 3.27462156e+00, 7.23169874e-01, -6.78237088e+02],
     [-3.69846362e-01,  5.45383143e+00, -1.36312869e+03],
      [-2.37831103e-04,  4.22887587e-03,  1.00000000e+00]]
 
-    thermal_start_x, thermal_start_y = convertRGBToThermalCoor(coordinates[0], coordinates[1], H)
-    thermal_end_x, thermal_end_y = convertRGBToThermalCoor(coordinates[2], coordinates[3], H)
-    cv2.rectangle(color, (int(thermal_start_x), int(thermal_start_y)), (int(thermal_end_x), int(thermal_end_y)), (255, 255, 255), 3)
-    max_temp = np.max(temp[int(thermal_start_y/8):int(thermal_end_y/8), int(thermal_start_x/8):int(thermal_end_x/8)], initial=15394)
-    temperature = "{:.2f}".format(max_temp*36.5/30788) + " oC"
-    objects[objectID].temperature = temperature
-    return temperature
+    for (objectID, obj) in objects.items():
+        coordinates = object_measurement[objectID].coor
+        thermal_start_x, thermal_start_y = convertRGBToThermalCoor(coordinates[0], coordinates[1], H)
+        thermal_end_x, thermal_end_y = convertRGBToThermalCoor(coordinates[2], coordinates[3], H)
+        # cv2.rectangle(color, (int(thermal_start_x), int(thermal_start_y)), (int(thermal_end_x), int(thermal_end_y)), (255, 255, 255), 3)
+        max_temp = np.max(temp[int(thermal_start_y/8):int(thermal_end_y/8), int(thermal_start_x/8):int(thermal_end_x/8)], initial=15394)
+        temperature = "{:.2f}".format(max_temp*36.5/30788) + " oC"
+        objects[objectID].temperature = temperature
+
+    return
+
