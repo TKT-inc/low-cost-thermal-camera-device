@@ -4,8 +4,7 @@ from threading import Thread
 import threading
 from azure.iot.device import IoTHubDeviceClient, Message, MethodResponse
 
-MSG_TXT = '{{"personID": "{personID}","temperature":"{temperature}","embedding": "{embedding}"}}'
-MSG_PEOPLE = []
+MSG_TXT = '{{"personID": "{personID}","temperature":"{temperature}","face": "{face}"}}'
 
 class IotConn:
     def __init__(self, connString, objects):
@@ -25,10 +24,11 @@ class IotConn:
             if int(json_data['personID']) in objects:
                 objects[int(json_data['personID'])].name = str(json_data['personName'])
 
-    def message_sending(self, personID, embedding, temperature):
-        person_record = MSG_TXT.format(personID=personID, temperature=temperature, embedding=embedding)
-        message = Message(person_record)
+    def message_sending(self, personID, face_img, temperature):
+        message = MSG_TXT.format(personID=personID, temperature=temperature, face=face_img)
+        message_object = Message(message)
+        message_object.custom_properties["level"] = "recognize"
         # Send the message.
-        self.client.send_message(message)
+        self.client.send_message(message_object)
         print( "Message sent" ) 
     

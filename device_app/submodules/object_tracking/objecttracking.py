@@ -4,10 +4,11 @@ from collections import OrderedDict
 import numpy as np
 
 class ObjectInfo():
-	def __init__(self, coor, name = "None", temperature = "None"):
+	def __init__(self, coor, rgb, scale,  name = "None", temperature = "None"):
 		self.coor = coor
 		self.name = name
 		self.temperature = temperature
+		self.face_rgb = rgb[int(coor[1]*scale):int(coor[3]*scale), int(coor[0]*scale):int(coor[2]*scale)]
 
 class CentroidTracker():
 	def __init__(self, maxDisappeared=25):
@@ -24,15 +25,16 @@ class CentroidTracker():
 		# need to deregister the object from tracking
 		self.maxDisappeared = maxDisappeared
 		self.counted = False
+
 	def getCentroid(self, coor):
 		cX = int((coor[0] + coor[2]) / 2.0)
 		cY = int((coor[1] + coor[3]) / 2.0)
 		return (cX, cY)
 
-	def register(self, coor):
+	def register(self, coor, rgb, scale):
 		# when registering an object we use the next available object
 		# ID to store the centroid
-		obj = ObjectInfo(coor)
+		obj = ObjectInfo(coor, rgb, scale)
 		self.objects[self.nextObjectID] = obj
 		self.disappeared[self.nextObjectID] = 0
 		self.nextObjectID += 1
@@ -43,7 +45,7 @@ class CentroidTracker():
 		del self.objects[objectID]
 		del self.disappeared[objectID]
 
-	def update(self, rects):
+	def update(self, rects, rgb, scale):
 		# check to see if the list of input bounding box rectangles
 		# is empty
 		if len(rects) == 0:
@@ -74,7 +76,7 @@ class CentroidTracker():
 		# centroids and register each of them
 		if len(self.objects) == 0:
 			for i in range(0, len(inputCentroids)):
-				self.register(rects[i])
+				self.register(rects[i], rgb, scale)
 
 		# otherwise, are are currently tracking objects so we need to
 		# try to match the input centroids to existing object
@@ -128,6 +130,7 @@ class CentroidTracker():
 				# counter
 				objectID = objectIDs[row]
 				self.objects[objectID].coor = rects[col]
+				self.objects[objectID].face_rgb =  rgb[int(rects[col][1]*scale):int(rects[col][3]*scale), int(rects[col][0]*scale):int(rects[col][2]*scale)]
 				self.disappeared[objectID] = 0
 
 				# indicate that we have examined each of the row and
@@ -163,7 +166,7 @@ class CentroidTracker():
 			# register each new input centroid as a trackable object
 			else:
 				for col in unusedCols:
-					self.register(rects[col])
+					self.register(rects[col],rgb, scale)
 
 		# return the set of trackable objects
 		return self.objects
