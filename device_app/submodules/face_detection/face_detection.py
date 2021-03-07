@@ -1,7 +1,9 @@
 import cv2
 import sys
 import numpy as np
+import dlib
 from math import ceil
+from imutils import face_utils
 from submodules.face_detection.vision.ssd.config.fd_config import define_img_size
 CAFFEMODEL = "/models/res10_300x300_ssd_iter_140000.caffemodel"
 PROTOTEXTPATH = "/models/deploy.prototxt.txt"
@@ -11,7 +13,27 @@ from submodules.face_detection.vision.ssd.mb_tiny_fd import create_mb_tiny_fd, c
 from submodules.face_detection.vision.ssd.mb_tiny_RFB_fd import create_Mb_Tiny_RFB_fd, create_Mb_Tiny_RFB_fd_predictor
 from submodules.face_detection.vision.utils.misc import Timer
 
+class LandmarkDetection:
+    def __init__ (self):
+        self.predictor = dlib.shape_predictor("./submodules/face_detection/models/landmarks.dat")
 
+    def detectLandmark(self, frame, rects):
+        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        (h,w) = gray.shape[:2]
+        if (len(rects) == 0):
+            return None
+        dlibRect = dlib.rectangle(rects[0][0], rects[0][1], rects[0][2], rects[0][3])
+        shape = self.predictor(gray, dlibRect)
+        shape = face_utils.shape_to_np(shape)
+        image_points = np.array([
+                                (shape[30][0], shape[30][1]),     # Nose tip
+                                (shape[8][0], shape[8][1]),     # Chin
+                                (shape[36][0], shape[36][1]),     # Left eye left corner
+                                (shape[45][0], shape[45][1]),     # Right eye right corne
+                                (shape[48][0], shape[48][1]),     # Left Mouth corner
+                                (shape[54][0], shape[54][1])      # Right mouth corner
+                            ], dtype="double")
+        return image_points
 
 class FaceDetection:
     def __init__(self, model = CAFFEMODEL, proto = PROTOTEXTPATH):
@@ -20,6 +42,7 @@ class FaceDetection:
         self.net.setPreferableBackend(cv2.dnn.DNN_BACKEND_CUDA)
         self.net.setPreferableTarget(cv2.dnn.DNN_TARGET_CUDA)
         self.timer = Timer()
+
     def detectFaces(self, frame):
         (h, w) = frame.shape[:2]
         # blobImage convert RGB (104.0, 177.0, 123.0)

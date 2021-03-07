@@ -1,6 +1,5 @@
 import cv2
 import numpy as np
-import face_recognition
 import time
 import yaml
 import base64
@@ -10,12 +9,12 @@ from collections import OrderedDict
 from threading import Thread
 from submodules.rgb_camera.rgb_camera import RgbCam
 from submodules.thermal_camera.thermal_camera import ThermalCam
-from submodules.face_detection.face_detection import FaceDetection, LightFaceDetection, FaceDetectionLightRfb
+from submodules.face_detection.face_detection import FaceDetection, LightFaceDetection, FaceDetectionLightRfb, LandmarkDetection
 from submodules.object_tracking.objecttracking import CentroidTracker
 from submodules.object_tracking.Tracker import TrackableObject
 from submodules.measure_temperature.measure_temperature import measureTemperature
 from submodules.iot_hub.iot_conn import IotConn
-
+from submodules.headpose_detection.headpose_detection import CaptureRegisterFace
 
 CONNECTION_STRING = cfg['iotHub']['connectionString']
 
@@ -83,7 +82,7 @@ def send_thread(conn,objects, personID):
         pic_str = base64.b64encode(buffer)
         pic_str = pic_str.decode()
 
-        conn.message_sending(personID, pic_str, objects[personID].temperature)
+        # conn.message_sending(personID, pic_str, objects[personID].temperature)
         
         time.sleep(TIME_SEND_REC)
 
@@ -112,34 +111,81 @@ def face_checking(frame, objects,trackableObjects, rects, conn):
         trackableObjects[objectID] = to
 
 
-rgb = RgbCam(RGB_SOURCE, RGB_WIDTH, RGB_HEIGHT)
-lep = ThermalCam(THERMAL_SOURCE)
+def face_register():
+    while (1):
+        rects, frame, ori = face_register_init()
+        cv2.imshow('frame', frame)
 
-faceDetect = LightFaceDetection(PROTO_SLIM320, MODEL_SLIM320)
-faceDetectTemp = LightFaceDetection(PROTO_SLIM320, MODEL_SLIM320)
-# faceDetect = FaceDetection(CAFFEMODEL, PROTOTEXTPATH)
-#faceDetect = FaceDetectionLightRfb()
-ct = CentroidTracker(MAX_DISAPEARED_FRAMES)
-ct_temp = CentroidTracker(MAX_DISAPEARED_FRAMES)
-trackableObjects = {}
-objects = ct.update([],[],RGB_SCALE)
-conn = IotConn(CONNECTION_STRING, objects)
+
+
+def init_system():
+    rgb = RgbCam(RGB_SOURCE, RGB_WIDTH, RGB_HEIGHT)
+    lep = ThermalCam(THERMAL_SOURCE)
+
+    faceDetect = LightFaceDetection(PROTO_SLIM320, MODEL_SLIM320)
+    faceDetectTemp = LightFaceDetection(PROTO_SLIM320, MODEL_SLIM320)
+    # faceDetect = FaceDetection(CAFFEMODEL, PROTOTEXTPATH)
+    #faceDetect = FaceDetectionLightRfb()
+    ct = CentroidTracker(MAX_DISAPEARED_FRAMES)
+    ct_temp = CentroidTracker(MAX_DISAPEARED_FRAMES)
+    trackableObjects = {}
+    objects = ct.update([],[],RGB_SCALE)
+    conn = IotConn(CONNECTION_STRING, objects)
+    landmarkDetect = LandmarkDetection()
+    return rgb, lep, faceDetect, faceDetectTemp, ct, ct_temp, trackableObjects, objects, conn, landmarkDetect
+
+
+
+rgb, lep, faceDetect, faceDetectTemp, ct, ct_temp, trackableObjects, objects, conn, landmarkDetect = init_system()
+
 
 measure = Thread(target=measure_thread, args=(rgb, lep, faceDetectTemp, objects,),daemon=True).start()
+MODE = 'NORMAL'
 
+temp = CaptureRegisterFace()
+flag = 1
 while (1):
     start = time.time()
     frame, ori = rgb.getFrame()
     rects = faceDetect.detectFaces(frame)
-    objects = ct.update(rects,ori, RGB_SCALE)
-    face_checking(frame, objects, trackableObjects, rects, conn)
+    if (MODE == 'NORMAL'):
+        objects = ct.update(rects,ori, RGB_SCALE)
+        if (len(rects) == 1 and flag == 1):
+            img_points = landmarkDetect.detectLandmark(frame, rects)
+            store = temp.update(frame,img_points)
+            save = ori[int(rects[0][1]*RGB_SCALE):int(rects[0][3]*RGB_SCALE), int(rects[0][0]*RGB_SCALE):int(rects[0][2]*RGB_SCALE)]
+            if store == "FRONT":
+                cv2.imwrite("../test/front.jpg",save)
+                print(store)
+            elif store == "LEFT":
+                cv2.imwrite("../test/left.jpg", save)
+                print(store)
+            elif store == "RIGHT":
+                cv2.imwrite("../test/right.jpg", save)
+                flag = 0
+                print(store)
+            
+        # if img_points is not None:
+        #     angles = detectHeadpose(frame, img_points)
+        #     print(angles)
+        # face_checking(frame, objects, trackableObjects, rects, conn)
+        # cv2.imshow('heat', color)
+        
+    elif (MODE == 'REGISTER_CHECK'):
+        print ('wrong register format')
+        if (len(rects) == 1):
+            MODE = 'REGISTER'
+    # elif (MODE == 'REGISTER'):
+        
+
     cv2.imshow('frame', frame)
-    # cv2.imshow('heat', color)
     end = time.time()
-    print('Inference: {:.6f}s'.format(end-start))
+    # print('Inference: {:.6f}s'.format(end-start))
     key = cv2.waitKey(1) & 0xFF
     # if the `q` key was pressed, break from the loop
     if key == ord("q"):
         rgb.capture.release()
         cv2.destroyAllWindows()
         break
+    if key == ord("r"):
+        MODE = 'REGISTER'
