@@ -32,3 +32,8 @@ transMatrix: [[ 3.27462156e+00, 7.23169874e-01, -6.78237088e+02],
      [-2.37831103e-04,  4.22887587e-03,  1.00000000e+00]]
 
 maxDisFramesObjectTracking: 50
+
+registration:
+    numFontPics: 5
+    numLeftPics: 5
+    numRightPics: 5

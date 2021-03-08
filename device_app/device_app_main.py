@@ -39,6 +39,10 @@ TIME_SEND_REC = cfg['periodTime']['sendRecMess']
 
 MAX_DISAPEARED_FRAMES = cfg['maxDisFramesObjectTracking']
 
+NUM_FRONT_PICS = cfg['registration']['numFontPics']
+NUM_LEFT_PICS = cfg['registration']['numLeftPics']
+NUM_RIGHT_PICS = cfg['registration']['numRightPics']
+
 
 def centroid_detect(x, y, w, h):
     x1 = int(w/2)
@@ -111,72 +115,68 @@ def face_checking(frame, objects,trackableObjects, rects, conn):
         trackableObjects[objectID] = to
 
 
-def face_register():
-    while (1):
-        rects, frame, ori = face_register_init()
-        cv2.imshow('frame', frame)
 
-
-
-def init_system():
+def init_camera():
     rgb = RgbCam(RGB_SOURCE, RGB_WIDTH, RGB_HEIGHT)
     lep = ThermalCam(THERMAL_SOURCE)
+    return rgb, lep
 
+def init_model():
     faceDetect = LightFaceDetection(PROTO_SLIM320, MODEL_SLIM320)
     faceDetectTemp = LightFaceDetection(PROTO_SLIM320, MODEL_SLIM320)
     # faceDetect = FaceDetection(CAFFEMODEL, PROTOTEXTPATH)
     #faceDetect = FaceDetectionLightRfb()
+
+
+    landmarkDetect = LandmarkDetection()
+    return faceDetect, faceDetectTemp, landmarkDetect
+
+def init_object_tracking():
     ct = CentroidTracker(MAX_DISAPEARED_FRAMES)
     ct_temp = CentroidTracker(MAX_DISAPEARED_FRAMES)
     trackableObjects = {}
     objects = ct.update([],[],RGB_SCALE)
+    return ct, ct_temp, trackableObjects, objects
+
+def init_conn():
     conn = IotConn(CONNECTION_STRING, objects)
-    landmarkDetect = LandmarkDetection()
-    return rgb, lep, faceDetect, faceDetectTemp, ct, ct_temp, trackableObjects, objects, conn, landmarkDetect
+    return conn
 
 
-
-rgb, lep, faceDetect, faceDetectTemp, ct, ct_temp, trackableObjects, objects, conn, landmarkDetect = init_system()
+#init the system
+rgb, lep = init_camera()
+faceDetect, faceDetectTemp, landmarkDetect = init_model()
+ct, ct_temp, trackableObjects, objects = init_object_tracking()
+conn = init_conn()
 
 
 measure = Thread(target=measure_thread, args=(rgb, lep, faceDetectTemp, objects,),daemon=True).start()
 MODE = 'NORMAL'
 
-temp = CaptureRegisterFace()
-flag = 1
+# temp = CaptureRegisterFace(NUM_FRONT_PICS,NUM_LEFT_PICS,NUM_RIGHT_PICS)
+
 while (1):
     start = time.time()
     frame, ori = rgb.getFrame()
     rects = faceDetect.detectFaces(frame)
     if (MODE == 'NORMAL'):
         objects = ct.update(rects,ori, RGB_SCALE)
-        if (len(rects) == 1 and flag == 1):
-            img_points = landmarkDetect.detectLandmark(frame, rects)
-            store = temp.update(frame,img_points)
-            save = ori[int(rects[0][1]*RGB_SCALE):int(rects[0][3]*RGB_SCALE), int(rects[0][0]*RGB_SCALE):int(rects[0][2]*RGB_SCALE)]
-            if store == "FRONT":
-                cv2.imwrite("../test/front.jpg",save)
-                print(store)
-            elif store == "LEFT":
-                cv2.imwrite("../test/left.jpg", save)
-                print(store)
-            elif store == "RIGHT":
-                cv2.imwrite("../test/right.jpg", save)
-                flag = 0
-                print(store)
             
-        # if img_points is not None:
-        #     angles = detectHeadpose(frame, img_points)
-        #     print(angles)
-        # face_checking(frame, objects, trackableObjects, rects, conn)
-        # cv2.imshow('heat', color)
+        face_checking(frame, objects, trackableObjects, rects, conn)
         
-    elif (MODE == 'REGISTER_CHECK'):
-        print ('wrong register format')
+    elif (MODE == 'REGISTER'):
         if (len(rects) == 1):
-            MODE = 'REGISTER'
-    # elif (MODE == 'REGISTER'):
-        
+            img_points = landmarkDetect.detectLandmark(frame, rects)
+            store = temp.update(frame,img_points, ori, rects, RGB_SCALE)
+            index = 1
+            if store is not None:
+                for x in store:
+                    cv2.imwrite("../test/test_" + str(index) + ".jpg", x)
+                    index += 1
+                del temp
+                ct, ct_temp, trackableObjects, objects = init_object_tracking()
+                MODE = "NORMAL"
+
 
     cv2.imshow('frame', frame)
     end = time.time()
@@ -189,3 +189,4 @@ while (1):
         break
     if key == ord("r"):
         MODE = 'REGISTER'
+        temp = CaptureRegisterFace(NUM_FRONT_PICS,NUM_LEFT_PICS,NUM_RIGHT_PICS)

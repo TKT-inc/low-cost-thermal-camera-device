@@ -5,45 +5,60 @@ import collections
 
 
 class CaptureRegisterFace:
-    def __init__ (self, left=-25, right=20, middle_range=35, stack_number=8):
+    def __init__ (self,front_pics=2, left_pics=2, right_pics=2, left=-25, right=20, middle_range=35, stack_number=8):
         self.left = left
         self.right = right
         self.mid = middle_range
+        self.front_pics = front_pics
+        self.left_pics = left_pics
+        self.right_pics = right_pics
         self.left_stack = 0
         self.right_stack = 0
         self.front_stack = 0
         self.stack_number = stack_number
         self.state = "FRONT"
+        self.imgs = []
     
-    def update(self, frame, image_points):
+    def update(self, frame, image_points, ori, rects, scale):
         rotation_angle = self.detectHeadpose(frame, image_points)[1]
-        print(self.state)
-        print(rotation_angle)
         if self.state == "FRONT":
             if (rotation_angle <= self.mid/2 and rotation_angle >= - self.mid/2):
                 self.front_stack = self.front_stack + 1
             else:
                 self.front_stack = 0
             if (self.front_stack > self.stack_number):
+                self.imgs.append(self.getFace(ori, rects,scale))
+                self.front_stack -= 3
+            if (len(self.imgs) == self.front_pics):
                 self.state = "LEFT"
-                return "FRONT"
+                print ("FRONT")
         elif self.state == "LEFT":
             if (rotation_angle < self.left):
                 self.left_stack += 1
             else:
                 self.left_stack = 0
             if self.left_stack > self.stack_number:
+                self.imgs.append(self.getFace(ori, rects,scale))
+                self.left_stack -= 3
+            if (len(self.imgs) == self.front_pics + self.left_pics):
                 self.state = "RIGHT"
-                return "LEFT"
+                print("LEFT")
         elif self.state == "RIGHT":
             if (rotation_angle > self.right):
                 self.right_stack += 1
             else:
                 self.right_stack = 0
             if (self.right_stack > self.stack_number):
-                return "RIGHT"
+                self.imgs.append(self.getFace(ori, rects,scale))
+                self.right_stack -= 3
+            if (len(self.imgs) == self.front_pics + self.left_pics + self.right_pics):
+                print("RIGHT")
+                return self.imgs
         return None
 
+    def getFace(self, ori, rects, RGB_SCALE):
+        savePic = ori[int(rects[0][1]*RGB_SCALE):int(rects[0][3]*RGB_SCALE), int(rects[0][0]*RGB_SCALE):int(rects[0][2]*RGB_SCALE)]
+        return savePic
 
     def detectHeadpose(self, frame, image_points):
         size = frame.shape

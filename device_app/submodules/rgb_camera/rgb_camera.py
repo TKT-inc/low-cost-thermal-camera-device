@@ -7,6 +7,7 @@ class RgbCam:
         self.width = width
         self.height = height
         self.capture = cv2.VideoCapture(src)
+        self.capture.set(cv2.CAP_PROP_EXPOSURE, 40)
         self.thread = Thread(target=self.update)
         self.thread.daemon = True
         self.thread.start()
