@@ -14,7 +14,7 @@ from submodules.object_tracking.objecttracking import CentroidTracker
 from submodules.object_tracking.Tracker import TrackableObject
 from submodules.measure_temperature.measure_temperature import measureTemperature
 from submodules.iot_hub.iot_conn import IotConn
-from submodules.headpose_detection.headpose_detection import CaptureRegisterFace
+from submodules.capture_register.capture_register import CaptureRegisterFace
 
 CONNECTION_STRING = cfg['iotHub']['connectionString']
 
@@ -62,7 +62,7 @@ def centroid_detect(x, y, w, h):
 
 def measure_thread(rgb, lep, faceDetect, objects):
     time.sleep(1)
-    while (1):
+    while (MODE == "NORMAL"):
         objects_measurement = objects
         ct_temp = ct
         gp_temp = rgb.getFrame()
@@ -149,9 +149,8 @@ faceDetect, faceDetectTemp, landmarkDetect = init_model()
 ct, ct_temp, trackableObjects, objects = init_object_tracking()
 conn = init_conn()
 
-
-measure = Thread(target=measure_thread, args=(rgb, lep, faceDetectTemp, objects,),daemon=True).start()
 MODE = 'NORMAL'
+measure = Thread(target=measure_thread, args=(rgb, lep, faceDetectTemp, objects,),daemon=True).start()
 
 # temp = CaptureRegisterFace(NUM_FRONT_PICS,NUM_LEFT_PICS,NUM_RIGHT_PICS)
 
@@ -176,6 +175,7 @@ while (1):
                 del temp
                 ct, ct_temp, trackableObjects, objects = init_object_tracking()
                 MODE = "NORMAL"
+                measure = Thread(target=measure_thread, args=(rgb, lep, faceDetectTemp, objects,),daemon=True).start()
 
 
     cv2.imshow('frame', frame)
