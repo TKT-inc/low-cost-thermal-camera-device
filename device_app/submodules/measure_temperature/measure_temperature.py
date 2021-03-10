@@ -14,10 +14,6 @@ def convertRGBToThermalCoor(x, y, H_raw):
     return convert_x, convert_y 
 
 def measureTemperature(color,temp, objects, object_measurement, H_matrix):
-    # H = [[ 3.27462156e+00, 7.23169874e-01, -6.78237088e+02],
-    # [-3.69846362e-01,  5.45383143e+00, -1.36312869e+03],
-    #  [-2.37831103e-04,  4.22887587e-03,  1.00000000e+00]]
-
     H = H_matrix
 
     for (objectID, obj) in objects.items():

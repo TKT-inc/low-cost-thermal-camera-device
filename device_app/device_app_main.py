@@ -16,7 +16,8 @@ from submodules.measure_temperature.measure_temperature import measureTemperatur
 from submodules.iot_hub.iot_conn import IotConn
 from submodules.capture_register.capture_register import CaptureRegisterFace
 
-CONNECTION_STRING = cfg['iotHub']['connectionString']
+CONNECTION_STRING_DEVICE = cfg['iotHub']['connectionStringDevice']
+CONNECTION_STRING_BLOB = cfg['iotHub']['connectionStringBlob']
 
 RGB_SOURCE = cfg['camera']['rgb']['source']
 RGB_WIDTH = cfg['camera']['rgb']['scaleWidth']
@@ -139,7 +140,7 @@ def init_object_tracking():
     return ct, ct_temp, trackableObjects, objects
 
 def init_conn():
-    conn = IotConn(CONNECTION_STRING, objects)
+    conn = IotConn(CONNECTION_STRING_DEVICE, CONNECTION_STRING_BLOB , objects)
     return conn
 
 
@@ -172,6 +173,7 @@ while (1):
                 for x in store:
                     cv2.imwrite("../test/test_" + str(index) + ".jpg", x)
                     index += 1
+                conn.registerToAzure('Tien',store)
                 del temp
                 ct, ct_temp, trackableObjects, objects = init_object_tracking()
                 MODE = "NORMAL"

@@ -3,7 +3,8 @@ periodTime:
     sendRecMess: 2
 
 iotHub:
-    connectionString: "HostName=thesis-hub.azure-devices.net;DeviceId=test-device;SharedAccessKey=E/uKH6XK6G2NLCYWQxu26+mrNBKmecm0I4WU2A1FfrY="
+    connectionStringDevice: "HostName=thesis-hub.azure-devices.net;DeviceId=test-device;SharedAccessKey=E/uKH6XK6G2NLCYWQxu26+mrNBKmecm0I4WU2A1FfrY="
+    connectionStringBlob: "DefaultEndpointsProtocol=https;AccountName=thesisbstorage;AccountKey=WdOJMq9wULxCEKKHHiI9lafWPjIpJpXuinasmDLO5F9zZObHDzrLxTszglLM0zCa+GILFbjZCTO0BjFEuUR/WQ==;EndpointSuffix=core.windows.net"
     msgFormat: '{{"personID": "{personID}","temperature":"{temperature}","embedding": "{embedding}"}}'
 
 camera:
