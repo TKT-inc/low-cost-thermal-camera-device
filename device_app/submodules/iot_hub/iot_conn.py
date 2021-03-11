@@ -1,6 +1,7 @@
 import numpy as np
 import json
 import uuid
+import cv2
 from threading import Thread
 import threading
 from azure.iot.device import IoTHubDeviceClient, Message, MethodResponse
@@ -37,19 +38,20 @@ class IotConn:
         self.client.send_message(message_object)
         print( "Message sent" ) 
 
-    def registerToAzure(self, personName, imgs):
-        containerName = uuid.uuid4()
-        self.sendImageToBlob(imgs, containerName)
+    def registerToAzure(self, personName, imgs, size):
+        containerName = str(uuid.uuid4())
+        self.sendImageToBlob(imgs, containerName, size)
         self.registerPersonToServer(containerName, personName)
 
     def createContainer(self, containerName):
-		self.container_client = self.blob_service_client.create_container(containerName)
+        print (containerName)
+        self.container_client = self.blob_service_client.create_container(containerName)
     
     def uploadBlob(self, containerName, fileName, image):
-		self.block_blob_client = self.blob_service_client.get_blob_client(containerName,filename)
+        self.block_blob_client = self.blob_service_client.get_blob_client(containerName,fileName)
 		# Upload blob
-		with open(image, "rb") as data:
-			self.block_blob_client.upload_blob(data)
+        _, encoded_img = cv2.imencode('.jpg',image)
+        self.block_blob_client.upload_blob(encoded_img.tobytes())
 
     def registerPersonToServer(self, containerName, personName):
         message = MSG_REGISTER.format(
@@ -62,7 +64,7 @@ class IotConn:
         self.client.send_message(message_object)
         print("Resgister sent to the server")
 
-    def sendImageToBlob(self, images, containerName):
+    def sendImageToBlob(self, images, containerName, size):
         # Create container
         self.createContainer(containerName)
         # Upload image to azure blob storage
@@ -70,7 +72,8 @@ class IotConn:
         threads = [None] * parallels_run
         for i in range(parallels_run):
             fileName = str(i) + ".jpg"
-            t = threading.Thread(target=self.uploadBlob(containerName, fileName, images[i]), daemon=True)
+            send_image = cv2.resize(images[i], (size,size))
+            t = threading.Thread(target=self.uploadBlob(containerName, fileName, send_image), daemon=True)
             threads[i] = t
             threads[i].start()
         for i in range(parallels_run):

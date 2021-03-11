@@ -32,6 +32,7 @@ PROTO_SSD = cfg['faceDetection']['protoSsd']
 MODEL_SLIM320 = cfg['faceDetection']['modelSlim320']
 PROTO_SLIM320 = cfg['faceDetection']['protoSlim320']
 ONNX_SLIM320 = cfg['faceDetection']['onnxSlim320']
+FACE_SIZE = cfg['faceDetection']['faceSize']
 
 H_MATRIX = cfg['transMatrix']
 
@@ -44,6 +45,8 @@ NUM_FRONT_PICS = cfg['registration']['numFontPics']
 NUM_LEFT_PICS = cfg['registration']['numLeftPics']
 NUM_RIGHT_PICS = cfg['registration']['numRightPics']
 
+ENABLE_SHOW_THERMAL_FRAME = cfg['display']['enableThermalFrame']
+
 
 def centroid_detect(x, y, w, h):
     x1 = int(w/2)
@@ -52,18 +55,10 @@ def centroid_detect(x, y, w, h):
     cy = y + y1
     return (cx,cy)
 
-# def create_embeddings(frame, faceTuple):
-#     rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-#     boxes = [faceTuple]
-#     image_base64 = base64.encodestring(input_file)
-
-#     # encodings = face_recognition.face_encodings(rgb, boxes)
-#     # embedding = ' '.join(map(str,encodings[0]))
-#     return embedding
-
 def measure_thread(rgb, lep, faceDetect, objects):
-    time.sleep(1)
-    while (MODE == "NORMAL"):
+    # time.sleep(1)
+    global rgb_temp, color
+    while (MODE == 'NORMAL'):
         objects_measurement = objects
         ct_temp = ct
         gp_temp = rgb.getFrame()
@@ -71,19 +66,18 @@ def measure_thread(rgb, lep, faceDetect, objects):
         raw = thermal
         thermal = cv2.resize(thermal,(THERMAL_WIDTH,THERMAL_HEIGHT))
         color = cv2.applyColorMap(thermal, cv2.COLORMAP_JET)
-        rgp_temp, rgp_ori = rgb.getFrame()
-        rects_measurement = faceDetect.detectFaces(rgp_temp)
+        rgb_temp, rgp_ori = rgb.getFrame()
+        rects_measurement = faceDetect.detectFaces(rgb_temp)
         objects_measurement = ct_temp.update(rects_measurement,rgp_ori,RGB_SCALE)
         
         measureTemperature(color, temp, objects, objects_measurement, H_MATRIX)
-        # cv2.imshow('temp_rgp', color)
-        # cv2.imshow('temp_thermal',rgp_temp )
+    
         time.sleep(TIME_MEASURE_TEMP)
 
 def send_thread(conn,objects, personID):
     while personID in objects:
         # cv2.imwrite("../test/a.jpg", objects[personID].face_rgb)
-        _, buffer = cv2.imencode('.jpg', cv2.resize(objects[personID].face_rgb,(550,550)))
+        _, buffer = cv2.imencode('.jpg', cv2.resize(objects[personID].face_rgb,(FACE_SIZE,FACE_SIZE)))
         pic_str = base64.b64encode(buffer)
         pic_str = pic_str.decode()
 
@@ -150,10 +144,23 @@ faceDetect, faceDetectTemp, landmarkDetect = init_model()
 ct, ct_temp, trackableObjects, objects = init_object_tracking()
 conn = init_conn()
 
+color = np.zeros((480,640,3), np.uint8)
+rgb_temp = np.zeros((480,640,3), np.uint8)
+
 MODE = 'NORMAL'
 measure = Thread(target=measure_thread, args=(rgb, lep, faceDetectTemp, objects,),daemon=True).start()
 
 # temp = CaptureRegisterFace(NUM_FRONT_PICS,NUM_LEFT_PICS,NUM_RIGHT_PICS)
+
+cv2.namedWindow('Main Monitor')
+cv2.moveWindow("Main Monitor", 600, 20)
+
+cv2.namedWindow('measure thermal')
+cv2.moveWindow('measure thermal', 120, 500)
+
+cv2.namedWindow('measure rgb')
+cv2.moveWindow('measure rgb', 1200, 500)
+
 
 while (1):
     start = time.time()
@@ -164,6 +171,10 @@ while (1):
             
         face_checking(frame, objects, trackableObjects, rects, conn)
         
+        if (ENABLE_SHOW_THERMAL_FRAME):
+            cv2.imshow('measure thermal', color)
+            cv2.imshow('measure rgb',rgb_temp)
+        
     elif (MODE == 'REGISTER'):
         if (len(rects) == 1):
             img_points = landmarkDetect.detectLandmark(frame, rects)
@@ -173,14 +184,14 @@ while (1):
                 for x in store:
                     cv2.imwrite("../test/test_" + str(index) + ".jpg", x)
                     index += 1
-                conn.registerToAzure('Tien',store)
+                conn.registerToAzure('Tien',store, FACE_SIZE)
                 del temp
                 ct, ct_temp, trackableObjects, objects = init_object_tracking()
                 MODE = "NORMAL"
                 measure = Thread(target=measure_thread, args=(rgb, lep, faceDetectTemp, objects,),daemon=True).start()
 
 
-    cv2.imshow('frame', frame)
+    cv2.imshow('Main Monitor', frame)
     end = time.time()
     # print('Inference: {:.6f}s'.format(end-start))
     key = cv2.waitKey(1) & 0xFF
@@ -192,3 +203,4 @@ while (1):
     if key == ord("r"):
         MODE = 'REGISTER'
         temp = CaptureRegisterFace(NUM_FRONT_PICS,NUM_LEFT_PICS,NUM_RIGHT_PICS)
+        del ct, ct_temp,trackableObjects, objects

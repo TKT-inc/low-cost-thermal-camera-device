@@ -5,7 +5,7 @@ import collections
 
 
 class CaptureRegisterFace:
-    def __init__ (self,front_pics=2, left_pics=2, right_pics=2, left=-25, right=20, middle_range=35, stack_number=8):
+    def __init__ (self,front_pics=2, left_pics=2, right_pics=2, left=-25, right=16, middle_range=35, stack_number=8):
         self.left = left
         self.right = right
         self.mid = middle_range

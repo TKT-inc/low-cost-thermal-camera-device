@@ -27,10 +27,12 @@ faceDetection:
     modelSlim320: "./submodules/face_detection/models/slim-320.caffemodel"
     protoSlim320: "./submodules/face_detection/models/slim-320.prototxt"
     onnxSlim320: "./submodules/face_detection/models/version-slim-320_simplified.onnx" 
+    faceSize: 600
 
-transMatrix: [[ 3.27462156e+00, 7.23169874e-01, -6.78237088e+02],
-    [-3.69846362e-01,  5.45383143e+00, -1.36312869e+03],
-     [-2.37831103e-04,  4.22887587e-03,  1.00000000e+00]]
+transMatrix: [[ 1.38561524e+00, -5.27680134e-04, -1.23831453e+02],
+ [ 4.82426727e-02 , 1.47376946e+00 ,-1.49092213e+02],
+ [-1.60874186e-04 , 1.36021487e-04 , 1.00000000e+00]]
+
 
 maxDisFramesObjectTracking: 50
 
@@ -38,3 +40,6 @@ registration:
     numFontPics: 5
     numLeftPics: 5
     numRightPics: 5
+
+display:
+    enableThermalFrame: True

@@ -20,7 +20,7 @@ def measureTemperature(color,temp, objects, object_measurement, H_matrix):
         coordinates = object_measurement[objectID].coor
         thermal_start_x, thermal_start_y = convertRGBToThermalCoor(coordinates[0], coordinates[1], H)
         thermal_end_x, thermal_end_y = convertRGBToThermalCoor(coordinates[2], coordinates[3], H)
-        # cv2.rectangle(color, (int(thermal_start_x), int(thermal_start_y)), (int(thermal_end_x), int(thermal_end_y)), (255, 255, 255), 3)
+        cv2.rectangle(color, (int(thermal_start_x), int(thermal_start_y)), (int(thermal_end_x), int(thermal_end_y)), (255, 255, 255), 3)
         max_temp = np.max(temp[int(thermal_start_y/8):int(thermal_end_y/8), int(thermal_start_x/8):int(thermal_end_x/8)], initial=15394)
         temperature = "{:.2f}".format(max_temp*36.5/30788) + " oC"
         objects[objectID].temperature = temperature
