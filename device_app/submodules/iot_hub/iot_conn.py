@@ -4,12 +4,14 @@ import uuid
 import cv2
 from threading import Thread
 import threading
+import time
 from azure.iot.device import IoTHubDeviceClient, Message, MethodResponse
 from azure.storage.blob import BlobServiceClient, BlobClient, ContainerClient
 
 
-MSG_TXT = '{{"personID": "{personID}","temperature":"{temperature}","face": "{face}"}}'
+MSG_TXT = '{{"buildingId":"{buildingId}","deviceId":"{deviceId}","trackingId": "{trackingId}","face": "{face}"}}'
 MSG_REGISTER = '{{"personName": "{personName}","containerName":"{containerName}"}}'
+MSG_RECORD = '{{"buildingId":"{buildingId}","personID": "{personID}", "personName": "{personName}", "temperature":"{temperature}", "face":"{face}"}}'
 
 class IotConn:
     def __init__(self, connStringDevice, connStringBlob, objects):
@@ -22,21 +24,31 @@ class IotConn:
 
     def message_listener(self, client, objects):
         print("Start listening to server")
-        while True:       
+        while (1):       
             message = client.receive_message()
             message = message.data.decode('utf-8')
             json_data = json.loads(message, strict = False)
             print(str(json_data))
-            if int(json_data['personID']) in objects:
-                objects[int(json_data['personID'])].name = str(json_data['personName'])
+            if int(json_data['trackingId']) in objects:
+                objects[int(json_data['trackingId'])].name = str(json_data['personName'])
+                objects[int(json_data['trackingId'])].id = str(json_data['personId'])
+                time.sleep(0.3)
 
-    def message_sending(self, personID, face_img, temperature):
-        message = MSG_TXT.format(personID=personID, temperature=temperature, face=face_img)
+    def message_sending(self, buildingId, deviceId, trackingId, face_img):
+        message = MSG_TXT.format(buildingId=buildingId, deviceId=deviceId, trackingId=trackingId, face=face_img)
         message_object = Message(message)
         message_object.custom_properties["level"] = "recognize"
         # Send the message.
         self.client.send_message(message_object)
         print( "Message sent" ) 
+
+    def send_record(self, buildingId, personID, name, temperature, face):
+        message = MSG_RECORD.format(buildingId=buildingId, personID=personID, personName=name, temperature=temperature, face=face)
+        message_object = Message(message)
+        message_object.custom_properties["level"] = "store"
+        # Send the message.
+        print("send record" + message)
+        self.client.send_message(message_object)        
 
     def registerToAzure(self, personName, imgs, size):
         containerName = str(uuid.uuid4())

@@ -16,6 +16,9 @@ from submodules.measure_temperature.measure_temperature import measureTemperatur
 from submodules.iot_hub.iot_conn import IotConn
 from submodules.capture_register.capture_register import CaptureRegisterFace
 
+DEVICE_ID = cfg['deviceId']
+BUILDING_ID = cfg['buildingId']
+
 CONNECTION_STRING_DEVICE = cfg['iotHub']['connectionStringDevice']
 CONNECTION_STRING_BLOB = cfg['iotHub']['connectionStringBlob']
 
@@ -56,7 +59,7 @@ def centroid_detect(x, y, w, h):
     return (cx,cy)
 
 def measure_thread(rgb, lep, faceDetect, objects):
-    # time.sleep(1)
+    time.sleep(1)
     global rgb_temp, color
     while (MODE == 'NORMAL'):
         objects_measurement = objects
@@ -68,22 +71,38 @@ def measure_thread(rgb, lep, faceDetect, objects):
         color = cv2.applyColorMap(thermal, cv2.COLORMAP_JET)
         rgb_temp, rgp_ori = rgb.getFrame()
         rects_measurement = faceDetect.detectFaces(rgb_temp)
-        objects_measurement = ct_temp.update(rects_measurement,rgp_ori,RGB_SCALE)
+        objects_measurement, _ = ct_temp.update(rects_measurement,rgp_ori,RGB_SCALE)
         
         measureTemperature(color, temp, objects, objects_measurement, H_MATRIX)
     
         time.sleep(TIME_MEASURE_TEMP)
 
-def send_thread(conn,objects, personID):
+def send_pics_for_rec(conn,objects, personID):
     while personID in objects:
+
         # cv2.imwrite("../test/a.jpg", objects[personID].face_rgb)
-        _, buffer = cv2.imencode('.jpg', cv2.resize(objects[personID].face_rgb,(FACE_SIZE,FACE_SIZE)))
+        try:
+            _, buffer = cv2.imencode('.jpg', cv2.resize(objects[personID].face_rgb, (FACE_SIZE,FACE_SIZE)))
+            pic_str = base64.b64encode(buffer)
+            pic_str = pic_str.decode()
+
+            conn.message_sending(BUILDING_ID ,DEVICE_ID, personID, pic_str)
+            time.sleep(TIME_SEND_REC)
+        except Exception as identifier:
+            pass
+        
+
+def send_records(conn, objects):
+    print(objects[0].coor)
+    print(objects[0].name)
+    for (objectID, obj) in objects.items():
+        _, buffer = cv2.imencode('.jpg', cv2.resize(obj.face_rgb,(FACE_SIZE,FACE_SIZE)))
         pic_str = base64.b64encode(buffer)
         pic_str = pic_str.decode()
-
-        # conn.message_sending(personID, pic_str, objects[personID].temperature)
-        
-        time.sleep(TIME_SEND_REC)
+        if obj.id is None:
+            obj.id = 0
+            obj.name = 'Tien'
+        conn.send_record(BUILDING_ID, obj.id, obj.name, obj.temperature, obj.face_rgb)
 
 def face_checking(frame, objects,trackableObjects, rects, conn):
     for (objectID, obj) in objects.items():
@@ -102,7 +121,7 @@ def face_checking(frame, objects,trackableObjects, rects, conn):
         # if there is no existing trackable object, create one
         if to is None:
             to = TrackableObject(objectID, centroid)
-            _ = Thread(target=send_thread, args=(conn, objects, objectID,),daemon=True).start()
+            _ = Thread(target=send_pics_for_rec, args=(conn, objects, objectID,),daemon=True).start()
         elif (not to.counted):
             to.counted = True
 
@@ -121,8 +140,6 @@ def init_model():
     faceDetectTemp = LightFaceDetection(PROTO_SLIM320, MODEL_SLIM320)
     # faceDetect = FaceDetection(CAFFEMODEL, PROTOTEXTPATH)
     #faceDetect = FaceDetectionLightRfb()
-
-
     landmarkDetect = LandmarkDetection()
     return faceDetect, faceDetectTemp, landmarkDetect
 
@@ -130,7 +147,7 @@ def init_object_tracking():
     ct = CentroidTracker(MAX_DISAPEARED_FRAMES)
     ct_temp = CentroidTracker(MAX_DISAPEARED_FRAMES)
     trackableObjects = {}
-    objects = ct.update([],[],RGB_SCALE)
+    objects, _ = ct.update([],[],RGB_SCALE)
     return ct, ct_temp, trackableObjects, objects
 
 def init_conn():
@@ -150,8 +167,6 @@ rgb_temp = np.zeros((480,640,3), np.uint8)
 MODE = 'NORMAL'
 measure = Thread(target=measure_thread, args=(rgb, lep, faceDetectTemp, objects,),daemon=True).start()
 
-# temp = CaptureRegisterFace(NUM_FRONT_PICS,NUM_LEFT_PICS,NUM_RIGHT_PICS)
-
 cv2.namedWindow('Main Monitor')
 cv2.moveWindow("Main Monitor", 600, 20)
 
@@ -167,7 +182,11 @@ while (1):
     frame, ori = rgb.getFrame()
     rects = faceDetect.detectFaces(frame)
     if (MODE == 'NORMAL'):
-        objects = ct.update(rects,ori, RGB_SCALE)
+        objects, deletedObject = ct.update(rects,ori, RGB_SCALE)
+        
+        if (deletedObject):
+            # record = Thread(target=send_records, args=(conn, deletedObject, ),daemon=True).start()
+            print("send records")
             
         face_checking(frame, objects, trackableObjects, rects, conn)
         

@@ -4,9 +4,10 @@ from collections import OrderedDict
 import numpy as np
 
 class ObjectInfo():
-	def __init__(self, coor, rgb, scale,  name = "None", temperature = "None"):
+	def __init__(self, coor, rgb, scale, id="None", name = "None", temperature = "None"):
 		self.coor = coor
 		self.name = name
+		self.id = id
 		self.temperature = temperature
 		self.face_rgb = rgb[int(coor[1]*scale):int(coor[3]*scale), int(coor[0]*scale):int(coor[2]*scale)]
 
@@ -48,6 +49,9 @@ class CentroidTracker():
 	def update(self, rects, rgb, scale):
 		# check to see if the list of input bounding box rectangles
 		# is empty
+		disappearedObjects = OrderedDict()
+		indexDisappeared = 0
+
 		if len(rects) == 0:
 			# loop over any existing tracked objects and mark them
 			# as disappeared
@@ -57,11 +61,13 @@ class CentroidTracker():
 				# frames where a given object has been marked as
 				# missing, deregister it
 				if self.disappeared[objectID] > self.maxDisappeared:
+					disappearedObjects[indexDisappeared] = self.objects[objectID]
+					indexDisappeared += 1
 					self.deregister(objectID)
 
 			# return early as there are no centroids or tracking info
 			# to update
-			return self.objects
+			return self.objects, disappearedObjects
 
 		# initialize an array of input centroids for the current frame
 		inputCentroids = np.zeros((len(rects), 2), dtype="int")
@@ -130,7 +136,9 @@ class CentroidTracker():
 				# counter
 				objectID = objectIDs[row]
 				self.objects[objectID].coor = rects[col]
-				self.objects[objectID].face_rgb =  rgb[int(rects[col][1]*scale):int(rects[col][3]*scale), int(rects[col][0]*scale):int(rects[col][2]*scale)]
+				face = rgb[int(rects[col][1]*scale):int(rects[col][3]*scale), int(rects[col][0]*scale):int(rects[col][2]*scale)]
+				if (len(face) != 0):
+					self.objects[objectID].face_rgb =  face
 				self.disappeared[objectID] = 0
 
 				# indicate that we have examined each of the row and
@@ -159,6 +167,8 @@ class CentroidTracker():
 					# frames the object has been marked "disappeared"
 					# for warrants deregistering the object
 					if self.disappeared[objectID] > self.maxDisappeared:
+						disappearedObjects[indexDisappeared] = self.objects[objectID]
+						indexDisappeared += 1
 						self.deregister(objectID)
 
 			# otherwise, if the number of input centroids is greater
@@ -169,4 +179,4 @@ class CentroidTracker():
 					self.register(rects[col],rgb, scale)
 
 		# return the set of trackable objects
-		return self.objects
+		return self.objects, disappearedObjects

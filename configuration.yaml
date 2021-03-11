@@ -1,6 +1,9 @@
+buildingId: 2
+deviceId: 'test-device'
+
 periodTime:
     measureTemp: 1
-    sendRecMess: 2
+    sendRecMess: 1.5
 
 iotHub:
     connectionStringDevice: "HostName=thesis-hub.azure-devices.net;DeviceId=test-device;SharedAccessKey=E/uKH6XK6G2NLCYWQxu26+mrNBKmecm0I4WU2A1FfrY="
@@ -29,9 +32,10 @@ faceDetection:
     onnxSlim320: "./submodules/face_detection/models/version-slim-320_simplified.onnx" 
     faceSize: 600
 
-transMatrix: [[ 1.38561524e+00, -5.27680134e-04, -1.23831453e+02],
- [ 4.82426727e-02 , 1.47376946e+00 ,-1.49092213e+02],
- [-1.60874186e-04 , 1.36021487e-04 , 1.00000000e+00]]
+transMatrix: [[ 1.47899218e+00, -4.04652164e-01, -1.96551979e+02],
+ [ 4.56129946e-02,  1.35470695e+00, -1.77840387e+02],
+ [ 2.92930280e-04, -7.06056523e-04,  1.00000000e+00]]
+
 
 
 maxDisFramesObjectTracking: 50
