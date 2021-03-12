@@ -47,7 +47,6 @@ class IotConn:
         message_object = Message(message)
         message_object.custom_properties["level"] = "store"
         # Send the message.
-        print("send record" + message)
         self.client.send_message(message_object)        
 
     def registerToAzure(self, personName, imgs, size):

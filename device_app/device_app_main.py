@@ -102,7 +102,7 @@ def send_records(conn, objects):
         if obj.id is None:
             obj.id = 0
             obj.name = 'Tien'
-        conn.send_record(BUILDING_ID, obj.id, obj.name, obj.temperature, obj.face_rgb)
+        conn.send_record(BUILDING_ID, obj.id, obj.name, obj.temperature, pic_str)
 
 def face_checking(frame, objects,trackableObjects, rects, conn):
     for (objectID, obj) in objects.items():
@@ -185,7 +185,7 @@ while (1):
         objects, deletedObject = ct.update(rects,ori, RGB_SCALE)
         
         if (deletedObject):
-            # record = Thread(target=send_records, args=(conn, deletedObject, ),daemon=True).start()
+            record = Thread(target=send_records, args=(conn, deletedObject, ),daemon=True).start()
             print("send records")
             
         face_checking(frame, objects, trackableObjects, rects, conn)
