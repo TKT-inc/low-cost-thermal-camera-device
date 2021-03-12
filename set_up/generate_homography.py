@@ -97,6 +97,7 @@ cv.namedWindow('rgb')
 cv.moveWindow('rgb', 780, 80)
 
 while (1):
+    _, rgb_ori = rgb_cam.read()
     with Lepton(THERMAL_SOURCE) as l:
         a,_ = l.capture()
         cv.normalize(a, a, 0, 65535, cv.NORM_MINMAX)
@@ -104,7 +105,6 @@ while (1):
         thermal =   np.uint8(a)
         thermal_frame = cv.resize(thermal,(THERMAL_WIDTH,THERMAL_HEIGHT))
         # thermal_frame = cv.applyColorMap(thermal, cv.COLORMAP_JET)
-    _, rgb_ori = rgb_cam.read()
     rgb_frame = cv.resize(rgb_ori, (RGB_WIDTH, RGB_HEIGHT))
     cv.imshow("rgb", rgb_frame)
     cv.imshow("thermal", thermal_frame)

@@ -96,9 +96,7 @@ def measure_thread(rgb, lep, faceDetect, objects):
         time.sleep(TIME_MEASURE_TEMP)
 
 def send_pics_for_rec(conn,objects, personID):
-    while personID in objects:
-
-        # cv2.imwrite("../test/a.jpg", objects[personID].face_rgb)
+    while personID in objects and MODE == 'NORMAL':
         try:
             _, buffer = cv2.imencode('.jpg', cv2.resize(objects[personID].face_rgb, (FACE_SIZE,FACE_SIZE)))
             pic_str = base64.b64encode(buffer)
@@ -117,7 +115,7 @@ def send_records(conn, objects):
         _, buffer = cv2.imencode('.jpg', cv2.resize(obj.face_rgb,(FACE_SIZE,FACE_SIZE)))
         pic_str = base64.b64encode(buffer)
         pic_str = pic_str.decode()
-        
+
         conn.send_record(BUILDING_ID, obj.id, obj.name, obj.temperature, pic_str)
 
 def face_checking(frame, objects,trackableObjects, rects, conn):
@@ -215,6 +213,7 @@ while (1):
                 register = Thread(target=conn.registerToAzure, args=(BUILDING_ID ,'Tien',store, FACE_SIZE, ), daemon=True).start()
                 del temp
                 MODE = "NORMAL"
+                ct, ct_temp, trackableObjects, objects = init_object_tracking()
                 measure = Thread(target=measure_thread, args=(rgb, lep, faceDetectTemp, objects,),daemon=True).start()
                 conn.restart_listener(objects)
 
@@ -231,4 +230,3 @@ while (1):
     if key == ord("r"): # registration mode
         MODE = 'REGISTER'
         temp = CaptureRegisterFace(NUM_FRONT_PICS,NUM_LEFT_PICS,NUM_RIGHT_PICS, LEFT_THRESHOLD, RIGHT_THRESHOLD, FRONT_RANGE, STACK_NUMBER, FRAMES_BETWEEN_CAP)
-        ct, ct_temp, trackableObjects, objects = init_object_tracking()
