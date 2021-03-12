@@ -2,6 +2,9 @@ import numpy as np
 import json
 import uuid
 import cv2
+import yaml
+with open("../configuration.yaml") as ymlfile:
+    cfg = yaml.safe_load(ymlfile)
 from threading import Thread
 import threading
 import time
@@ -9,33 +12,37 @@ from azure.iot.device import IoTHubDeviceClient, Message, MethodResponse
 from azure.storage.blob import BlobServiceClient, BlobClient, ContainerClient
 
 
-MSG_TXT = '{{"buildingId":"{buildingId}","deviceId":"{deviceId}","trackingId": "{trackingId}","face": "{face}"}}'
-MSG_REGISTER = '{{"personName": "{personName}","containerName":"{containerName}"}}'
-MSG_RECORD = '{{"buildingId":"{buildingId}","personID": "{personID}", "personName": "{personName}", "temperature":"{temperature}", "face":"{face}"}}'
+MSG_REC = cfg['iotHub']['msgFormat']['recMsg']
+MSG_REGISTER = cfg['iotHub']['msgFormat']['registerMsg']
+MSG_RECORD = cfg['iotHub']['msgFormat']['recordMsg']
 
 class IotConn:
-    def __init__(self, connStringDevice, connStringBlob, objects):
+    def __init__(self, mode, connStringDevice, connStringBlob, objects):
         # Create an IoT Hub client
         self.client = IoTHubDeviceClient.create_from_connection_string(connStringDevice)
         self.blob_service_client = BlobServiceClient.from_connection_string(connStringBlob)
+        self.mode = mode
+        self.thread = Thread(target=self.message_listener, args=(self.client, objects,))
+        self.thread.daemon = True
+        self.thread.start()
+
+    def restart_listener(self, objects):
         self.thread = Thread(target=self.message_listener, args=(self.client, objects,))
         self.thread.daemon = True
         self.thread.start()
 
     def message_listener(self, client, objects):
         print("Start listening to server")
-        while (1):       
+        while (self.mode == 'NORMAL'):       
             message = client.receive_message()
             message = message.data.decode('utf-8')
             json_data = json.loads(message, strict = False)
             print(str(json_data))
             if int(json_data['trackingId']) in objects:
-                objects[int(json_data['trackingId'])].name = str(json_data['personName'])
-                objects[int(json_data['trackingId'])].id = str(json_data['personId'])
-                time.sleep(0.3)
+                objects[int(json_data['trackingId'])].updateNameAndId(str(json_data['personName']), str(json_data['personId']))
 
     def message_sending(self, buildingId, deviceId, trackingId, face_img):
-        message = MSG_TXT.format(buildingId=buildingId, deviceId=deviceId, trackingId=trackingId, face=face_img)
+        message = MSG_REC.format(buildingId=buildingId, deviceId=deviceId, trackingId=trackingId, face=face_img)
         message_object = Message(message)
         message_object.custom_properties["level"] = "recognize"
         # Send the message.
@@ -49,10 +56,10 @@ class IotConn:
         # Send the message.
         self.client.send_message(message_object)        
 
-    def registerToAzure(self, personName, imgs, size):
+    def registerToAzure(self, buildingId, personName, imgs, size):
         containerName = str(uuid.uuid4())
         self.sendImageToBlob(imgs, containerName, size)
-        self.registerPersonToServer(containerName, personName)
+        self.registerPersonToServer(buildingId ,containerName, personName)
 
     def createContainer(self, containerName):
         print (containerName)
@@ -64,8 +71,9 @@ class IotConn:
         _, encoded_img = cv2.imencode('.jpg',image)
         self.block_blob_client.upload_blob(encoded_img.tobytes())
 
-    def registerPersonToServer(self, containerName, personName):
+    def registerPersonToServer(self, buildingId, containerName, personName):
         message = MSG_REGISTER.format(
+            buildingId = buildingId,
             containerName = containerName,
             personName = personName
         )

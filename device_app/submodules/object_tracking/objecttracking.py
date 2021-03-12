@@ -4,12 +4,25 @@ from collections import OrderedDict
 import numpy as np
 
 class ObjectInfo():
-	def __init__(self, coor, rgb, scale, id="None", name = "None", temperature = "None"):
+	def __init__(self, coor, rgb, scale, max_stack = 3):
 		self.coor = coor
-		self.name = name
-		self.id = id
-		self.temperature = temperature
+		self.name = "None"
+		self.id = "None"
+		self.temperature = "None"
 		self.face_rgb = rgb[int(coor[1]*scale):int(coor[3]*scale), int(coor[0]*scale):int(coor[2]*scale)]
+		self.rec_stacks = []
+		self.max_stack = max_stack
+	
+	def updateNameAndId(self, name, id):
+		self.rec_stacks.append((name, id))
+		if (len(self.rec_stacks) == self.max_stack + 1):
+			self.rec_stacks.pop(0)
+			self.name, self.id = max(self.rec_stacks, key=self.rec_stacks.count)
+		else:
+			self.name = name
+			self.id = id
+		print(self.rec_stacks)
+
 
 class CentroidTracker():
 	def __init__(self, maxDisappeared=25):

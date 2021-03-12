@@ -1,4 +1,4 @@
-buildingId: 2
+buildingId: 1
 deviceId: 'test-device'
 
 periodTime:
@@ -8,7 +8,10 @@ periodTime:
 iotHub:
     connectionStringDevice: "HostName=thesis-hub.azure-devices.net;DeviceId=test-device;SharedAccessKey=E/uKH6XK6G2NLCYWQxu26+mrNBKmecm0I4WU2A1FfrY="
     connectionStringBlob: "DefaultEndpointsProtocol=https;AccountName=thesisbstorage;AccountKey=WdOJMq9wULxCEKKHHiI9lafWPjIpJpXuinasmDLO5F9zZObHDzrLxTszglLM0zCa+GILFbjZCTO0BjFEuUR/WQ==;EndpointSuffix=core.windows.net"
-    msgFormat: '{{"personID": "{personID}","temperature":"{temperature}","embedding": "{embedding}"}}'
+    msgFormat: 
+        recMsg: '{{"buildingId":"{buildingId}","deviceId":"{deviceId}","trackingId": "{trackingId}","face": "{face}"}}'
+        recordMsg: '{{"buildingId":"{buildingId}","personId": "{personID}", "personName": "{personName}", "temperature":"{temperature}", "face":"{face}"}}'
+        registerMsg: '{{"buildingId":"{buildingId}","personName": "{personName}","containerName":"{containerName}"}}'
 
 camera:
     rgb:
@@ -36,14 +39,17 @@ transMatrix: [[ 1.47899218e+00, -4.04652164e-01, -1.96551979e+02],
  [ 4.56129946e-02,  1.35470695e+00, -1.77840387e+02],
  [ 2.92930280e-04, -7.06056523e-04,  1.00000000e+00]]
 
-
-
-maxDisFramesObjectTracking: 50
+maxDisFramesObjectTracking: 40
 
 registration:
     numFontPics: 5
     numLeftPics: 5
     numRightPics: 5
+    stackNumberPics: 6
+    leftThreshold: -30
+    rightThreshold: 30
+    frontRange: 60
+    frameBetweenCapture: 3
 
 display:
     enableThermalFrame: True

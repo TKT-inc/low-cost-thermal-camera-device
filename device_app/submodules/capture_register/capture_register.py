@@ -5,7 +5,7 @@ import collections
 
 
 class CaptureRegisterFace:
-    def __init__ (self,front_pics=2, left_pics=2, right_pics=2, left=-25, right=16, middle_range=35, stack_number=8):
+    def __init__ (self,front_pics=2, left_pics=2, right_pics=2, left=-25, right=16, middle_range=35, stack_number=8, frame_distance_capture=3):
         self.left = left
         self.right = right
         self.mid = middle_range
@@ -16,6 +16,7 @@ class CaptureRegisterFace:
         self.right_stack = 0
         self.front_stack = 0
         self.stack_number = stack_number
+        self.frame_distance_capture = frame_distance_capture
         self.state = "FRONT"
         self.imgs = []
     
@@ -28,7 +29,7 @@ class CaptureRegisterFace:
                 self.front_stack = 0
             if (self.front_stack > self.stack_number):
                 self.imgs.append(self.getFace(ori, rects,scale))
-                self.front_stack -= 3
+                self.front_stack -= self.frame_distance_capture
             if (len(self.imgs) == self.front_pics):
                 self.state = "LEFT"
                 print ("FRONT")
@@ -39,7 +40,7 @@ class CaptureRegisterFace:
                 self.left_stack = 0
             if self.left_stack > self.stack_number:
                 self.imgs.append(self.getFace(ori, rects,scale))
-                self.left_stack -= 3
+                self.left_stack -= self.frame_distance_capture
             if (len(self.imgs) == self.front_pics + self.left_pics):
                 self.state = "RIGHT"
                 print("LEFT")
@@ -50,7 +51,7 @@ class CaptureRegisterFace:
                 self.right_stack = 0
             if (self.right_stack > self.stack_number):
                 self.imgs.append(self.getFace(ori, rects,scale))
-                self.right_stack -= 3
+                self.right_stack -= self.frame_distance_capture
             if (len(self.imgs) == self.front_pics + self.left_pics + self.right_pics):
                 print("RIGHT")
                 return self.imgs

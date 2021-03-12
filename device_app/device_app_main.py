@@ -16,12 +16,15 @@ from submodules.measure_temperature.measure_temperature import measureTemperatur
 from submodules.iot_hub.iot_conn import IotConn
 from submodules.capture_register.capture_register import CaptureRegisterFace
 
+# Set up device params
 DEVICE_ID = cfg['deviceId']
 BUILDING_ID = cfg['buildingId']
 
+# Set up azure cloud params 
 CONNECTION_STRING_DEVICE = cfg['iotHub']['connectionStringDevice']
 CONNECTION_STRING_BLOB = cfg['iotHub']['connectionStringBlob']
 
+# Set up camera params
 RGB_SOURCE = cfg['camera']['rgb']['source']
 RGB_WIDTH = cfg['camera']['rgb']['scaleWidth']
 RGB_HEIGHT = cfg['camera']['rgb']['scaleHeight']
@@ -30,6 +33,7 @@ THERMAL_SOURCE = cfg['camera']['thermal']['source']
 THERMAL_WIDTH = cfg['camera']['thermal']['scaleWidth']
 THERMAL_HEIGHT = cfg['camera']['thermal']['scaleHeight']
 
+# Set up face detection params
 MODEL_SSD = cfg['faceDetection']['modelSsd']
 PROTO_SSD = cfg['faceDetection']['protoSsd']
 MODEL_SLIM320 = cfg['faceDetection']['modelSlim320']
@@ -37,19 +41,33 @@ PROTO_SLIM320 = cfg['faceDetection']['protoSlim320']
 ONNX_SLIM320 = cfg['faceDetection']['onnxSlim320']
 FACE_SIZE = cfg['faceDetection']['faceSize']
 
+# Set up mapping param between 2 cameras
 H_MATRIX = cfg['transMatrix']
 
+# Set up time params
 TIME_MEASURE_TEMP = cfg['periodTime']['measureTemp']
 TIME_SEND_REC = cfg['periodTime']['sendRecMess']
 
+# Set up tracking params
 MAX_DISAPEARED_FRAMES = cfg['maxDisFramesObjectTracking']
 
+# Set up registeration params
 NUM_FRONT_PICS = cfg['registration']['numFontPics']
 NUM_LEFT_PICS = cfg['registration']['numLeftPics']
 NUM_RIGHT_PICS = cfg['registration']['numRightPics']
+STACK_NUMBER = cfg['registration']['stackNumberPics']
+LEFT_THRESHOLD = cfg['registration']['leftThreshold']
+RIGHT_THRESHOLD = cfg['registration']['rightThreshold']
+FRONT_RANGE = cfg['registration']['frontRange']
+FRAMES_BETWEEN_CAP = cfg['registration']['frameBetweenCapture']
 
+# FLags of display
 ENABLE_SHOW_THERMAL_FRAME = cfg['display']['enableThermalFrame']
 
+color = np.zeros((480,640,3), np.uint8)
+rgb_temp = np.zeros((480,640,3), np.uint8)
+
+MODE = 'NORMAL'
 
 def centroid_detect(x, y, w, h):
     x1 = int(w/2)
@@ -99,9 +117,7 @@ def send_records(conn, objects):
         _, buffer = cv2.imencode('.jpg', cv2.resize(obj.face_rgb,(FACE_SIZE,FACE_SIZE)))
         pic_str = base64.b64encode(buffer)
         pic_str = pic_str.decode()
-        if obj.id is None:
-            obj.id = 0
-            obj.name = 'Tien'
+        
         conn.send_record(BUILDING_ID, obj.id, obj.name, obj.temperature, pic_str)
 
 def face_checking(frame, objects,trackableObjects, rects, conn):
@@ -151,7 +167,7 @@ def init_object_tracking():
     return ct, ct_temp, trackableObjects, objects
 
 def init_conn():
-    conn = IotConn(CONNECTION_STRING_DEVICE, CONNECTION_STRING_BLOB , objects)
+    conn = IotConn(MODE, CONNECTION_STRING_DEVICE, CONNECTION_STRING_BLOB , objects)
     return conn
 
 
@@ -161,10 +177,6 @@ faceDetect, faceDetectTemp, landmarkDetect = init_model()
 ct, ct_temp, trackableObjects, objects = init_object_tracking()
 conn = init_conn()
 
-color = np.zeros((480,640,3), np.uint8)
-rgb_temp = np.zeros((480,640,3), np.uint8)
-
-MODE = 'NORMAL'
 measure = Thread(target=measure_thread, args=(rgb, lep, faceDetectTemp, objects,),daemon=True).start()
 
 cv2.namedWindow('Main Monitor')
@@ -198,28 +210,25 @@ while (1):
         if (len(rects) == 1):
             img_points = landmarkDetect.detectLandmark(frame, rects)
             store = temp.update(frame,img_points, ori, rects, RGB_SCALE)
-            index = 1
+
             if store is not None:
-                for x in store:
-                    cv2.imwrite("../test/test_" + str(index) + ".jpg", x)
-                    index += 1
-                conn.registerToAzure('Tien',store, FACE_SIZE)
+                register = Thread(target=conn.registerToAzure, args=(BUILDING_ID ,'Tien',store, FACE_SIZE, ), daemon=True).start()
                 del temp
-                ct, ct_temp, trackableObjects, objects = init_object_tracking()
                 MODE = "NORMAL"
                 measure = Thread(target=measure_thread, args=(rgb, lep, faceDetectTemp, objects,),daemon=True).start()
-
+                conn.restart_listener(objects)
 
     cv2.imshow('Main Monitor', frame)
     end = time.time()
     # print('Inference: {:.6f}s'.format(end-start))
+
     key = cv2.waitKey(1) & 0xFF
     # if the `q` key was pressed, break from the loop
-    if key == ord("q"):
+    if key == ord("q"):# quit
         rgb.capture.release()
         cv2.destroyAllWindows()
         break
-    if key == ord("r"):
+    if key == ord("r"): # registration mode
         MODE = 'REGISTER'
-        temp = CaptureRegisterFace(NUM_FRONT_PICS,NUM_LEFT_PICS,NUM_RIGHT_PICS)
-        del ct, ct_temp,trackableObjects, objects
+        temp = CaptureRegisterFace(NUM_FRONT_PICS,NUM_LEFT_PICS,NUM_RIGHT_PICS, LEFT_THRESHOLD, RIGHT_THRESHOLD, FRONT_RANGE, STACK_NUMBER, FRAMES_BETWEEN_CAP)
+        ct, ct_temp, trackableObjects, objects = init_object_tracking()
