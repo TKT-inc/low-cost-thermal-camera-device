@@ -2,6 +2,7 @@
 import sys
 import os
 import cv2
+import time
 import numpy as np
 from threading import Thread
 
@@ -11,44 +12,46 @@ from device_app_function import DeviceAppFunctions
 import qimage2ndarray
 
 
-class MainWindow(QMainWindow):
+class MainWindow(QtWidgets.QMainWindow):
     def __init__(self, deviceFuntion):
         super(MainWindow, self).__init__()
-        self.ui = Ui_mainUi()
-        uic.loadUi("form.ui", self)
+
+        uic.loadUi("./guiModules/form.ui", self)
 
         self.deviceFuntion = deviceFuntion
 
-        self.timerRGB = QTimer()
+        self.timerRGB = QtCore.QTimer()
         self.timerRGB.timeout.connect(self.display_main_frame)
-        self.timerRGB.start(30)
+        self.timerRGB.start(0)
 
         self.timerThermal = QtCore.QTimer()
-        self.timerThermal.timeout.connect(self.timerThermal)
+        self.timerThermal.timeout.connect(self.display_thermal_frame)
         self.timerThermal.start(1000)
-        # self.ui.pushButton_2.clicked.connect(self.full())
 
     def display_main_frame(self):
-        frame = self.deviceFuntion.get_main_frame()
-        frame = cv2.resize(frame, (self.ui.label.width(), self.ui.label.height()))
-        frame = cv2.cvtColor(frame,cv2.COLOR_BGR2RGB)
-        frame = cv2.flip(frame, 1)
+        start_a = time.time()
+        frame = self.deviceFuntion.process()
+        end_a = time.time()
+        frame = cv2.resize(frame, (self.label.width(), self.label.height()))
+        # frame = cv2.cvtColor(frame,cv2.COLOR_BGR2RGB)
         image = qimage2ndarray.array2qimage(frame)  #SOLUTION FOR MEMORY LEAK
-        self.ui.label.setPixmap(QtGui.QPixmap.fromImage(image))
+        end_a = time.time()
+        print ('time {:.2f}' .format(end_a - start_a))
+        self.label.setPixmap(QtGui.QPixmap.fromImage(image))
 
     def display_thermal_frame(self):
         frame = self.deviceFuntion.get_thermal_frame()
-        frame = cv2.resize(frame, (self.ui.label_2.width(), self.ui.label_2.height()))
+        frame = cv2.resize(frame, (self.label_2.width(), self.label_2.height()))
         frame = cv2.cvtColor(frame,cv2.COLOR_BGR2RGB)
-        frame = cv2.flip(frame, 1)
         image = qimage2ndarray.array2qimage(frame)  #SOLUTION FOR MEMORY LEAK
-        self.ui.label_2.setPixmap(QPixmap.fromImage(image))
+        self.label_2.setPixmap(QtGui.QPixmap.fromImage(image))
 
 
 if __name__ == "__main__":
-    app = QApplication(sys.argv)
+    app = QtWidgets.QApplication(sys.argv)
 
     deviceFunction = DeviceAppFunctions()
+    # print('start')
     window = MainWindow(deviceFunction)
     window.showFullScreen()
 

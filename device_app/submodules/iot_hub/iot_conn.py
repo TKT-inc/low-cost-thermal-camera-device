@@ -33,7 +33,7 @@ class IotConn:
 
     def message_listener(self, client, objects):
         print("Start listening to server")
-        while (self.mode == 'NORMAL'):       
+        while (self.mode == 'NORMAL'): 
             message = client.receive_message()
             message = message.data.decode('utf-8')
             json_data = json.loads(message, strict = False)
