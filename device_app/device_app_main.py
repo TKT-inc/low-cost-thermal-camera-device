@@ -37,14 +37,14 @@ class MainWindow(QtWidgets.QMainWindow):
         qimg = QtGui.QImage(frame.data, width, height, 3*width, QtGui.QImage.Format_RGB888).rgbSwapped()
         print('time: {:.5f} ----- {:.5f}' .format(time.time() - start_a, end_a - start_a))
         
-        self.label.setPixmap(QtGui.QPixmap(qimg))
+        self.rgb_frame.setPixmap(QtGui.QPixmap(qimg))
 
     def display_thermal_frame(self):
         frame = self.deviceFuntion.get_thermal_frame()
 
         frame = cv2.resize(frame, (self.label_2.width(), self.label_2.height()))
         height, width, _ = frame.shape
-        qimg = QtGui.QImage(frame.data, width, height, 3*width, QtGui.QImage.Format_RGB888).rgbSwapped()
+        qimg = thremal_frame.QImage(frame.data, width, height, 3*width, QtGui.QImage.Format_RGB888).rgbSwapped()
         self.label_2.setPixmap(QtGui.QPixmap(qimg))
 
 
