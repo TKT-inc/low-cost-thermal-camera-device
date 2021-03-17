@@ -12,6 +12,7 @@ iotHub:
         recMsg: '{{"buildingId":"{buildingId}","deviceId":"{deviceId}","trackingId": "{trackingId}","face": "{face}"}}'
         recordMsg: '{{"buildingId":"{buildingId}","personId": "{personID}", "personName": "{personName}", "temperature":"{temperature}", "face":"{face}"}}'
         registerMsg: '{{"buildingId":"{buildingId}","personName": "{personName}","containerName":"{containerName}"}}'
+    enableSending: False
 
 camera:
     rgb:
@@ -39,8 +40,6 @@ transMatrix: [[ 1.77017876e+00,  1.60302510e-01, -2.87481949e+02],
  [-1.21156792e-02,  1.65665897e+00, -1.77777938e+02],
  [ 3.16496161e-04,  1.30910715e-04,  1.00000000e+00]]
 
-
-
 maxDisFramesObjectTracking: 40
 
 registration:
@@ -52,6 +51,8 @@ registration:
     rightThreshold: 22
     frontRange: 44
     frameBetweenCapture: 3
+
+offsetTemprture: 0.5
 
 display:
     enableThermalFrame: False

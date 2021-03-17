@@ -61,8 +61,12 @@ RIGHT_THRESHOLD = cfg['registration']['rightThreshold']
 FRONT_RANGE = cfg['registration']['frontRange']
 FRAMES_BETWEEN_CAP = cfg['registration']['frameBetweenCapture']
 
-# FLags of display
+# Flags of mode
 ENABLE_SHOW_THERMAL_FRAME = cfg['display']['enableThermalFrame']
+ENABLE_SENDING_TO_CLOUD = cfg['iotHub']['enableSending']
+
+#setup ofset temperature
+OFFSET_TEMPERATURE = cfg['offsetTemprture']
 
 
 
@@ -81,19 +85,8 @@ class DeviceAppFunctions():
         self.init_object_tracking()
         self.init_conn()
 
-        # self.frame, self.ori = self.rgb.getFrame()
-
         Thread(target=self.measure_thread,daemon=True).start()
 
-        # cv2.namedWindow('Main Monitor')
-        # cv2.moveWindow("Main Monitor", 600, 20)
-
-        # cv2.namedWindow('measure thermal')
-        # cv2.moveWindow('measure thermal', 120, 500)
-
-        # cv2.namedWindow('measure rgb')
-        # cv2.moveWindow('measure rgb', 1200, 500)
-        # Thread(target=self.process ,daemon=True).start()
         self.process()
 
 
@@ -109,12 +102,11 @@ class DeviceAppFunctions():
         # self.faceDetectTemp = FaceDetection(MODEL_SSD, PROTO_SSD)
         #self.faceDetect = FaceDetectionLightRfb()
         #self.faceDetectTemp = FaceDetectionLightRfb()
-        self.landmarkDetect = LandmarkDetection()
+        # self.landmarkDetect = LandmarkDetection()
 
 
     def init_object_tracking(self):
         self.ct = CentroidTracker(MAX_DISAPEARED_FRAMES)
-        # self.ct_temp = CentroidTracker(MAX_DISAPEARED_FRAMES)
         self.trackableObjects = {}
         self.objects, _ = self.ct.update([],[],RGB_SCALE)
 
@@ -124,54 +116,38 @@ class DeviceAppFunctions():
 
 
     def process(self):
-        while (1):
-        
-            try:
-                start = time.time()
-                self.frame, self.ori = self.rgb.getFrame()
-                rects = self.faceDetect.detectFaces(self.frame)
+        start = time.time()
+        self.frame, self.ori = self.rgb.getFrame()
+        rects = self.faceDetect.detectFaces(self.frame)
 
-                if (self.MODE == 'NORMAL'):
-                    self.objects, deletedObject = self.ct.update(rects, self.ori, RGB_SCALE)
-                    
-                    if (deletedObject):
-                        Thread(target=self.send_records, args=(deletedObject, ),daemon=True).start()
-                        print("send records")
-                        
-                    self.face_checking(rects)
-                    
-                    if (ENABLE_SHOW_THERMAL_FRAME):
-                        cv2.imshow('measure thermal', self.color)
-                        cv2.imshow('measure rgb', self.rgb_temp)
-                    
-                # elif (self.MODE == 'REGISTER'):
-                #     if (len(rects) == 1):
-                #         img_points = self.landmarkDetect.detectLandmark(self.frame, rects)
-                #         store = temp.update(self.frame,img_points, self.ori, rects, RGB_SCALE)
+        if (self.MODE == 'NORMAL'):
+            self.objects, deletedObject = self.ct.update(rects, self.ori, RGB_SCALE)
+            
+            if (deletedObject):
+                Thread(target=self.send_records, args=(deletedObject, ),daemon=True).start()
+                print("send records")
+                
+            self.face_checking(rects)
+            
+        elif (self.MODE == 'REGISTER'):
+            if (len(rects) == 1):
+                img_points = self.landmarkDetect.detectLandmark(self.frame, rects)
+                store = self.register.update(self.frame,img_points, self.ori, rects, RGB_SCALE)
 
-                #         if store is not None:
-                #             Thread(target=self.conn.registerToAzure, args=(BUILDING_ID ,'Tien',store, FACE_SIZE, ), daemon=True).start()
-                #             del temp
-                #             self.MODE = "NORMAL"
-                #             self.ct, self.ct_temp, self.trackableObjects, self.objects = self.init_object_tracking()
-                #             Thread(target=self.measure_thread, daemon=True).start()
-                #             self.conn.restart_listener(objects)
+                if store is not None:
+                    if (ENABLE_SENDING_TO_CLOUD):
+                        Thread(target=self.conn.registerToAzure, args=(BUILDING_ID ,'Tien',store, FACE_SIZE, ), daemon=True).start()
+                    del self.register
+                    self.MODE = "NORMAL"
+                    self.ct, self.ct_temp, self.trackableObjects, self.objects = self.init_object_tracking()
+                    Thread(target=self.measure_thread, daemon=True).start()
+                    self.conn.restart_listener(self.objects)
 
-                cv2.imshow('Main Monitor', self.frame)
-                # print(self.frame)
-                end = time.time()
-                print('Inference: {:.6f}s'.format(end-start))
-                key = cv2.waitKey(1) & 0xFF
-                if (key == ord("q")):
-                    self.rgb.capture.release()
-                    cv2.destroyAllWindows()
-                    break
-                # if (self.displayFrame is not None):
-                #     return self.displayFrame
-                # return self.frame
-                    # break
-            except Exception as identifier:
-                pass
+        # cv2.imshow('Main Monitor', self.frame)
+
+        end = time.time()
+        print('Inference: {:.6f}s'.format(end-start))
+        return self.displayFrame
             
     def centroid_detect(self, x, y, w, h):
         x1 = int(w/2)
@@ -179,7 +155,6 @@ class DeviceAppFunctions():
         cx = x + x1
         cy = y + y1
         return (cx,cy)
-
 
     def measure_thread(self):
         time.sleep(1)
@@ -195,7 +170,7 @@ class DeviceAppFunctions():
             rects_measurement = self.faceDetectTemp.detectFaces(self.rgb_temp)
             objects_measurement, _ = ct_temp.update(rects_measurement,rgp_ori,RGB_SCALE)
             
-            measureTemperature(self.color, temp, self.objects, objects_measurement, H_MATRIX)
+            measureTemperature(self.color, temp, self.objects, objects_measurement, H_MATRIX, OFFSET_TEMPERATURE)
         
             time.sleep(TIME_MEASURE_TEMP)
 
@@ -207,7 +182,9 @@ class DeviceAppFunctions():
                 pic_str = base64.b64encode(buffer)
                 pic_str = pic_str.decode()
 
-                self.conn.message_sending(BUILDING_ID ,DEVICE_ID, personID, pic_str)
+                if (ENABLE_SENDING_TO_CLOUD):
+                    self.conn.message_sending(BUILDING_ID ,DEVICE_ID, personID, pic_str)
+                    
                 time.sleep(TIME_SEND_REC)
             except Exception as identifier:
                 pass
@@ -218,7 +195,9 @@ class DeviceAppFunctions():
             _, buffer = cv2.imencode('.jpg', cv2.resize(obj.face_rgb,(FACE_SIZE,FACE_SIZE)))
             pic_str = base64.b64encode(buffer)
             pic_str = pic_str.decode()
-            self.conn.send_record(BUILDING_ID, obj.id, obj.name, obj.temperature, pic_str)
+
+            if (ENABLE_SENDING_TO_CLOUD):
+                self.conn.send_record(BUILDING_ID, obj.id, obj.name, obj.temperature, pic_str)
 
 
     def face_checking( self, rects):
@@ -243,20 +222,14 @@ class DeviceAppFunctions():
                 to.counted = True
 
             cv2.putText(self.frame, str(obj.temperature), (centroid[0], y), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
-            self.displayFrame = self.frame
             self.trackableObjects[objectID] = to
 
-    def get_main_frame(self):
-        return self.displayFrame
+        self.displayFrame = self.frame
+
 
     def get_thermal_frame(self):
         return self.color
 
     def register_mode(self):
         self.MODE = 'REGISTER'
-
-test = DeviceAppFunctions()
-# while (1):
-#     a = 3
-
-    
+        self.register = CaptureRegisterFace(NUM_FRONT_PICS,NUM_LEFT_PICS,NUM_RIGHT_PICS, LEFT_THRESHOLD, RIGHT_THRESHOLD, FRONT_RANGE, STACK_NUMBER, FRAMES_BETWEEN_CAP)
