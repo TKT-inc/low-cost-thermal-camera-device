@@ -13,17 +13,22 @@ def convertRGBToThermalCoor(x, y, H_raw):
         convert_y = MAX_HEIGHT - 1
     return convert_x, convert_y 
 
-def measureTemperature(color,temp, objects, object_measurement, H_matrix, offset_temp):
+def measureTemperature(color,temp, objects, object_measurement, H_matrix, offset_temp, number_max):
     H = H_matrix
-
     for (objectID, obj) in objects.items():
-        coordinates = object_measurement[objectID].coor
-        thermal_start_x, thermal_start_y = convertRGBToThermalCoor(coordinates[0], coordinates[1], H)
-        thermal_end_x, thermal_end_y = convertRGBToThermalCoor(coordinates[2], coordinates[3], H)
-        cv2.rectangle(color, (int(thermal_start_x), int(thermal_start_y)), (int(thermal_end_x), int(thermal_end_y)), (255, 255, 255), 3)
-        
-        max_temp = np.max(temp[int(thermal_start_y/8):int(thermal_end_y/8), int(thermal_start_x/8):int(thermal_end_x/8)], initial=15394)
-        temperature = "{:.2f}".format((max_temp/100.0) - 273.15 + offset_temp) + " oC"
-        objects[objectID].temperature = temperature
+        try:
+            coordinates = object_measurement[objectID].coor
+            thermal_start_x, thermal_start_y = convertRGBToThermalCoor(coordinates[0], coordinates[1], H)
+            thermal_end_x, thermal_end_y = convertRGBToThermalCoor(coordinates[2], coordinates[3], H)
+            cv2.rectangle(color, (int(thermal_start_x), int(thermal_start_y)), (int(thermal_end_x), int(thermal_end_y)), (255, 255, 255), 3)
+            thermal_matrix = temp[int(thermal_start_y/8):int(thermal_end_y/8), int(thermal_start_x/8):int(thermal_end_x/8)]
+            top_max_indices = (-np.array(thermal_matrix)).argpartition(number_max, axis=None)[:number_max]
+            # measured_temp = np.max(thermal_matrix)
+            measured_temp = np.average(thermal_matrix[np.unravel_index(top_max_indices, thermal_matrix.shape)])
+            # print(thermal_matrix[np.unravel_index(top_max_indices, thermal_matrix.shape)])
+            temperature = "{:.2f}".format((measured_temp/100.0) - 273.15) + " oC"
+            objects[objectID].temperature = temperature
+        except Exception as identifier:
+            pass
     return
 

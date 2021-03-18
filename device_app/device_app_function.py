@@ -67,6 +67,7 @@ ENABLE_SENDING_TO_CLOUD = cfg['iotHub']['enableSending']
 
 #setup ofset temperature
 OFFSET_TEMPERATURE = cfg['offsetTemprture']
+NUMBER_MAX_THERMAL_POINTS = cfg['numberMaxThermalPoints']
 
 
 
@@ -116,7 +117,7 @@ class DeviceAppFunctions():
 
 
     def process(self):
-        start = time.time()
+        # start = time.time()
         self.frame, self.ori = self.rgb.getFrame()
         rects = self.faceDetect.detectFaces(self.frame)
 
@@ -145,8 +146,8 @@ class DeviceAppFunctions():
 
         # cv2.imshow('Main Monitor', self.frame)
 
-        end = time.time()
-        print('Inference: {:.6f}s'.format(end-start))
+        # end = time.time()
+        # print('Inference: {:.6f}s'.format(end-start))
         return self.displayFrame
             
     def centroid_detect(self, x, y, w, h):
@@ -170,7 +171,7 @@ class DeviceAppFunctions():
             rects_measurement = self.faceDetectTemp.detectFaces(self.rgb_temp)
             objects_measurement, _ = ct_temp.update(rects_measurement,rgp_ori,RGB_SCALE)
             
-            measureTemperature(self.color, temp, self.objects, objects_measurement, H_MATRIX, OFFSET_TEMPERATURE)
+            measureTemperature(self.color, temp, self.objects, objects_measurement, H_MATRIX, OFFSET_TEMPERATURE, NUMBER_MAX_THERMAL_POINTS)
         
             time.sleep(TIME_MEASURE_TEMP)
 
@@ -233,3 +234,6 @@ class DeviceAppFunctions():
     def register_mode(self):
         self.MODE = 'REGISTER'
         self.register = CaptureRegisterFace(NUM_FRONT_PICS,NUM_LEFT_PICS,NUM_RIGHT_PICS, LEFT_THRESHOLD, RIGHT_THRESHOLD, FRONT_RANGE, STACK_NUMBER, FRAMES_BETWEEN_CAP)
+
+    def __del__(self):
+        self.rgb.capture.release()

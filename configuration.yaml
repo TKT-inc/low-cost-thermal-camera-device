@@ -36,9 +36,9 @@ faceDetection:
     onnxSlim320: "./submodules/face_detection/models/version-slim-320_simplified.onnx" 
     faceSize: 600
 
-transMatrix: [[ 1.77017876e+00,  1.60302510e-01, -2.87481949e+02],
- [-1.21156792e-02,  1.65665897e+00, -1.77777938e+02],
- [ 3.16496161e-04,  1.30910715e-04,  1.00000000e+00]]
+transMatrix: [[ 1.69051699e+00,  1.79461135e-01, -3.25437975e+02],
+ [-6.29553165e-02,  1.81581827e+00, -2.28105166e+02],
+ [ 1.64793732e-04,  2.73841290e-04,  1.00000000e+00]]
 
 maxDisFramesObjectTracking: 40
 
@@ -52,7 +52,8 @@ registration:
     frontRange: 44
     frameBetweenCapture: 3
 
-offsetTemprture: 0.5
+offsetTemprture: 1.8
+numberMaxThermalPoints: 16
 
 display:
     enableThermalFrame: False
