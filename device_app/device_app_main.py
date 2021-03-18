@@ -29,6 +29,11 @@ class MainWindow(QtWidgets.QMainWindow):
         self.timerThermal.timeout.connect(self.display_thermal_frame)
         self.timerThermal.start(1000)
 
+        self.btn_home.clicked.connect(self.Button)
+        self.btn_new_user.clicked.connect(self.Button)
+        self.btn_info.clicked.connect(self.Button)
+        self.register_button.clicked.connect(self.Button)
+
     def closeApp(self):
         app.quit()
 
@@ -44,12 +49,56 @@ class MainWindow(QtWidgets.QMainWindow):
         self.rgb_frame.setPixmap(QtGui.QPixmap(qimg))
 
     def display_thermal_frame(self):
-        frame = self.deviceFuntion.get_thermal_frame()
+        frame = self.deviceFuntion.get_thermal_frame()[1]
 
         frame = cv2.resize(frame, (self.thremal_frame.width(), self.thremal_frame.height()))
         height, width, _ = frame.shape
+        # print(frame)
         qimg = QtGui.QImage(frame.data, width, height, 3*width, QtGui.QImage.Format_RGB888).rgbSwapped()
         self.thremal_frame.setPixmap(QtGui.QPixmap(qimg))
+
+    def Button(self):
+        # GET BT CLICKED
+        btnWidget = self.sender()
+
+        # PAGE HOME
+        if btnWidget.objectName() == "btn_home":
+            self.stackedWidget.setCurrentWidget(self.home_page)
+            self.resetStyle("btn_home")
+            btnWidget.setStyleSheet(self.selectMenu(btnWidget.styleSheet()))
+
+        # PAGE NEW USER
+        if btnWidget.objectName() == "btn_new_user":
+            self.stackedWidget.setCurrentWidget(self.new_user)
+            self.resetStyle("btn_new_user")
+            btnWidget.setStyleSheet(self.selectMenu(btnWidget.styleSheet()))
+
+        # PAGE WIDGETS
+        if btnWidget.objectName() == "btn_info" or btnWidget.objectName == "register_button":
+            self.stackedWidget.setCurrentWidget(self.page)
+            self.resetStyle("btn_widgets")
+            btnWidget.setStyleSheet(self.selectMenu(btnWidget.styleSheet()))
+
+    def selectMenu(self, getStyle):
+        select = getStyle + ("QPushButton { border-right: 8px solid rgb(44, 49, 60); }")
+        return select
+
+    ## ==> DESELECT
+    def deselectMenu(self, getStyle):
+        deselect = getStyle.replace("QPushButton { border-right: 8px solid rgb(44, 49, 60); }", "")
+        return deselect
+
+    ## ==> START SELECTION
+    def selectStandardMenu(self, widget):
+        for w in self.ui.menu.findChildren(QtWidgets.QPushButton):
+            if w.objectName() == widget:
+                w.setStyleSheet(self.selectMenu(w.styleSheet()))
+
+    ## ==> RESET SELECTION
+    def resetStyle(self, widget):
+        for w in self.menu.findChildren(QtWidgets.QPushButton):
+            if w.objectName() != widget:
+                w.setStyleSheet(self.deselectMenu(w.styleSheet()))
 
 
 if __name__ == "__main__":
