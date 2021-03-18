@@ -180,7 +180,7 @@ QPushButton:pressed {
       </property>
       <property name="styleSheet">
        <string notr="true">QPushButton {	
-	background-image: url(&quot;/Users/tom/Desktop/icons/20x20/cil-settings.png&quot;);
+	background-image: url(&quot;/Desktop/Thesis/thesis-device_app/device_app/guiModules/icons/20x20/cil-settings.png&quot;);
 	background-position: left center;
     background-repeat: no-repeat;
 	border: none;
@@ -233,7 +233,7 @@ QPushButton:pressed {
       </property>
       <property name="styleSheet">
        <string notr="true">QPushButton {	
-	background-image: url(&quot;/Users/tom/Desktop/icons/20x20/cil-exit-to-app.png&quot;);
+	background-image: url(&quot;/Desktop/Thesis/thesis-device_app/device_app/guiModules/icons/20x20/cil-exit-to-app.png&quot;);
 	background-position: left center;
     background-repeat: no-repeat;
 	border: none;
@@ -286,7 +286,7 @@ QPushButton:pressed {
       </property>
       <property name="styleSheet">
        <string notr="true">QPushButton {	
-	background-image: url(&quot;/Users/tom/Desktop/icons/16x16/cil-user-follow.png&quot;);
+	background-image: url(&quot;/Desktop/Thesis/thesis-device_app/device_app/guiModules/icons/16x16/cil-user-follow.png&quot;);
 	background-position: left center;
     background-repeat: no-repeat;
 	border: none;
@@ -339,7 +339,7 @@ QPushButton:pressed {
       </property>
       <property name="styleSheet">
        <string notr="true">QPushButton {	
-	background-image: url(&quot;/Users/tom/Desktop/icons/16x16/cil-notes.png&quot;);
+	background-image: url(&quot;/Desktop/Thesis/thesis-device_app/device_app/guiModules/icons/16x16/cil-notes.png&quot;);
 	background-position: left center;
     background-repeat: no-repeat;
 	border: none;
@@ -706,7 +706,7 @@ background-color: rgb(150, 150, 150);</string>
              </color>
             </brush>
            </colorrole>
-           <colorrole role="PlaceholderText">
+           <!-- <colorrole role="PlaceholderText">
             <brush brushstyle="NoBrush">
              <color alpha="128">
               <red>210</red>
@@ -714,7 +714,7 @@ background-color: rgb(150, 150, 150);</string>
               <blue>210</blue>
              </color>
             </brush>
-           </colorrole>
+           </colorrole> -->
           </active>
           <inactive>
            <colorrole role="WindowText">
@@ -771,7 +771,7 @@ background-color: rgb(150, 150, 150);</string>
              </color>
             </brush>
            </colorrole>
-           <colorrole role="PlaceholderText">
+           <!-- <colorrole role="PlaceholderText">
             <brush brushstyle="NoBrush">
              <color alpha="128">
               <red>210</red>
@@ -779,7 +779,7 @@ background-color: rgb(150, 150, 150);</string>
               <blue>210</blue>
              </color>
             </brush>
-           </colorrole>
+           </colorrole> -->
           </inactive>
           <disabled>
            <colorrole role="WindowText">
@@ -836,7 +836,7 @@ background-color: rgb(150, 150, 150);</string>
              </color>
             </brush>
            </colorrole>
-           <colorrole role="PlaceholderText">
+           <!-- <colorrole role="PlaceholderText">
             <brush brushstyle="NoBrush">
              <color alpha="128">
               <red>210</red>
@@ -844,7 +844,7 @@ background-color: rgb(150, 150, 150);</string>
               <blue>210</blue>
              </color>
             </brush>
-           </colorrole>
+           </colorrole> -->
           </disabled>
          </palette>
         </property>
@@ -1193,7 +1193,7 @@ QPushButton:pressed {
              </color>
             </brush>
            </colorrole>
-           <colorrole role="PlaceholderText">
+           <!-- <colorrole role="PlaceholderText">
             <brush brushstyle="NoBrush">
              <color alpha="128">
               <red>210</red>
@@ -1201,7 +1201,7 @@ QPushButton:pressed {
               <blue>210</blue>
              </color>
             </brush>
-           </colorrole>
+           </colorrole> -->
           </active>
           <inactive>
            <colorrole role="WindowText">
@@ -1258,7 +1258,7 @@ QPushButton:pressed {
              </color>
             </brush>
            </colorrole>
-           <colorrole role="PlaceholderText">
+           <!-- <colorrole role="PlaceholderText">
             <brush brushstyle="NoBrush">
              <color alpha="128">
               <red>210</red>
@@ -1266,7 +1266,7 @@ QPushButton:pressed {
               <blue>210</blue>
              </color>
             </brush>
-           </colorrole>
+           </colorrole> -->
           </inactive>
           <disabled>
            <colorrole role="WindowText">
@@ -1323,7 +1323,7 @@ QPushButton:pressed {
              </color>
             </brush>
            </colorrole>
-           <colorrole role="PlaceholderText">
+           <!-- <colorrole role="PlaceholderText">
             <brush brushstyle="NoBrush">
              <color alpha="128">
               <red>210</red>
@@ -1331,7 +1331,7 @@ QPushButton:pressed {
               <blue>210</blue>
              </color>
             </brush>
-           </colorrole>
+           </colorrole> -->
           </disabled>
          </palette>
         </property>
