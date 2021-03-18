@@ -52,8 +52,18 @@ def get_plan_view():
     src_pts = np.array(src_list).reshape(-1,1,2)
     dst_pts = np.array(dst_list).reshape(-1,1,2)
     H, mask = cv.findHomography(src_pts, dst_pts, cv.RANSAC,5.0)
-    print(H)
-    print(" ")
+    str1 = '['
+    for i in range(len(H)):
+        str1 += '['
+        for j in range(len(H[i])):
+            str1 = str1 + f'{H[i][j]:.60f}'
+            if j != 2:
+                str1 += ','
+        str1 += ']'
+        if (i != 2):
+            str1 += ','
+    str1 += ']'
+    print(str1)
 
 def select_points_planview(event,x,y,flags,param):
     global planview_x, planview_y, drawing, planview_copy
