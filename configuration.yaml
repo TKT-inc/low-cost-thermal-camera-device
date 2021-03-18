@@ -33,6 +33,8 @@ faceDetection:
     protoSsd: "./submodules/face_detection/models/deploy.prototxt.txt"
     modelSlim320: "./submodules/face_detection/models/slim-320.caffemodel"
     protoSlim320: "./submodules/face_detection/models/slim-320.prototxt"
+    modelRfb320: "./submodules/face_detection/models/RFB-320.caffemodel"
+    protoRfb320: "./submodules/face_detection/models/RFB-320.prototxt"
     onnxSlim320: "./submodules/face_detection/models/version-slim-320_simplified.onnx" 
     faceSize: 600
 

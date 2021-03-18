@@ -38,6 +38,8 @@ MODEL_SSD = cfg['faceDetection']['modelSsd']
 PROTO_SSD = cfg['faceDetection']['protoSsd']
 MODEL_SLIM320 = cfg['faceDetection']['modelSlim320']
 PROTO_SLIM320 = cfg['faceDetection']['protoSlim320']
+MODEL_RFB320 = cfg['faceDetection']['modelRfb320']
+PROTO_RFB320 = cfg['faceDetection']['protoRfb320']
 ONNX_SLIM320 = cfg['faceDetection']['onnxSlim320']
 FACE_SIZE = cfg['faceDetection']['faceSize']
 
