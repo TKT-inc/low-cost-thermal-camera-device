@@ -35,6 +35,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.register_button.clicked.connect(self.Button)
 
     def closeApp(self):
+        self.deviceFuntion.stop()
         app.quit()
 
     def display_main_frame(self):
@@ -49,7 +50,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.rgb_frame.setPixmap(QtGui.QPixmap(qimg))
 
     def display_thermal_frame(self):
-        frame = self.deviceFuntion.get_thermal_frame()[1]
+        frame = self.deviceFuntion.get_thermal_frame()
 
         frame = cv2.resize(frame, (self.thremal_frame.width(), self.thremal_frame.height()))
         height, width, _ = frame.shape

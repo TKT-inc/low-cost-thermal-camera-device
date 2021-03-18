@@ -235,5 +235,5 @@ class DeviceAppFunctions():
         self.MODE = 'REGISTER'
         self.register = CaptureRegisterFace(NUM_FRONT_PICS,NUM_LEFT_PICS,NUM_RIGHT_PICS, LEFT_THRESHOLD, RIGHT_THRESHOLD, FRONT_RANGE, STACK_NUMBER, FRAMES_BETWEEN_CAP)
 
-    def __del__(self):
-        self.rgb.capture.release()
+    def stop(self):
+        self.rgb.stop()
