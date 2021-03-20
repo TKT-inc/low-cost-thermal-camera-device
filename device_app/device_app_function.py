@@ -99,8 +99,8 @@ class DeviceAppFunctions():
 
 
     def init_model(self):
-        self.faceDetect = LightFaceDetection(PROTO_SLIM320, MODEL_SLIM320)
-        self.faceDetectTemp = LightFaceDetection(PROTO_SLIM320, MODEL_SLIM320)
+        self.faceDetect = LightFaceDetection(PROTO_RFB320, MODEL_RFB320)
+        self.faceDetectTemp = LightFaceDetection(PROTO_RFB320, MODEL_RFB320)
         # self.faceDetect = FaceDetection(MODEL_SSD, PROTO_SSD)
         # self.faceDetectTemp = FaceDetection(MODEL_SSD, PROTO_SSD)
         #self.faceDetect = FaceDetectionLightRfb()

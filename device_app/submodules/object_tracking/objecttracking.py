@@ -21,7 +21,6 @@ class ObjectInfo():
 		else:
 			self.name = name
 			self.id = id
-		print(self.rec_stacks)
 
 
 class CentroidTracker():

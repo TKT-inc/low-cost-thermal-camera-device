@@ -1626,6 +1626,9 @@ s</string>
           <height>51</height>
          </rect>
         </property>
+        <property name="styleSheet">
+         <string notr="true">background-color: rgb(102,209,255);</string>
+        </property>
        </widget>
       </widget>
       <widget class="QWidget" name="new_user">

@@ -2,18 +2,31 @@
 import sys
 import cv2
 import time
+import os
+import dbus
 from threading import Thread
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5 import uic
 from device_app_function import DeviceAppFunctions
+import subprocess
+
+bus = dbus.SessionBus()
+proxy = bus.get_object("org.onboard.Onboard", "/org/onboard/Onboard/Keyboard")
+keyboard = dbus.Interface(proxy, "org.onboard.Onboard.Keyboard")
 
 
 class MainWindow(QtWidgets.QMainWindow):
-    def __init__(self, deviceFunction):
+    def __init__(self, devviceFunction):
         super(MainWindow, self).__init__()
-        # start_a = time.time()
+        # self.start_aver = time.time()
+        # self.count_frames = 0
         uic.loadUi("./guiModules/form.ui", self)
+
+        # self.min = 5
+        # self.max = 0
+
+        QtWidgets.QApplication.instance().focusChanged.connect(self.handle_focuschanged)
 
         self.deviceFuntion = deviceFunction
         self.shortcut_quit = QtWidgets.QShortcut(QtGui.QKeySequence('Ctrl+Q'), self)
@@ -36,18 +49,32 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def closeApp(self):
         self.deviceFuntion.stop()
+        print ("MAX time per frame : {:.5}" .format(self.max))
+        print ("MIN time per frame : {:.5}" .format(self.min))
         app.quit()
 
     def display_main_frame(self):
         # start_a = time.time()
         frame = self.deviceFuntion.process()
+        # self.count_frames += 1
         # end_a = time.time()
 
         height, width, _ = frame.shape
         qimg = QtGui.QImage(frame.data, width, height, 3*width, QtGui.QImage.Format_RGB888).rgbSwapped()
         # print('time: {:.5f} ----- {:.5f}' .format(time.time() - start_a, end_a - start_a))
+        # end_aver = time.time() - self.start_aver
+        # if (end_aver > 10):
+        #     print("Frame per 10 seconds: {:.4f}" .format(self.count_frames / end_aver))
+        #     self.start_aver = time.time()
+        #     self.count_frames = 0
         
         self.rgb_frame.setPixmap(QtGui.QPixmap(qimg))
+        # end = time.time() - start_a
+        # if (end > self.max):
+        #     self.max = end
+        # if (end < self.min):
+        #     self.min = end
+        # print("Time per frame: {:.5f}" .format(end))
 
     def display_thermal_frame(self):
         frame = self.deviceFuntion.get_thermal_frame()
@@ -75,10 +102,11 @@ class MainWindow(QtWidgets.QMainWindow):
             btnWidget.setStyleSheet(self.selectMenu(btnWidget.styleSheet()))
 
         # PAGE WIDGETS
-        if btnWidget.objectName() == "btn_info" or btnWidget.objectName == "register_button":
+        if btnWidget.objectName() == "btn_info" or btnWidget.objectName() == "register_button":
             self.stackedWidget.setCurrentWidget(self.page)
             self.resetStyle("btn_widgets")
             btnWidget.setStyleSheet(self.selectMenu(btnWidget.styleSheet()))
+            
 
     def selectMenu(self, getStyle):
         select = getStyle + ("QPushButton { border-right: 8px solid rgb(44, 49, 60); }")
@@ -100,6 +128,13 @@ class MainWindow(QtWidgets.QMainWindow):
         for w in self.menu.findChildren(QtWidgets.QPushButton):
             if w.objectName() != widget:
                 w.setStyleSheet(self.deselectMenu(w.styleSheet()))
+
+    @QtCore.pyqtSlot("QWidget*", "QWidget*")
+    def handle_focuschanged(self, old, now):
+        if self.lineEdit == now:
+            keyboard.Show()
+        elif self.lineEdit == old:
+            keyboard.Hide()
 
 
 if __name__ == "__main__":

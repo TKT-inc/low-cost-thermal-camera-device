@@ -37,7 +37,6 @@ class IotConn:
             message = client.receive_message()
             message = message.data.decode('utf-8')
             json_data = json.loads(message, strict = False)
-            print(str(json_data))
             if int(json_data['trackingId']) in objects:
                 objects[int(json_data['trackingId'])].updateNameAndId(str(json_data['personName']), str(json_data['personId']))
 
