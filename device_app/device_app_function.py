@@ -136,10 +136,8 @@ class DeviceAppFunctions():
                 img_points = self.landmarkDetect.detectLandmark(self.frame, rects)
                 self.store_registered_imgs, status = self.register.update(self.frame,img_points, self.ori, rects, RGB_SCALE)
 
-                if self.store_registered_imgsre is not None:
-                    # print('Register Ok')
-                    # if (ENABLE_SENDING_TO_CLOUD):
-                    #     Thread(target=self.conn.registerToAzure, args=(BUILDING_ID ,'Tien',store, FACE_SIZE, ), daemon=True).start()
+                if status == "REGISTER_SUCCESS":
+                    print('Register Ok')
                     del self.register
                     self.MODE = "NORMAL"
                     self.init_object_tracking()
@@ -246,7 +244,8 @@ class DeviceAppFunctions():
     def send_registered_info_to_server(self, name_of_new_user):
         if (self.store_registered_imgs is not None and ENABLE_SENDING_TO_CLOUD):
             Thread(target=self.conn.registerToAzure, args=(BUILDING_ID ,name_of_new_user, self.store_registered_imgs, FACE_SIZE, ), daemon=True).start()
-            self.store_registered_imgs = None
+        self.store_registered_imgs = None
     
     def stop(self):
+        self.MODE = "OFF"
         self.rgb.stop()
