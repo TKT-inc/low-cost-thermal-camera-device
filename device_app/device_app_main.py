@@ -9,6 +9,7 @@ from threading import Thread
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5 import uic
 from device_app_function import DeviceAppFunctions
+from ui_functions import *
 import subprocess
 
 bus = dbus.SessionBus()
@@ -51,7 +52,11 @@ class MainWindow(QtWidgets.QMainWindow):
         self.register_button.clicked.connect(self.Button)
 
     def working(self):
-        self.deviceFuntion.process()
+        status = self.deviceFuntion.process()
+        if (status = "REGISTER_SUCCESS"):
+            self.create_input_name_dialog()
+        elif (status = "REGISTER_DONE_LEFT"):
+            self.
 
     def closeApp(self):
         self.deviceFuntion.stop()
@@ -69,6 +74,12 @@ class MainWindow(QtWidgets.QMainWindow):
         qimg = QtGui.QImage(frame.data, width, height, 3*width, QtGui.QImage.Format_RGB888).rgbSwapped()
         self.thremal_frame.setPixmap(QtGui.QPixmap(qimg))
 
+    def create_input_name_dialog(self):
+        self.dlg = EmployeeDlg(self)
+        self.dlg.accepted.connect(self.input_register_name)
+        self.dlg.reject.connect(self.select_register_mode)
+        dlg.exec()
+
     def Button(self):
         # GET BT CLICKED
         btnWidget = self.sender()
@@ -78,7 +89,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.deviceFuntion.select_normal_mode()
             self.main_display_monitor = self.rgb_frame
             self.stackedWidget.setCurrentWidget(self.home_page)
-            self.resetStyle("btn_home")
+            self.resetStyleBtn("btn_home")
             btnWidget.setStyleSheet(self.selectMenu(btnWidget.styleSheet()))
 
         # PAGE NEW USER
@@ -86,14 +97,17 @@ class MainWindow(QtWidgets.QMainWindow):
             self.deviceFuntion.select_register_mode()
             self.main_display_monitor = self.register_screen
             self.stackedWidget.setCurrentWidget(self.new_user)
-            self.resetStyle("btn_new_user")
+            self.resetStyleBtn("btn_new_user")
             btnWidget.setStyleSheet(self.selectMenu(btnWidget.styleSheet()))
 
         # PAGE WIDGETS
         if btnWidget.objectName() == "btn_info":
             self.stackedWidget.setCurrentWidget(self.page)
-            self.resetStyle("btn_widgets")
+            self.resetStyleBtn("btn_widgets")
             btnWidget.setStyleSheet(self.selectMenu(btnWidget.styleSheet()))
+
+    def input_register_name(self):
+        self.deviceFuntion.send_registered_info_to_server(self.)
 
     @QtCore.pyqtSlot("QWidget*", "QWidget*")
     def handle_focuschanged(self, old, now):
@@ -118,10 +132,24 @@ class MainWindow(QtWidgets.QMainWindow):
                 w.setStyleSheet(self.selectMenu(w.styleSheet()))
 
     ## ==> RESET SELECTION
-    def resetStyle(self, widget):
+    def resetStyleBtn(self, widget):
         for w in self.menu.findChildren(QtWidgets.QPushButton):
             if w.objectName() != widget:
                 w.setStyleSheet(self.deselectMenu(w.styleSheet()))
+
+    def finishedFaceRegistrationState(self, state):
+        if (state == "LEFT"):
+        elif (state == "RIGHT"):
+        else:
+
+
+class EmployeeDlg(QtWidgets.QDialog):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        uic.loadUi("./guiModules/dialog.ui", self)
+        self.setWindowFlags(QtCore.Qt.FramelessWindowHint)
+
+
 
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
@@ -130,7 +158,6 @@ if __name__ == "__main__":
     window = MainWindow(deviceFunction)
 
     window.showFullScreen()
-    print('end')
-    del deviceFunction
+
     sys.exit(app.exec_())
     

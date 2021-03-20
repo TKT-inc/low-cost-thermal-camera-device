@@ -23,18 +23,7 @@ class CaptureRegisterFace:
     def update(self, frame, image_points, ori, rects, scale):
         rotation_angle = self.detectHeadpose(frame, image_points)[1]
         # print(rotation_angle)
-        if self.state == "FRONT":
-            if (rotation_angle <= self.mid/2 and rotation_angle >= - self.mid/2):
-                self.front_stack = self.front_stack + 1
-            else:
-                self.front_stack = 0
-            if (self.front_stack > self.stack_number):
-                self.imgs.append(self.getFace(ori, rects,scale))
-                self.front_stack -= self.frame_distance_capture
-            if (len(self.imgs) == self.front_pics):
-                self.state = "LEFT"
-                print ("***FRONT")
-        elif self.state == "LEFT":
+        if self.state == "LEFT":
             if (rotation_angle < self.left):
                 self.left_stack += 1
             else:
@@ -45,6 +34,19 @@ class CaptureRegisterFace:
             if (len(self.imgs) == self.front_pics + self.left_pics):
                 self.state = "RIGHT"
                 print("***LEFT")
+                return None, "REGISTER_DONE_LEFT"
+        elif self.state == "FRONT":
+            if (rotation_angle <= self.mid/2 and rotation_angle >= - self.mid/2):
+                self.front_stack = self.front_stack + 1
+            else:
+                self.front_stack = 0
+            if (self.front_stack > self.stack_number):
+                self.imgs.append(self.getFace(ori, rects,scale))
+                self.front_stack -= self.frame_distance_capture
+            if (len(self.imgs) == self.front_pics):
+                self.state = "LEFT"
+                print ("***FRONT")
+                return None, "REGISTER_DONE_FRONT"
         elif self.state == "RIGHT":
             if (rotation_angle > self.right):
                 self.right_stack += 1
@@ -55,8 +57,8 @@ class CaptureRegisterFace:
                 self.right_stack -= self.frame_distance_capture
             if (len(self.imgs) == self.front_pics + self.left_pics + self.right_pics):
                 print("***RIGHT")
-                return self.imgs
-        return None
+                return self.imgs, "REGISTER_SUCCESS"
+        return None, None
 
     def getFace(self, ori, rects, RGB_SCALE):
         savePic = ori[int(rects[0][1]*RGB_SCALE):int(rects[0][3]*RGB_SCALE), int(rects[0][0]*RGB_SCALE):int(rects[0][2]*RGB_SCALE)]

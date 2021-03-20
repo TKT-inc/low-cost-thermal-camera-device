@@ -616,6 +616,9 @@ background-color: rgb(150, 150, 150);</string>
         <property name="text">
          <string/>
         </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
        </widget>
        <widget class="QLabel" name="thremal_frame">
         <property name="geometry">
@@ -1080,10 +1083,10 @@ QHeaderView::section:vertical
        <widget class="QPushButton" name="register_button">
         <property name="geometry">
          <rect>
-          <x>30</x>
-          <y>60</y>
+          <x>20</x>
+          <y>50</y>
           <width>151</width>
-          <height>131</height>
+          <height>151</height>
          </rect>
         </property>
         <property name="minimumSize">
@@ -1590,9 +1593,9 @@ QHeaderView::section:vertical
        <widget class="QLabel" name="label_2">
         <property name="geometry">
          <rect>
-          <x>190</x>
+          <x>200</x>
           <y>40</y>
-          <width>51</width>
+          <width>31</width>
           <height>171</height>
          </rect>
         </property>
@@ -1617,19 +1620,6 @@ s</string>
          <set>Qt::AlignCenter</set>
         </property>
        </widget>
-       <widget class="QLineEdit" name="lineEdit">
-        <property name="geometry">
-         <rect>
-          <x>40</x>
-          <y>200</y>
-          <width>151</width>
-          <height>51</height>
-         </rect>
-        </property>
-        <property name="styleSheet">
-         <string notr="true">background-color: rgb(102,209,255);</string>
-        </property>
-       </widget>
       </widget>
       <widget class="QWidget" name="new_user">
        <widget class="QLabel" name="register_screen">
@@ -1638,10 +1628,10 @@ s</string>
         </property>
         <property name="geometry">
          <rect>
-          <x>0</x>
+          <x>50</x>
           <y>0</y>
-          <width>1211</width>
-          <height>721</height>
+          <width>1111</width>
+          <height>631</height>
          </rect>
         </property>
         <property name="styleSheet">
@@ -1650,6 +1640,75 @@ background-color: rgb(150, 150, 150);</string>
         </property>
         <property name="text">
          <string/>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label_3">
+        <property name="geometry">
+         <rect>
+          <x>310</x>
+          <y>630</y>
+          <width>151</width>
+          <height>91</height>
+         </rect>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">background-color: rgb(255, 255, 255);</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="pixmap">
+         <pixmap>images/face_left.png</pixmap>
+        </property>
+        <property name="scaledContents">
+         <bool>true</bool>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label_4">
+        <property name="geometry">
+         <rect>
+          <x>760</x>
+          <y>630</y>
+          <width>151</width>
+          <height>91</height>
+         </rect>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">background-color: rgb(255, 255, 255);</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="pixmap">
+         <pixmap>images/face_right.png</pixmap>
+        </property>
+        <property name="scaledContents">
+         <bool>true</bool>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label_5">
+        <property name="geometry">
+         <rect>
+          <x>530</x>
+          <y>630</y>
+          <width>161</width>
+          <height>91</height>
+         </rect>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">background-color: rgb(255, 255, 255);</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="pixmap">
+         <pixmap>images/face_front.png</pixmap>
+        </property>
+        <property name="scaledContents">
+         <bool>true</bool>
         </property>
        </widget>
       </widget>
