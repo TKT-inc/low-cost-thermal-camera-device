@@ -49,7 +49,7 @@ color: rgb(210, 210, 210);</string>
      </rect>
     </property>
     <property name="styleSheet">
-     <string notr="true">background-color: rgb(55, 59, 67);
+     <string notr="true">background-color: rgb(75, 79, 87);
 
 </string>
     </property>
@@ -1655,7 +1655,9 @@ background-color: rgb(150, 150, 150);</string>
          </rect>
         </property>
         <property name="styleSheet">
-         <string notr="true">background-color: rgb(255, 255, 255);</string>
+         <string notr="true">background-color: rgb(255, 255, 255);
+border: 2px solid rgb(200, 200, 200);
+border-radius: 20px;	</string>
         </property>
         <property name="text">
          <string/>
@@ -1677,7 +1679,9 @@ background-color: rgb(150, 150, 150);</string>
          </rect>
         </property>
         <property name="styleSheet">
-         <string notr="true">background-color: rgb(255, 255, 255);</string>
+         <string notr="true">background-color: rgb(255, 255, 255);
+border: 2px solid rgb(200, 200, 200);
+border-radius: 20px;	</string>
         </property>
         <property name="text">
          <string/>
@@ -1699,7 +1703,9 @@ background-color: rgb(150, 150, 150);</string>
          </rect>
         </property>
         <property name="styleSheet">
-         <string notr="true">background-color: rgb(255, 255, 255);</string>
+         <string notr="true">background-color: rgb(255, 255, 255);
+border: 2px solid rgb(200, 200, 200);
+border-radius: 20px;	</string>
         </property>
         <property name="text">
          <string/>
