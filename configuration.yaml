@@ -1,1 +1,61 @@
-configuration: asdasd
+buildingId: 1
+deviceId: 'test-device'
+
+periodTime:
+    measureTemp: 1
+    sendRecMess: 2
+
+iotHub:
+    connectionStringDevice: "HostName=thesis-hub.azure-devices.net;DeviceId=test-device;SharedAccessKey=E/uKH6XK6G2NLCYWQxu26+mrNBKmecm0I4WU2A1FfrY="
+    connectionStringBlob: "DefaultEndpointsProtocol=https;AccountName=thesisbstorage;AccountKey=WdOJMq9wULxCEKKHHiI9lafWPjIpJpXuinasmDLO5F9zZObHDzrLxTszglLM0zCa+GILFbjZCTO0BjFEuUR/WQ==;EndpointSuffix=core.windows.net"
+    msgFormat: 
+        recMsg: '{{"buildingId":"{buildingId}","deviceId":"{deviceId}","trackingId": "{trackingId}","face": "{face}"}}'
+        recordMsg: '{{"buildingId":"{buildingId}","personId": "{personID}", "personName": "{personName}", "temperature":"{temperature}", "face":"{face}"}}'
+        registerMsg: '{{"buildingId":"{buildingId}","personName": "{personName}","containerName":"{containerName}"}}'
+    enableSending: False
+
+camera:
+    rgb:
+        source: "nvarguscamerasrc ! video/x-raw(memory:NVMM), 
+        width=(int)1920, height=(int)1080,format=(string)NV12, 
+        framerate=(fraction)29/1 ! nvvidconv flip-method=2 ! video/x-raw, 
+        format=(string)BGRx ! videoconvert ! video/x-raw, 
+        format=(string)BGR ! appsink"
+        scaleWidth: 768
+        scaleHeight: 432
+    thermal: 
+        source: "/dev/spidev0.0"
+        scaleWidth: 640
+        scaleHeight: 480
+    
+faceDetection:
+    modelSsd: "./submodules/face_detection/models/res10_300x300_ssd_iter_140000.caffemodel"
+    protoSsd: "./submodules/face_detection/models/deploy.prototxt.txt"
+    modelSlim320: "./submodules/face_detection/models/slim-320.caffemodel"
+    protoSlim320: "./submodules/face_detection/models/slim-320.prototxt"
+    modelRfb320: "./submodules/face_detection/models/RFB-320.caffemodel"
+    protoRfb320: "./submodules/face_detection/models/RFB-320.prototxt"
+    onnxSlim320: "./submodules/face_detection/models/version-slim-320_simplified.onnx" 
+    faceSize: 600
+
+transMatrix: [[ 1.69051699e+00,  1.79461135e-01, -3.25437975e+02],
+ [-6.29553165e-02,  1.81581827e+00, -2.28105166e+02],
+ [ 1.64793732e-04,  2.73841290e-04,  1.00000000e+00]]
+
+maxDisFramesObjectTracking: 40
+
+registration:
+    numFontPics: 5
+    numLeftPics: 5
+    numRightPics: 5
+    stackNumberPics: 6
+    leftThreshold: -22
+    rightThreshold: 22
+    frontRange: 44
+    frameBetweenCapture: 3
+
+offsetTemprture: 1.8
+numberMaxThermalPoints: 16
+
+display:
+    enableThermalFrame: False
