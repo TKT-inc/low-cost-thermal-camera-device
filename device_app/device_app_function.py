@@ -105,7 +105,7 @@ class DeviceAppFunctions():
         # self.faceDetectTemp = FaceDetection(MODEL_SSD, PROTO_SSD)
         #self.faceDetect = FaceDetectionLightRfb()
         #self.faceDetectTemp = FaceDetectionLightRfb()
-        # self.landmarkDetect = LandmarkDetection()
+        self.landmarkDetect = LandmarkDetection()
 
 
     def init_object_tracking(self):
@@ -119,7 +119,6 @@ class DeviceAppFunctions():
 
 
     def process(self):
-        # start = time.time()
         self.frame, self.ori = self.rgb.getFrame()
         rects = self.faceDetect.detectFaces(self.frame)
 
@@ -138,19 +137,16 @@ class DeviceAppFunctions():
                 store = self.register.update(self.frame,img_points, self.ori, rects, RGB_SCALE)
 
                 if store is not None:
+                    print('Register Ok')
                     if (ENABLE_SENDING_TO_CLOUD):
                         Thread(target=self.conn.registerToAzure, args=(BUILDING_ID ,'Tien',store, FACE_SIZE, ), daemon=True).start()
                     del self.register
                     self.MODE = "NORMAL"
-                    self.ct, self.ct_temp, self.trackableObjects, self.objects = self.init_object_tracking()
+                    self.init_object_tracking()
                     Thread(target=self.measure_thread, daemon=True).start()
                     self.conn.restart_listener(self.objects)
 
-        # cv2.imshow('Main Monitor', self.frame)
-
-        # end = time.time()
-        # print('Inference: {:.6f}s'.format(end-start))
-        return self.displayFrame
+        self.displayFrame = self.frame
             
     def centroid_detect(self, x, y, w, h):
         x1 = int(w/2)
@@ -227,15 +223,20 @@ class DeviceAppFunctions():
             cv2.putText(self.frame, str(obj.temperature), (centroid[0], y), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
             self.trackableObjects[objectID] = to
 
-        self.displayFrame = self.frame
 
+    def get_rgb_frame(self):
+        return self.displayFrame
 
     def get_thermal_frame(self):
         return self.color
 
-    def register_mode(self):
+    def select_register_mode(self):
         self.MODE = 'REGISTER'
         self.register = CaptureRegisterFace(NUM_FRONT_PICS,NUM_LEFT_PICS,NUM_RIGHT_PICS, LEFT_THRESHOLD, RIGHT_THRESHOLD, FRONT_RANGE, STACK_NUMBER, FRAMES_BETWEEN_CAP)
 
+    def select_normal_mode(self):
+        self.MODE = "NORMAL"
+        self.init_object_tracking()
+    
     def stop(self):
         self.rgb.stop()

@@ -50,7 +50,7 @@ registration:
     numRightPics: 5
     stackNumberPics: 6
     leftThreshold: -22
-    rightThreshold: 22
+    rightThreshold: 15
     frontRange: 44
     frameBetweenCapture: 3
 

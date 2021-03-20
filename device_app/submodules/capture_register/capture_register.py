@@ -22,6 +22,7 @@ class CaptureRegisterFace:
     
     def update(self, frame, image_points, ori, rects, scale):
         rotation_angle = self.detectHeadpose(frame, image_points)[1]
+        # print(rotation_angle)
         if self.state == "FRONT":
             if (rotation_angle <= self.mid/2 and rotation_angle >= - self.mid/2):
                 self.front_stack = self.front_stack + 1
@@ -32,7 +33,7 @@ class CaptureRegisterFace:
                 self.front_stack -= self.frame_distance_capture
             if (len(self.imgs) == self.front_pics):
                 self.state = "LEFT"
-                print ("FRONT")
+                print ("***FRONT")
         elif self.state == "LEFT":
             if (rotation_angle < self.left):
                 self.left_stack += 1
@@ -43,7 +44,7 @@ class CaptureRegisterFace:
                 self.left_stack -= self.frame_distance_capture
             if (len(self.imgs) == self.front_pics + self.left_pics):
                 self.state = "RIGHT"
-                print("LEFT")
+                print("***LEFT")
         elif self.state == "RIGHT":
             if (rotation_angle > self.right):
                 self.right_stack += 1
@@ -53,7 +54,7 @@ class CaptureRegisterFace:
                 self.imgs.append(self.getFace(ori, rects,scale))
                 self.right_stack -= self.frame_distance_capture
             if (len(self.imgs) == self.front_pics + self.left_pics + self.right_pics):
-                print("RIGHT")
+                print("***RIGHT")
                 return self.imgs
         return None
 
