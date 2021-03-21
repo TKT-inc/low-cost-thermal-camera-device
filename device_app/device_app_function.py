@@ -134,19 +134,20 @@ class DeviceAppFunctions():
         elif (self.MODE == 'REGISTER'):
             if (len(rects) == 1):
                 img_points = self.landmarkDetect.detectLandmark(self.frame, rects)
-                store = self.register.update(self.frame,img_points, self.ori, rects, RGB_SCALE)
+                self.store_registered_imgs, status = self.register.update(self.frame,img_points, self.ori, rects, RGB_SCALE)
 
-                if store is not None:
+                if status == "REGISTER_SUCCESS":
                     print('Register Ok')
-                    if (ENABLE_SENDING_TO_CLOUD):
-                        Thread(target=self.conn.registerToAzure, args=(BUILDING_ID ,'Tien',store, FACE_SIZE, ), daemon=True).start()
                     del self.register
                     self.MODE = "NORMAL"
                     self.init_object_tracking()
                     Thread(target=self.measure_thread, daemon=True).start()
                     self.conn.restart_listener(self.objects)
+                return status
+
 
         self.displayFrame = self.frame
+        return "NORMAL"
             
     def centroid_detect(self, x, y, w, h):
         x1 = int(w/2)
@@ -231,12 +232,20 @@ class DeviceAppFunctions():
         return self.color
 
     def select_register_mode(self):
+        self.store_registered_imgs = None
         self.MODE = 'REGISTER'
         self.register = CaptureRegisterFace(NUM_FRONT_PICS,NUM_LEFT_PICS,NUM_RIGHT_PICS, LEFT_THRESHOLD, RIGHT_THRESHOLD, FRONT_RANGE, STACK_NUMBER, FRAMES_BETWEEN_CAP)
 
     def select_normal_mode(self):
-        self.MODE = "NORMAL"
         self.init_object_tracking()
+        Thread(target=self.measure_thread, daemon=True).start()
+        self.conn.restart_listener(self.objects)
+
+    def send_registered_info_to_server(self, name_of_new_user):
+        if (self.store_registered_imgs is not None and ENABLE_SENDING_TO_CLOUD):
+            Thread(target=self.conn.registerToAzure, args=(BUILDING_ID ,name_of_new_user, self.store_registered_imgs, FACE_SIZE, ), daemon=True).start()
+        self.store_registered_imgs = None
     
     def stop(self):
+        self.MODE = "OFF"
         self.rgb.stop()

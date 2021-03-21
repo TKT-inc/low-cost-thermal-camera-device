@@ -50,50 +50,94 @@ class MainWindow(QtWidgets.QMainWindow):
         self.btn_info.clicked.connect(self.Button)
         self.register_button.clicked.connect(self.Button)
 
-    def working(self):
-        self.deviceFuntion.process()
+    """
+    Main processing of the application
+    """
 
+    #PROCESSING OF THE MAIN SYSTEM
+    def working(self):
+        status = self.deviceFuntion.process()
+        if (status = "REGISTER_SUCCESS"):
+            self.finishedFaceRegistrationState(self.face_right)
+            self.create_input_name_dialog()
+        elif (status = "REGISTER_DONE_LEFT"):
+            self.finishedFaceRegistrationState(self.face_left)
+        elif (status = "REGISTER_DONE_FRONT"):
+            self.finishedFaceRegistrationState(self.face_front)
+
+    #Close the application
     def closeApp(self):
         self.deviceFuntion.stop()
         app.quit()
 
+    #Display main frame into rgb frame in homepage and register page
     def display_main_frame(self):
         frame = self.deviceFuntion.get_rgb_frame()
         height, width, _ = frame.shape
         qimg = QtGui.QImage(frame.data, width, height, 3*width, QtGui.QImage.Format_RGB888).rgbSwapped()
         self.main_display_monitor.setPixmap(QtGui.QPixmap(qimg))
 
+    #Display thermal frame in homepage
     def display_thermal_frame(self):
         frame = self.deviceFuntion.get_thermal_frame()
         height, width, _ = frame.shape
         qimg = QtGui.QImage(frame.data, width, height, 3*width, QtGui.QImage.Format_RGB888).rgbSwapped()
         self.thremal_frame.setPixmap(QtGui.QPixmap(qimg))
 
+    #Create an input dialog to input person's info when finish face register
+    def create_input_name_dialog(self):
+        self.dlg = EmployeeDlg(self)
+        self.dlg.accepted.connect(self.input_register_name)
+        self.dlg.reject.connect(self.selectRegisterMode)
+        self.dlg.exec()
+    
+    def input_register_name(self):
+        self.deviceFuntion.send_registered_info_to_server(self.dlg.name_edit.text())
+
+    def finishedFaceRegistrationStyle(self, label_of_face):
+        label_of_face.setStyleSheet(label_of_face.styleSheet() + ("background-color: rgb(147, 255, 165);"))
+
+    def selectNormalMode(self):
+        self.deviceFuntion.select_normal_mode()
+        self.main_display_monitor = self.rgb_frame
+        self.stackedWidget.setCurrentWidget(self.home_page)
+        self.resetStyleBtn("btn_home")
+        self.btn_home.setStyleSheet(self.selectMenu(self.btn_home.styleSheet()))
+
+    def selectRegisterMode(self):
+        self.deviceFuntion.select_register_mode()
+        self.main_display_monitor = self.register_screen
+        self.face_left.setStyleSheet(self.face_left.styleSheet().replace("background-color: rgb(147, 255, 165);", ""))
+        self.face_right.setStyleSheet(self.face_right.styleSheet().replace("background-color: rgb(147, 255, 165);", ""))
+        self.face_front.setStyleSheet(self.face_front.styleSheet().replace("background-color: rgb(147, 255, 165);", ""))
+        self.stackedWidget.setCurrentWidget(self.new_user)
+        self.resetStyleBtn("btn_new_user")
+        self.btn_new_user.setStyleSheet(self.selectMenu(self.btn_new_user.styleSheet()))
+
+
+    """
+    Handle inputs and signals of the application
+    """
+
+    #Handle all button of the application
     def Button(self):
         # GET BT CLICKED
         btnWidget = self.sender()
 
         # PAGE HOME
         if btnWidget.objectName() == "btn_home":
-            self.deviceFuntion.select_normal_mode()
-            self.main_display_monitor = self.rgb_frame
-            self.stackedWidget.setCurrentWidget(self.home_page)
-            self.resetStyle("btn_home")
-            btnWidget.setStyleSheet(self.selectMenu(btnWidget.styleSheet()))
+            self.selectNormalMode()
 
         # PAGE NEW USER
         if btnWidget.objectName() == "btn_new_user" or btnWidget.objectName() == "register_button":
-            self.deviceFuntion.select_register_mode()
-            self.main_display_monitor = self.register_screen
-            self.stackedWidget.setCurrentWidget(self.new_user)
-            self.resetStyle("btn_new_user")
-            btnWidget.setStyleSheet(self.selectMenu(btnWidget.styleSheet()))
+            self.selectRegisterMode()
 
-        # PAGE WIDGETS
+        # PAGE INFO
         if btnWidget.objectName() == "btn_info":
             self.stackedWidget.setCurrentWidget(self.page)
-            self.resetStyle("btn_widgets")
+            self.resetStyleBtn("btn_widgets")
             btnWidget.setStyleSheet(self.selectMenu(btnWidget.styleSheet()))
+
 
     @QtCore.pyqtSlot("QWidget*", "QWidget*")
     def handle_focuschanged(self, old, now):
@@ -118,10 +162,19 @@ class MainWindow(QtWidgets.QMainWindow):
                 w.setStyleSheet(self.selectMenu(w.styleSheet()))
 
     ## ==> RESET SELECTION
-    def resetStyle(self, widget):
+    def resetStyleBtn(self, widget):
         for w in self.menu.findChildren(QtWidgets.QPushButton):
             if w.objectName() != widget:
                 w.setStyleSheet(self.deselectMenu(w.styleSheet()))
+
+
+class EmployeeDlg(QtWidgets.QDialog):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        uic.loadUi("./guiModules/dialog.ui", self)
+        self.setWindowFlags(QtCore.Qt.FramelessWindowHint)
+
+
 
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
@@ -130,7 +183,6 @@ if __name__ == "__main__":
     window = MainWindow(deviceFunction)
 
     window.showFullScreen()
-    print('end')
-    del deviceFunction
+
     sys.exit(app.exec_())
     
