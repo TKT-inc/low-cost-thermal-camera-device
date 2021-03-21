@@ -68,11 +68,10 @@ ENABLE_SHOW_THERMAL_FRAME = cfg['display']['enableThermalFrame']
 ENABLE_SENDING_TO_CLOUD = cfg['iotHub']['enableSending']
 
 #setup ofset temperature
-OFFSET_TEMPERATURE = cfg['offsetTemprture']
-NUMBER_MAX_THERMAL_POINTS = cfg['numberMaxThermalPoints']
-
-
-
+OFFSET_TEMPERATURE_USER = cfg['measureTemperature']['offsetTemperature']
+NUMBER_MAX_THERMAL_POINTS = cfg['measureTemperature']['numberMaxThermalPoints']
+OFFSET_TEMPERATURE_DIST_COEF = cfg['measureTemperature']['offsetDistCoeffecient']
+OFFSET_TEMPERATURE_DIST_INT = cfg['measureTemperature']['offsetDistIntercept']
 
 
 class DeviceAppFunctions():
@@ -143,6 +142,8 @@ class DeviceAppFunctions():
                     self.init_object_tracking()
                     Thread(target=self.measure_thread, daemon=True).start()
                     self.conn.restart_listener(self.objects)
+
+                self.displayFrame = self.frame
                 return status
 
 
@@ -169,8 +170,8 @@ class DeviceAppFunctions():
             
             rects_measurement = self.faceDetectTemp.detectFaces(self.rgb_temp)
             objects_measurement, _ = ct_temp.update(rects_measurement,rgp_ori,RGB_SCALE)
-            
-            measureTemperature(self.color, temp, self.objects, objects_measurement, H_MATRIX, OFFSET_TEMPERATURE, NUMBER_MAX_THERMAL_POINTS)
+
+            measureTemperature(self.color, temp, self.objects, objects_measurement, H_MATRIX, OFFSET_TEMPERATURE_USER, NUMBER_MAX_THERMAL_POINTS ,OFFSET_TEMPERATURE_DIST_COEF, OFFSET_TEMPERATURE_DIST_INT, RGB_SCALE)
         
             time.sleep(TIME_MEASURE_TEMP)
 
@@ -240,11 +241,13 @@ class DeviceAppFunctions():
         self.init_object_tracking()
         Thread(target=self.measure_thread, daemon=True).start()
         self.conn.restart_listener(self.objects)
+        self.MODE = 'NORMAL'
 
     def send_registered_info_to_server(self, name_of_new_user):
         if (self.store_registered_imgs is not None and ENABLE_SENDING_TO_CLOUD):
             Thread(target=self.conn.registerToAzure, args=(BUILDING_ID ,name_of_new_user, self.store_registered_imgs, FACE_SIZE, ), daemon=True).start()
         self.store_registered_imgs = None
+        print('Registered')
     
     def stop(self):
         self.MODE = "OFF"

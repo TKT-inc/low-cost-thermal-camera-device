@@ -17,13 +17,14 @@ class CaptureRegisterFace:
         self.front_stack = 0
         self.stack_number = stack_number
         self.frame_distance_capture = frame_distance_capture
-        self.state = "FRONT"
+        self.state = "LEFT"
         self.imgs = []
     
     def update(self, frame, image_points, ori, rects, scale):
         rotation_angle = self.detectHeadpose(frame, image_points)[1]
         # print(rotation_angle)
         if self.state == "LEFT":
+            # print ('dang left')
             if (rotation_angle < self.left):
                 self.left_stack += 1
             else:
@@ -31,11 +32,12 @@ class CaptureRegisterFace:
             if self.left_stack > self.stack_number:
                 self.imgs.append(self.getFace(ori, rects,scale))
                 self.left_stack -= self.frame_distance_capture
-            if (len(self.imgs) == self.front_pics + self.left_pics):
-                self.state = "RIGHT"
+            if (len(self.imgs) == self.left_pics):
+                self.state = "FRONT"
                 print("***LEFT")
                 return None, "REGISTER_DONE_LEFT"
         elif self.state == "FRONT":
+            # print ('dang front')
             if (rotation_angle <= self.mid/2 and rotation_angle >= - self.mid/2):
                 self.front_stack = self.front_stack + 1
             else:
@@ -43,11 +45,12 @@ class CaptureRegisterFace:
             if (self.front_stack > self.stack_number):
                 self.imgs.append(self.getFace(ori, rects,scale))
                 self.front_stack -= self.frame_distance_capture
-            if (len(self.imgs) == self.front_pics):
-                self.state = "LEFT"
+            if (len(self.imgs) == self.front_pics + self.left_pics):
+                self.state = "RIGHT"
                 print ("***FRONT")
                 return None, "REGISTER_DONE_FRONT"
         elif self.state == "RIGHT":
+            # print ('dang right')
             if (rotation_angle > self.right):
                 self.right_stack += 1
             else:

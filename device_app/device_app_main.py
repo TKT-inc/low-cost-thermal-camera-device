@@ -22,7 +22,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         uic.loadUi("./guiModules/form.ui", self)
 
-        QtWidgets.QApplication.instance().focusChanged.connect(self.handle_focuschanged)
+        # QtWidgets.QApplication.instance().focusChanged.connect(self.handle_focuschanged)
 
         self.main_display_monitor = self.rgb_frame
 
@@ -38,7 +38,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.timerRGB = QtCore.QTimer()
         self.timerRGB.setTimerType(QtCore.Qt.PreciseTimer)
         self.timerRGB.timeout.connect(self.display_main_frame)
-        self.timerRGB.start(30)
+        self.timerRGB.start(20)
 
         self.timerThermal = QtCore.QTimer()
         self.timerThermal.setTimerType(QtCore.Qt.PreciseTimer)
@@ -57,13 +57,13 @@ class MainWindow(QtWidgets.QMainWindow):
     #PROCESSING OF THE MAIN SYSTEM
     def working(self):
         status = self.deviceFuntion.process()
-        if (status = "REGISTER_SUCCESS"):
-            self.finishedFaceRegistrationState(self.face_right)
+        if (status == "REGISTER_SUCCESS"):
+            self.finishedFaceRegistrationStyle(self.face_right)
             self.create_input_name_dialog()
-        elif (status = "REGISTER_DONE_LEFT"):
-            self.finishedFaceRegistrationState(self.face_left)
-        elif (status = "REGISTER_DONE_FRONT"):
-            self.finishedFaceRegistrationState(self.face_front)
+        elif (status == "REGISTER_DONE_LEFT"):
+            self.finishedFaceRegistrationStyle(self.face_left)
+        elif (status == "REGISTER_DONE_FRONT"):
+            self.finishedFaceRegistrationStyle(self.face_front)
 
     #Close the application
     def closeApp(self):
@@ -80,19 +80,26 @@ class MainWindow(QtWidgets.QMainWindow):
     #Display thermal frame in homepage
     def display_thermal_frame(self):
         frame = self.deviceFuntion.get_thermal_frame()
+        frame = cv2.resize(frame, (self.thremal_frame.width(),self.thremal_frame.height()))
         height, width, _ = frame.shape
         qimg = QtGui.QImage(frame.data, width, height, 3*width, QtGui.QImage.Format_RGB888).rgbSwapped()
         self.thremal_frame.setPixmap(QtGui.QPixmap(qimg))
 
     #Create an input dialog to input person's info when finish face register
     def create_input_name_dialog(self):
-        self.dlg = EmployeeDlg(self)
-        self.dlg.accepted.connect(self.input_register_name)
-        self.dlg.reject.connect(self.selectRegisterMode)
+        keyboard.Show()
+        self.dlg = InputDlg(self)
+        self.dlg.accepted.connect(self.accept_input_register_name)
+        self.dlg.rejected.connect(self.cancel_input_register_name)
         self.dlg.exec()
     
-    def input_register_name(self):
+    def accept_input_register_name(self):
+        keyboard.Hide()
         self.deviceFuntion.send_registered_info_to_server(self.dlg.name_edit.text())
+
+    def cancel_input_register_name(self):
+        keyboard.Hide()
+        self.selectRegisterMode()
 
     def finishedFaceRegistrationStyle(self, label_of_face):
         label_of_face.setStyleSheet(label_of_face.styleSheet() + ("background-color: rgb(147, 255, 165);"))
@@ -141,10 +148,10 @@ class MainWindow(QtWidgets.QMainWindow):
 
     @QtCore.pyqtSlot("QWidget*", "QWidget*")
     def handle_focuschanged(self, old, now):
-        if self.lineEdit == now:
+        if now.objectName() == "name_edit":
             keyboard.Show()
-        elif self.lineEdit == old:
-            keyboard.Hide()
+        # elif self.lineEdit == old:
+        #     keyboard.Hide()
 
     def selectMenu(self, getStyle):
         select = getStyle + ("QPushButton { border-right: 8px solid rgb(44, 49, 60); }")
@@ -168,7 +175,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 w.setStyleSheet(self.deselectMenu(w.styleSheet()))
 
 
-class EmployeeDlg(QtWidgets.QDialog):
+class InputDlg(QtWidgets.QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
         uic.loadUi("./guiModules/dialog.ui", self)

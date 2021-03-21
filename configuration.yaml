@@ -45,17 +45,20 @@ transMatrix: [[ 1.69051699e+00,  1.79461135e-01, -3.25437975e+02],
 maxDisFramesObjectTracking: 40
 
 registration:
-    numFontPics: 5
-    numLeftPics: 5
-    numRightPics: 5
+    numFontPics: 2
+    numLeftPics: 2
+    numRightPics: 2
     stackNumberPics: 6
-    leftThreshold: -22
+    leftThreshold: -18
     rightThreshold: 15
     frontRange: 44
     frameBetweenCapture: 3
 
-offsetTemprture: 1.8
-numberMaxThermalPoints: 16
+measureTemperature:
+    offsetTemperature: 4
+    numberMaxThermalPoints: 16
+    offsetDistCoeffecient: -0.0000212
+    offsetDistIntercept: 1.654018585
 
 display:
     enableThermalFrame: False

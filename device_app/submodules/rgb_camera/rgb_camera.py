@@ -17,9 +17,13 @@ class RgbCam:
     
     def update(self):
         while self.working:
-            _, self.ori = self.capture.read()
-            if self.ori is not None:
-                self.frame = cv2.resize(self.ori, (self.width, self.height))
+            try:
+                _, self.ori = self.capture.read()
+                if self.ori is not None:
+                    self.frame = cv2.resize(self.ori, (self.width, self.height))
+            except Exception as identifier:
+                pass
+            
 
     def getFrame(self):
         return self.frame, self.ori
