@@ -88,6 +88,7 @@ class MainWindow(QtWidgets.QMainWindow):
     #Create an input dialog to input person's info when finish face register
     def create_input_name_dialog(self):
         keyboard.Show()
+        os.system('wmctrl -r onboard above')
         self.dlg = InputDlg(self)
         self.dlg.accepted.connect(self.accept_input_register_name)
         self.dlg.rejected.connect(self.cancel_input_register_name)
@@ -188,8 +189,7 @@ if __name__ == "__main__":
 
     deviceFunction = DeviceAppFunctions()
     window = MainWindow(deviceFunction)
-
-    window.showFullScreen()
-
+    window.show()
+    
     sys.exit(app.exec_())
     
