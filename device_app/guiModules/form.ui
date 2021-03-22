@@ -90,7 +90,7 @@ color: rgb(210, 210, 210);</string>
        <string/>
       </property>
       <property name="pixmap">
-       <pixmap>Thesis/Project/thesis-device-app/device_app/guiModules/images/logo.png</pixmap>
+       <pixmap>./images/logo.png</pixmap>
       </property>
       <property name="scaledContents">
        <bool>true</bool>

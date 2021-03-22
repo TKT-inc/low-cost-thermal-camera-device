@@ -16,7 +16,7 @@ proxy = bus.get_object("org.onboard.Onboard", "/org/onboard/Onboard/Keyboard")
 keyboard = dbus.Interface(proxy, "org.onboard.Onboard.Keyboard")
 
 FONT_OF_TABLE = QtGui.QFont()
-FONT_OF_TABLE.setPointSize(12)
+FONT_OF_TABLE.setPointSize(16)
 FONT_OF_TABLE.setBold(True)
 
 class MainWindow(QtWidgets.QMainWindow):
@@ -34,9 +34,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.shortcut_quit.activated.connect(self.closeApp)
 
         self.history_record.setColumnWidth(0, 120)
-        self.history_record.setColumnWidth(1, 200)
-        self.history_record.setColumnWidth(2, 60)
-        self.history_record.verticalHeader().setDefaultSectionSize(10)
+        self.history_record.setColumnWidth(1, 185)
+        self.history_record.setColumnWidth(2, 75)
+        # self.history_record.verticalHeader().setDefaultSectionSize(10)
 
         self.timerWorking = QtCore.QTimer()
         self.timerWorking.setTimerType(QtCore.Qt.PreciseTimer)
@@ -101,7 +101,6 @@ class MainWindow(QtWidgets.QMainWindow):
     #Create an input dialog to input person's info when finish face register
     def create_input_name_dialog(self):
         keyboard.Show()
-        # os.system('wmctrl -r onboard above')
         self.dlg = InputDlg(self)
         self.dlg.accepted.connect(self.accept_input_register_name)
         self.dlg.rejected.connect(self.cancel_input_register_name)
@@ -110,6 +109,7 @@ class MainWindow(QtWidgets.QMainWindow):
     def accept_input_register_name(self):
         keyboard.Hide()
         self.deviceFuntion.send_registered_info_to_server(self.dlg.name_edit.text())
+        self.selectNormalMode()
 
     def cancel_input_register_name(self):
         keyboard.Hide()
@@ -216,6 +216,7 @@ class InputDlg(QtWidgets.QDialog):
 
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
+    app.setApplicationName('TKT')
 
     deviceFunction = DeviceAppFunctions()
     window = MainWindow(deviceFunction)
