@@ -122,10 +122,10 @@ class DeviceAppFunctions():
         rects = self.faceDetect.detectFaces(self.frame)
 
         if (self.MODE == 'NORMAL'):
-            self.objects, deletedObject = self.ct.update(rects, self.ori, RGB_SCALE)
+            self.objects, self.deletedObject = self.ct.update(rects, self.ori, RGB_SCALE)
             
-            if (deletedObject):
-                Thread(target=self.send_records, args=(deletedObject, ),daemon=True).start()
+            if (self.deletedObject):
+                Thread(target=self.send_records, args=(self.deletedObject, ),daemon=True).start()
                 print("send records")
                 
             self.face_checking(rects)
@@ -149,13 +149,6 @@ class DeviceAppFunctions():
 
         self.displayFrame = self.frame
         return "NORMAL"
-            
-    def centroid_detect(self, x, y, w, h):
-        x1 = int(w/2)
-        y1 = int(h/2)
-        cx = x + x1
-        cy = y + y1
-        return (cx,cy)
 
     def measure_thread(self):
         time.sleep(1)
@@ -225,12 +218,22 @@ class DeviceAppFunctions():
             cv2.putText(self.frame, str(obj.temperature), (centroid[0], y), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
             self.trackableObjects[objectID] = to
 
+    
+    def centroid_detect(self, x, y, w, h):
+        x1 = int(w/2)
+        y1 = int(h/2)
+        cx = x + x1
+        cy = y + y1
+        return (cx,cy)
 
     def get_rgb_frame(self):
         return self.displayFrame
 
     def get_thermal_frame(self):
         return self.color
+
+    def get_records(self):
+        return self.deletedObject
 
     def select_register_mode(self):
         self.store_registered_imgs = None

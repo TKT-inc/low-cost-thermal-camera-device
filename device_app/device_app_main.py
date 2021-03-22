@@ -8,13 +8,16 @@ from threading import Thread
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5 import uic
+from datetime import datetime
 from device_app_function import DeviceAppFunctions
-import subprocess
 
 bus = dbus.SessionBus()
 proxy = bus.get_object("org.onboard.Onboard", "/org/onboard/Onboard/Keyboard")
 keyboard = dbus.Interface(proxy, "org.onboard.Onboard.Keyboard")
 
+FONT_OF_TABLE = QtGui.QFont()
+FONT_OF_TABLE.setPointSize(12)
+FONT_OF_TABLE.setBold(True)
 
 class MainWindow(QtWidgets.QMainWindow):
     def __init__(self, devviceFunction):
@@ -29,6 +32,11 @@ class MainWindow(QtWidgets.QMainWindow):
         self.deviceFuntion = deviceFunction
         self.shortcut_quit = QtWidgets.QShortcut(QtGui.QKeySequence('Ctrl+Q'), self)
         self.shortcut_quit.activated.connect(self.closeApp)
+
+        self.history_record.setColumnWidth(0, 120)
+        self.history_record.setColumnWidth(1, 200)
+        self.history_record.setColumnWidth(2, 60)
+        self.history_record.verticalHeader().setDefaultSectionSize(10)
 
         self.timerWorking = QtCore.QTimer()
         self.timerWorking.setTimerType(QtCore.Qt.PreciseTimer)
@@ -65,6 +73,11 @@ class MainWindow(QtWidgets.QMainWindow):
         elif (status == "REGISTER_DONE_FRONT"):
             self.finishedFaceRegistrationStyle(self.face_front)
 
+        records = self.deviceFuntion.get_records()
+        for (objectID, obj) in records.items():
+            self.addRecords(str(objectID) + '-' + obj.name, obj.temperature)
+
+
     #Close the application
     def closeApp(self):
         self.deviceFuntion.stop()
@@ -88,7 +101,7 @@ class MainWindow(QtWidgets.QMainWindow):
     #Create an input dialog to input person's info when finish face register
     def create_input_name_dialog(self):
         keyboard.Show()
-        os.system('wmctrl -r onboard above')
+        # os.system('wmctrl -r onboard above')
         self.dlg = InputDlg(self)
         self.dlg.accepted.connect(self.accept_input_register_name)
         self.dlg.rejected.connect(self.cancel_input_register_name)
@@ -126,6 +139,23 @@ class MainWindow(QtWidgets.QMainWindow):
     """
     Handle inputs and signals of the application
     """
+    def addRecords(self, name, temperature):
+        vbar = self.history_record.verticalScrollBar()
+        _scroll = vbar.value() == vbar.maximum()
+        now = datetime.now()
+        
+        current_time = now.strftime("%d-%m|%H:%M:%S")
+        self.history_record.insertRow(self.history_record.rowCount())
+
+        self.history_record.setItem(self.history_record.rowCount()-1, 0, QtWidgets.QTableWidgetItem(current_time))
+        self.history_record.item(self.history_record.rowCount()-1, 0).setFont(FONT_OF_TABLE)
+        self.history_record.setItem(self.history_record.rowCount()-1, 1, QtWidgets.QTableWidgetItem(name))
+        self.history_record.item(self.history_record.rowCount()-1, 1).setFont(FONT_OF_TABLE)
+        self.history_record.setItem(self.history_record.rowCount()-1, 2, QtWidgets.QTableWidgetItem(temperature))
+        self.history_record.item(self.history_record.rowCount()-1, 2).setFont(FONT_OF_TABLE)
+
+        if(_scroll):
+            self.history_record.scrollToBottom()
 
     #Handle all button of the application
     def Button(self):
