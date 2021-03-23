@@ -40,33 +40,17 @@ class LandmarkDetection:
         return image_points
 
     def faceMaskDetected(self, gray_frame, frame, rect, scale):
-        gray_frame = gray_frame[[int(rect[1]*scale):int(rect[3]*scale), int(rect[0]*scale):int(rect[2]*scale)]]
-        mouth_rects = mouth_cascade.detectMultiScale(gray, 1.5, 5)
+        gray_frame = gray_frame[int(rect[1]*scale):int(rect[3]*scale), int(rect[0]*scale):int(rect[2]*scale)]
+        h, w = gray_frame.shape
+        gray_frame = gray_frame[int(h*0.25):h, 0:w]
+        alpha = 1.25
+        beta = 0
+
+        gray_frame = cv2.convertScaleAbs(gray_frame, alpha=alpha, beta=beta)
+        mouth_rects = self.mouth_cascade.detectMultiScale(gray_frame, minNeighbors=3)
         if (len(mouth_rects) == 0):
             return True
         return False
-
-        # dlibRect = dlib.rectangle(int(rect[0]*scale), int(rect[1]*scale), int(rect[2]*scale), int(rect[3]*scale))
-        # landmark = self.predictor(gray_frame, dlibRect)
-        # landmark = face_utils.shape_to_np(landmark)
-        # (mStart, mEnd) = face_utils.FACIAL_LANDMARKS_IDXS["mouth"]
-        # mouth = landmark[mStart:mEnd]
-
-        # boundRect = cv2.boundingRect(mouth)
-
-        # hsv = cv2.cvtColor(frame[int(boundRect[1]):int(boundRect[1] + boundRect[3]),int(boundRect[0]):int(boundRect[0] + boundRect[2])], cv2.COLOR_RGB2HSV)
-        # sum_saturation = np.sum(hsv[:, :, 1])
-        # area = int(boundRect[2])*int(boundRect[3])
-        # avg_saturation = sum_saturation / area
-
-        # print(avg_saturation)
-        # if avg_saturation>self.facemask_saturation:
-        #     return False
-        # return True
-
-
-
-
 
 
 class FaceDetection:
@@ -113,7 +97,7 @@ class LightFaceDetection:
         self.image_std = 128.0
         self.center_variance = 0.1
         self.size_variance = 0.2
-        self.threshold = 0.7
+        self.threshold = 0.65
         self.strides = [8.0, 16.0, 32.0, 64.0]
         self.min_boxes = [[10.0, 16.0, 24.0], [32.0, 48.0], [64.0, 96.0], [128.0, 192.0, 256.0]]
         self.priors = self.define_img_size((self.width, self.height))

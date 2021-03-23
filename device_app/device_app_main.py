@@ -43,6 +43,11 @@ class MainWindow(QtWidgets.QMainWindow):
         self.timerWorking.timeout.connect(self.working)
         self.timerWorking.start(0)
 
+        self.timeHandleStatus = QtCore.QTimer()
+        self.timeHandleStatus.setTimerType(QtCore.Qt.PreciseTimer)
+        self.timeHandleStatus.timeout.connect(self.handleRecordsAndNotis)
+        self.timeHandleStatus.start(20)
+
         self.timerRGB = QtCore.QTimer()
         self.timerRGB.setTimerType(QtCore.Qt.PreciseTimer)
         self.timerRGB.timeout.connect(self.display_main_frame)
@@ -73,9 +78,13 @@ class MainWindow(QtWidgets.QMainWindow):
         elif (status == "REGISTER_DONE_FRONT"):
             self.finishedFaceRegistrationStyle(self.face_front)
 
+    #Handle status of working process
+    def handleRecordsAndNotis(self):
         records = self.deviceFuntion.get_records()
         for (objectID, obj) in records.items():
             self.addRecords(str(objectID) + '-' + obj.name, obj.temperature)
+            if (~obj.have_mask):
+                self.addNotiNoMask(obj.name)
 
 
     #Close the application
@@ -139,6 +148,16 @@ class MainWindow(QtWidgets.QMainWindow):
     """
     Handle inputs and signals of the application
     """
+    def addNotiNoMask(self, name):
+        self.notifications.insertRow(self.notifications.rowCount())
+        noti = name + " does not have MASK!"
+        self.notifications.setItem(self.notifications.rowCount()-1, 0, QtWidgets.QTableWidgetItem(noti))
+
+    def addNotiFever(self, name, temp):
+        self.notifications.insertRow(self.notifications.rowCount())
+        noti = name + " got sick with " + temp
+        self.notifications.setItem(self.notifications.rowCount()-1, 0, QtWidgets.QTableWidgetItem(noti))
+
     def addRecords(self, name, temperature):
         vbar = self.history_record.verticalScrollBar()
         _scroll = vbar.value() == vbar.maximum()
