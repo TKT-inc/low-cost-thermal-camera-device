@@ -108,7 +108,7 @@ class DeviceAppFunctions():
         # self.faceDetectTemp = FaceDetection(MODEL_SSD, PROTO_SSD)
         #self.faceDetect = FaceDetectionLightRfb()
         #self.faceDetectTemp = FaceDetectionLightRfb()
-        self.landmarkDetect = LandmarkDetection(LANDMARK_MODEL, FACEMASK_DETECTION_THRESHOLD)
+        self.landmarkDetect = LandmarkDetection(FACEMASK_DETECTION_THRESHOLD, LANDMARK_MODEL)
 
 
     def init_object_tracking(self):
@@ -153,7 +153,7 @@ class DeviceAppFunctions():
                 self.displayFrame = self.frame
                 return status
 
-        print('time frame: {:.5f}'.format(time.time() - start))
+        # print('time frame: {:.5f}'.format(time.time() - start))
         self.displayFrame = self.frame
         return "NORMAL"
 
@@ -177,6 +177,10 @@ class DeviceAppFunctions():
             measureTemperature(self.color, temp, self.objects, objects_measurement, H_MATRIX, OFFSET_TEMPERATURE_USER, NUMBER_MAX_THERMAL_POINTS ,OFFSET_TEMPERATURE_DIST_COEF, OFFSET_TEMPERATURE_DIST_INT, RGB_SCALE)
             for (objectID, obj) in self.objects.items():
                 obj.have_mask = self.landmarkDetect.faceMaskDetected(gray_frame, self.rgb_temp, obj.coor)
+                if (obj.have_mask):
+                    print(str(objectID) + '  ' +  ' Co khau trang')
+                else:
+                    print(str(objectID) + ' Die')
                 
             time.sleep(TIME_MEASURE_TEMP)
 

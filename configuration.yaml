@@ -45,7 +45,7 @@ transMatrix: [[2.272738307672771629341923471656627953052520751953125000000000,0.
 
 maxDisFramesObjectTracking: 40
 
-thresholdFaceMaskDetection: 100
+thresholdFaceMaskDetection: 75
 
 registration:
     numFontPics: 2
