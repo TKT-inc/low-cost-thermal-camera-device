@@ -9,6 +9,7 @@ class ObjectInfo():
 		self.name = "None"
 		self.id = "None"
 		self.temperature = "None"
+		self.have_mask = False
 		self.face_rgb = rgb[int(coor[1]*scale):int(coor[3]*scale), int(coor[0]*scale):int(coor[2]*scale)]
 		self.rec_stacks = []
 		self.max_stack = max_stack

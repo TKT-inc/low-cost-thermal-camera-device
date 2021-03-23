@@ -42,6 +42,7 @@ MODEL_RFB320 = cfg['faceDetection']['modelRfb320']
 PROTO_RFB320 = cfg['faceDetection']['protoRfb320']
 ONNX_SLIM320 = cfg['faceDetection']['onnxSlim320']
 FACE_SIZE = cfg['faceDetection']['faceSize']
+LANDMARK_MODEL = cfg['faceDetection']['landmarkDetectionModel']
 
 # Set up mapping param between 2 cameras
 H_MATRIX = cfg['transMatrix']
@@ -67,11 +68,14 @@ FRAMES_BETWEEN_CAP = cfg['registration']['frameBetweenCapture']
 ENABLE_SHOW_THERMAL_FRAME = cfg['display']['enableThermalFrame']
 ENABLE_SENDING_TO_CLOUD = cfg['iotHub']['enableSending']
 
-#setup ofset temperature
+#setup offset temperature
 OFFSET_TEMPERATURE_USER = cfg['measureTemperature']['offsetTemperature']
 NUMBER_MAX_THERMAL_POINTS = cfg['measureTemperature']['numberMaxThermalPoints']
 OFFSET_TEMPERATURE_DIST_COEF = cfg['measureTemperature']['offsetDistCoeffecient']
 OFFSET_TEMPERATURE_DIST_INT = cfg['measureTemperature']['offsetDistIntercept']
+
+#setup threshold of face mask detection
+FACEMASK_DETECTION_THRESHOLD = cfg['thresholdFaceMaskDetection']
 
 
 class DeviceAppFunctions():
@@ -104,7 +108,7 @@ class DeviceAppFunctions():
         # self.faceDetectTemp = FaceDetection(MODEL_SSD, PROTO_SSD)
         #self.faceDetect = FaceDetectionLightRfb()
         #self.faceDetectTemp = FaceDetectionLightRfb()
-        self.landmarkDetect = LandmarkDetection()
+        self.landmarkDetect = LandmarkDetection(LANDMARK_MODEL, FACEMASK_DETECTION_THRESHOLD)
 
 
     def init_object_tracking(self):
@@ -132,7 +136,7 @@ class DeviceAppFunctions():
             
         elif (self.MODE == 'REGISTER'):
             if (len(rects) == 1):
-                img_points = self.landmarkDetect.detectLandmark(self.frame, rects)
+                img_points = self.landmarkDetect.detectLandmarkForRegister(self.frame, rects)
                 self.store_registered_imgs, status = self.register.update(self.frame,img_points, self.ori, rects, RGB_SCALE)
 
                 if status == "REGISTER_SUCCESS":
@@ -164,8 +168,12 @@ class DeviceAppFunctions():
             rects_measurement = self.faceDetectTemp.detectFaces(self.rgb_temp)
             objects_measurement, _ = ct_temp.update(rects_measurement,rgp_ori,RGB_SCALE)
 
+            gray_frame = cv2.cvtColor(self.rgb_temp, cv2.COLOR_BGR2GRAY)
+
             measureTemperature(self.color, temp, self.objects, objects_measurement, H_MATRIX, OFFSET_TEMPERATURE_USER, NUMBER_MAX_THERMAL_POINTS ,OFFSET_TEMPERATURE_DIST_COEF, OFFSET_TEMPERATURE_DIST_INT, RGB_SCALE)
-        
+            for (objectID, obj) in self.objects.items():
+                obj.have_mask = self.landmarkDetect.faceMaskDetected(gray_frame, self.rgb_temp, obj.coor)
+                
             time.sleep(TIME_MEASURE_TEMP)
 
 

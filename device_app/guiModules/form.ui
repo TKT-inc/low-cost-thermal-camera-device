@@ -90,7 +90,7 @@ color: rgb(210, 210, 210);</string>
        <string/>
       </property>
       <property name="pixmap">
-       <pixmap>./images/logo.png</pixmap>
+       <pixmap>images/logo.png</pixmap>
       </property>
       <property name="scaledContents">
        <bool>true</bool>
@@ -1028,16 +1028,6 @@ QHeaderView::section:vertical
           </color>
          </property>
         </column>
-        <item row="0" column="0">
-         <property name="text">
-          <string>Test</string>
-         </property>
-         <property name="font">
-          <font>
-           <pointsize>14</pointsize>
-          </font>
-         </property>
-        </item>
        </widget>
        <widget class="QLabel" name="label">
         <property name="geometry">

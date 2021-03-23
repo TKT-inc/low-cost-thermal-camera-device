@@ -5,25 +5,28 @@ import dlib
 from math import ceil
 from imutils import face_utils
 from submodules.face_detection.vision.ssd.config.fd_config import define_img_size
-CAFFEMODEL = "/models/res10_300x300_ssd_iter_140000.caffemodel"
-PROTOTEXTPATH = "/models/deploy.prototxt.txt"
 input_img_size = 480
 define_img_size(input_img_size)
 from submodules.face_detection.vision.ssd.mb_tiny_fd import create_mb_tiny_fd, create_mb_tiny_fd_predictor
 from submodules.face_detection.vision.ssd.mb_tiny_RFB_fd import create_Mb_Tiny_RFB_fd, create_Mb_Tiny_RFB_fd_predictor
 from submodules.face_detection.vision.utils.misc import Timer
 
-class LandmarkDetection:
-    def __init__ (self):
-        self.predictor = dlib.shape_predictor("./submodules/face_detection/models/landmarks.dat")
+CAFFEMODEL = "/models/res10_300x300_ssd_iter_140000.caffemodel"
+PROTOTEXTPATH = "/models/deploy.prototxt.txt"
+LANDMARK_DETECTION_MODEL = "./submodules/face_detection/models/landmarks.dat"
 
-    def detectLandmark(self, frame, rects):
+class LandmarkDetection:
+    def __init__ (self, facemask_saturation = 100, model = LANDMARK_DETECTION_MODEL):
+        self.predictor = dlib.shape_predictor(model)
+        self.facemask_saturation = facemask_saturation
+
+    def detectLandmarkForRegister(self, frame, rects):
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        (h,w) = gray.shape[:2]
         if (len(rects) == 0):
             return None
         dlibRect = dlib.rectangle(rects[0][0], rects[0][1], rects[0][2], rects[0][3])
         shape = self.predictor(gray, dlibRect)
+        
         shape = face_utils.shape_to_np(shape)
         image_points = np.array([
                                 (shape[30][0], shape[30][1]),     # Nose tip
@@ -34,6 +37,25 @@ class LandmarkDetection:
                                 (shape[54][0], shape[54][1])      # Right mouth corner
                             ], dtype="double")
         return image_points
+
+    def faceMaskDetected(self, gray_frame, frame, rect):
+
+        dlibRect = dlib.rectangle(rect[0][0], rect[0][1], rect[0][2], rect[0][3])
+        landmark = self.predictor(gray_frame, dlibRect)
+        landmark = face_utils.shape_to_np(landmark)
+        (mStart, mEnd) = face_utils.FACIAL_LANDMARKS_IDXS["mouth"]
+        mouth = landmark[mStart:mEnd]
+
+        boundRect = cv2.boundingRect(mouth)
+
+        hsv = cv2.cvtColor(frame[int(boundRect[1]):int(boundRect[1] + boundRect[3]),int(boundRect[0]):int(boundRect[0] + boundRect[2])], cv2.COLOR_RGB2HSV)
+		sum_saturation = np.sum(hsv[:, :, 1])
+		area = int(boundRect[2])*int(boundRect[3])
+		avg_saturation = sum_saturation / area
+
+        if avg_saturation>100:
+            return False
+        return True
 
 class FaceDetection:
     def __init__(self, model = CAFFEMODEL, proto = PROTOTEXTPATH):
