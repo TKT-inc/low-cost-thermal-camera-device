@@ -38,9 +38,9 @@ class LandmarkDetection:
                             ], dtype="double")
         return image_points
 
-    def faceMaskDetected(self, gray_frame, frame, rect):
+    def faceMaskDetected(self, gray_frame, frame, rect, scale):
 
-        dlibRect = dlib.rectangle(rect[0], rect[1], rect[2], rect[3])
+        dlibRect = dlib.rectangle(int(rect[0]*scale), int(rect[1]*scale), int(rect[2]*scale), int(rect[3]*scale))
         landmark = self.predictor(gray_frame, dlibRect)
         landmark = face_utils.shape_to_np(landmark)
         (mStart, mEnd) = face_utils.FACIAL_LANDMARKS_IDXS["mouth"]
@@ -51,7 +51,9 @@ class LandmarkDetection:
         hsv = cv2.cvtColor(frame[int(boundRect[1]):int(boundRect[1] + boundRect[3]),int(boundRect[0]):int(boundRect[0] + boundRect[2])], cv2.COLOR_RGB2HSV)
         sum_saturation = np.sum(hsv[:, :, 1])
         area = int(boundRect[2])*int(boundRect[3])
-        
+        avg_saturation = sum_saturation / area
+
+        print(avg_saturation)
         if avg_saturation>self.facemask_saturation:
             return False
         return True

@@ -162,7 +162,7 @@ class DeviceAppFunctions():
         while (self.MODE == 'NORMAL'):
             objects_measurement = self.objects
             ct_temp = self.ct
-            self.rgb_temp, rgp_ori = self.rgb.getFrame()
+            self.rgb_temp, rgb_ori = self.rgb.getFrame()
             thermal, temp = self.lep.getFrame()        
             raw = thermal
 
@@ -170,13 +170,13 @@ class DeviceAppFunctions():
             self.color = cv2.applyColorMap(thermal, cv2.COLORMAP_JET)
             
             rects_measurement = self.faceDetectTemp.detectFaces(self.rgb_temp)
-            objects_measurement, _ = ct_temp.update(rects_measurement,rgp_ori,RGB_SCALE)
+            objects_measurement, _ = ct_temp.update(rects_measurement,rgb_ori,RGB_SCALE)
 
-            gray_frame = cv2.cvtColor(self.rgb_temp, cv2.COLOR_BGR2GRAY)
+            gray_frame = cv2.cvtColor(rgb_ori, cv2.COLOR_BGR2GRAY)
 
             measureTemperature(self.color, temp, self.objects, objects_measurement, H_MATRIX, OFFSET_TEMPERATURE_USER, NUMBER_MAX_THERMAL_POINTS ,OFFSET_TEMPERATURE_DIST_COEF, OFFSET_TEMPERATURE_DIST_INT, RGB_SCALE)
             for (objectID, obj) in self.objects.items():
-                obj.have_mask = self.landmarkDetect.faceMaskDetected(gray_frame, self.rgb_temp, obj.coor)
+                obj.have_mask = self.landmarkDetect.faceMaskDetected(gray_frame, rgb_ori, obj.coor, RGB_SCALE)
                 if (obj.have_mask):
                     print(str(objectID) + '  ' +  ' Co khau trang')
                 else:
