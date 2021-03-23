@@ -118,8 +118,11 @@ class DeviceAppFunctions():
 
 
     def process(self):
+        start = time.time()
         self.frame, self.ori = self.rgb.getFrame()
         rects = self.faceDetect.detectFaces(self.frame)
+        # img_points = self.landmarkDetect.detectLandmark(self.frame, rects)
+        # print(img_points)
 
         if (self.MODE == 'NORMAL'):
             self.objects, self.deletedObject = self.ct.update(rects, self.ori, RGB_SCALE)
@@ -146,7 +149,7 @@ class DeviceAppFunctions():
                 self.displayFrame = self.frame
                 return status
 
-
+        print('time frame: {:.5f}'.format(time.time() - start))
         self.displayFrame = self.frame
         return "NORMAL"
 
@@ -158,15 +161,19 @@ class DeviceAppFunctions():
             self.rgb_temp, rgp_ori = self.rgb.getFrame()
             thermal, temp = self.lep.getFrame()        
             raw = thermal
+
             thermal = cv2.resize(thermal,(THERMAL_WIDTH,THERMAL_HEIGHT))
             self.color = cv2.applyColorMap(thermal, cv2.COLORMAP_JET)
             
             rects_measurement = self.faceDetectTemp.detectFaces(self.rgb_temp)
             objects_measurement, _ = ct_temp.update(rects_measurement,rgp_ori,RGB_SCALE)
 
+            img_points = self.landmarkDetect.detectLandmark(self.rgb_temp, rects_measurement)
+            print(img_points)
             measureTemperature(self.color, temp, self.objects, objects_measurement, H_MATRIX, OFFSET_TEMPERATURE_USER, NUMBER_MAX_THERMAL_POINTS ,OFFSET_TEMPERATURE_DIST_COEF, OFFSET_TEMPERATURE_DIST_INT, RGB_SCALE)
         
             time.sleep(TIME_MEASURE_TEMP)
+
 
 
     def send_pics_for_rec(self, personID):
