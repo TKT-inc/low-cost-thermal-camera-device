@@ -33,7 +33,7 @@ def measureTemperature(color,temp, objects, object_measurement, H_matrix, offset
             
             face_area = (coordinates[2]-coordinates[0])*(coordinates[3]-coordinates[1])*(scale*2)
             offset_temp += measureOffsetTempOfDistance(face_area, coefficient, intercept)
-            print(offset_temp)
+
             # print(thermal_matrix[np.unravel_index(top_max_indices, thermal_matrix.shape)])
             temperature = "{:.2f}".format((measured_temp/100.0) - 273.15 + offset_temp) + " oC"
             objects[objectID].temperature = temperature
