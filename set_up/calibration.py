@@ -31,7 +31,7 @@ while (1):
         a,_ = l.capture()
         thermal_matrix = a[int(120/8):int(360/8), int(200/8):int(400/8)]
         max_temp = np.max(thermal_matrix)
-        temp = float(max_temp/100.0 - 273.15)
+        temp = float(max_temp)
         print(f'{temp:.5f}')
         cv.normalize(a, a, 0, 65535, cv.NORM_MINMAX)
         np.right_shift(a, 8, a)

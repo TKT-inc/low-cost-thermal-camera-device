@@ -16,11 +16,11 @@ iotHub:
 
 camera:
     rgb:
-        source: "nvarguscamerasrc ! video/x-raw(memory:NVMM), 
+        source: 'nvarguscamerasrc exposuretimerange="10000000 10000000"! video/x-raw(memory:NVMM), 
         width=(int)1920, height=(int)1080,format=(string)NV12, 
         framerate=(fraction)29/1 ! nvvidconv flip-method=2 ! video/x-raw, 
         format=(string)BGRx ! videoconvert ! video/x-raw, 
-        format=(string)BGR ! appsink"
+        format=(string)BGR ! appsink'
         scaleWidth: 768
         scaleHeight: 432
     thermal: 

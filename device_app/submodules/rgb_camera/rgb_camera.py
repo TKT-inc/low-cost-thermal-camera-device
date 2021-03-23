@@ -9,7 +9,7 @@ class RgbCam:
         self.capture = cv2.VideoCapture(src)
         _, self.ori = self.capture.read()
         self.frame = cv2.resize(self.ori, (self.width, self.height))
-        self.capture.set(cv2.CAP_PROP_EXPOSURE, 40)
+        # self.capture.set(cv2.CAP_PROP_EXPOSURE, 40)
         self.working = True
         self.thread = Thread(target=self.update, daemon=True)
         self.thread.start()
@@ -18,7 +18,7 @@ class RgbCam:
     def update(self):
         while self.working:
             try:
-                _, self.ori = self.capture.read()
+                _, self.ori = self.capture.read()                
                 if self.ori is not None:
                     self.frame = cv2.resize(self.ori, (self.width, self.height))
             except Exception as identifier:
