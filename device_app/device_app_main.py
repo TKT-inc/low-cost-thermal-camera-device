@@ -83,7 +83,7 @@ class MainWindow(QtWidgets.QMainWindow):
         records = self.deviceFuntion.get_records()
         for (objectID, obj) in records.items():
             self.addRecords(str(objectID) + '-' + obj.name, obj.temperature)
-            if (~obj.have_mask):
+            if (obj.have_mask is False):
                 self.addNotiNoMask(obj.name)
 
 

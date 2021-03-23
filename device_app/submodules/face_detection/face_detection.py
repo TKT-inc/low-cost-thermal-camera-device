@@ -39,15 +39,19 @@ class LandmarkDetection:
                             ], dtype="double")
         return image_points
 
-    def faceMaskDetected(self, gray_frame, frame, rect, scale):
-        gray_frame = gray_frame[int(rect[1]*scale):int(rect[3]*scale), int(rect[0]*scale):int(rect[2]*scale)]
-        h, w = gray_frame.shape
-        gray_frame = gray_frame[int(h*0.25):h, 0:w]
+    def faceMaskDetected(self, face):
+        # cv2.imwrite('../test/mask.png', face)
+        face = cv2.cvtColor(face, cv2.COLOR_BGR2GRAY)
+        h, w = face.shape
+        face = face[int(h*0.25):h, 0:w]
         alpha = 1.25
         beta = 0
 
-        gray_frame = cv2.convertScaleAbs(gray_frame, alpha=alpha, beta=beta)
-        mouth_rects = self.mouth_cascade.detectMultiScale(gray_frame, minNeighbors=3)
+        face = cv2.convertScaleAbs(face, alpha=alpha, beta=beta)
+        mouth_rects = self.mouth_cascade.detectMultiScale(face, minNeighbors=5)
+        # cv2.imwrite('../test/' + str(len(mouth_rects)) + '.png', face)
+
+        print(len(mouth_rects))
         if (len(mouth_rects) == 0):
             return True
         return False

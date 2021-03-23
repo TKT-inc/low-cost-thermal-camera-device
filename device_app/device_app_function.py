@@ -173,15 +173,15 @@ class DeviceAppFunctions():
                 rects_measurement = self.faceDetectTemp.detectFaces(self.rgb_temp)
                 objects_measurement, _ = ct_temp.update(rects_measurement,rgb_ori,RGB_SCALE)
 
-                gray_frame = cv2.cvtColor(rgb_ori, cv2.COLOR_BGR2GRAY)
+                for (objectID, obj) in self.objects.items():
+                    obj.have_mask = self.landmarkDetect.faceMaskDetected(obj.face_rgb)
 
                 measureTemperature(self.color, temp, self.objects, objects_measurement, H_MATRIX, OFFSET_TEMPERATURE_USER, NUMBER_MAX_THERMAL_POINTS ,OFFSET_TEMPERATURE_DIST_COEF, OFFSET_TEMPERATURE_DIST_INT, RGB_SCALE)
-                for (objectID, obj) in self.objects.items():
-                    obj.have_mask = self.landmarkDetect.faceMaskDetected(gray_frame, rgb_ori, obj.coor, RGB_SCALE)
-                    
-                time.sleep(TIME_MEASURE_TEMP)
+                
+                              
             except Exception as identifier:
-                pass
+                print(identifier)
+            time.sleep(TIME_MEASURE_TEMP)
             
 
 
@@ -227,7 +227,7 @@ class DeviceAppFunctions():
             # if there is no existing trackable object, create one
             if to is None:
                 to = TrackableObject(objectID, centroid)
-                _ = Thread(target=self.send_pics_for_rec, args=(objectID,),daemon=True).start()
+                Thread(target=self.send_pics_for_rec, args=(objectID,),daemon=True).start()
             elif (not to.counted):
                 to.counted = True
 
