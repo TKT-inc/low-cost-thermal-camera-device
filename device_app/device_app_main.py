@@ -33,8 +33,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.shortcut_quit = QtWidgets.QShortcut(QtGui.QKeySequence('Ctrl+Q'), self)
         self.shortcut_quit.activated.connect(self.closeApp)
 
-        self.history_record.setColumnWidth(0, 120)
-        self.history_record.setColumnWidth(1, 185)
+        self.history_record.setColumnWidth(0, 130)
+        self.history_record.setColumnWidth(1, 175)
         self.history_record.setColumnWidth(2, 75)
         # self.history_record.verticalHeader().setDefaultSectionSize(10)
 
