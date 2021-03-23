@@ -51,7 +51,6 @@ class LandmarkDetection:
         mouth_rects = self.mouth_cascade.detectMultiScale(face, minNeighbors=5)
         # cv2.imwrite('../test/' + str(len(mouth_rects)) + '.png', face)
 
-        print(len(mouth_rects))
         if (len(mouth_rects) == 0):
             return True
         return False

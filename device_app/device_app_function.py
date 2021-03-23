@@ -145,13 +145,13 @@ class DeviceAppFunctions():
                 if status == "REGISTER_SUCCESS":
                     print('Register Ok')
                     del self.register
-                    self.MODE = "NORMAL"
-                    self.init_object_tracking()
-                    Thread(target=self.measure_thread, daemon=True).start()
-                    self.conn.restart_listener(self.objects)
+                    self.MODE = 'WAITING'
 
                 self.displayFrame = self.frame
                 return status
+        elif (self.MODE == 'WAITING'):
+            time.sleep(0.3)
+
 
         # print('time frame: {:.5f}'.format(time.time() - start))
         self.displayFrame = self.frame
@@ -254,13 +254,15 @@ class DeviceAppFunctions():
     def select_register_mode(self):
         self.store_registered_imgs = None
         self.MODE = 'REGISTER'
+        del self.objects, self.ct, self.trackableObjects
         self.register = CaptureRegisterFace(NUM_FRONT_PICS,NUM_LEFT_PICS,NUM_RIGHT_PICS, LEFT_THRESHOLD, RIGHT_THRESHOLD, FRONT_RANGE, STACK_NUMBER, FRAMES_BETWEEN_CAP)
 
     def select_normal_mode(self):
         self.init_object_tracking()
+        self.init_model()
         Thread(target=self.measure_thread, daemon=True).start()
-        self.conn.restart_listener(self.objects)
         self.MODE = 'NORMAL'
+        self.conn.restart_listener(self.objects)
 
     def send_registered_info_to_server(self, name_of_new_user):
         if (self.store_registered_imgs is not None and ENABLE_SENDING_TO_CLOUD):

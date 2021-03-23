@@ -12,7 +12,7 @@ iotHub:
         recMsg: '{{"buildingId":"{buildingId}","deviceId":"{deviceId}","trackingId": "{trackingId}","face": "{face}"}}'
         recordMsg: '{{"buildingId":"{buildingId}","personId": "{personID}", "personName": "{personName}", "temperature":"{temperature}", "face":"{face}"}}'
         registerMsg: '{{"buildingId":"{buildingId}","personName": "{personName}","containerName":"{containerName}"}}'
-    enableSending: False
+    enableSending: True
 
 camera:
     rgb:
