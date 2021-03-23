@@ -19,6 +19,7 @@ class LandmarkDetection:
     def __init__ (self, facemask_saturation = 100, model = LANDMARK_DETECTION_MODEL):
         self.predictor = dlib.shape_predictor(model)
         self.facemask_saturation = facemask_saturation
+        self.mouth_cascade = cv2.CascadeClassifier('./submodules/face_detection/models/haarcascade_mouth.xml')
 
     def detectLandmarkForRegister(self, frame, rects):
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
@@ -39,24 +40,34 @@ class LandmarkDetection:
         return image_points
 
     def faceMaskDetected(self, gray_frame, frame, rect, scale):
+        gray_frame = gray_frame[[int(rect[1]*scale):int(rect[3]*scale), int(rect[0]*scale):int(rect[2]*scale)]]
+        mouth_rects = mouth_cascade.detectMultiScale(gray, 1.5, 5)
+        if (len(mouth_rects) == 0):
+            return True
+        return False
 
-        dlibRect = dlib.rectangle(int(rect[0]*scale), int(rect[1]*scale), int(rect[2]*scale), int(rect[3]*scale))
-        landmark = self.predictor(gray_frame, dlibRect)
-        landmark = face_utils.shape_to_np(landmark)
-        (mStart, mEnd) = face_utils.FACIAL_LANDMARKS_IDXS["mouth"]
-        mouth = landmark[mStart:mEnd]
+        # dlibRect = dlib.rectangle(int(rect[0]*scale), int(rect[1]*scale), int(rect[2]*scale), int(rect[3]*scale))
+        # landmark = self.predictor(gray_frame, dlibRect)
+        # landmark = face_utils.shape_to_np(landmark)
+        # (mStart, mEnd) = face_utils.FACIAL_LANDMARKS_IDXS["mouth"]
+        # mouth = landmark[mStart:mEnd]
 
-        boundRect = cv2.boundingRect(mouth)
+        # boundRect = cv2.boundingRect(mouth)
 
-        hsv = cv2.cvtColor(frame[int(boundRect[1]):int(boundRect[1] + boundRect[3]),int(boundRect[0]):int(boundRect[0] + boundRect[2])], cv2.COLOR_RGB2HSV)
-        sum_saturation = np.sum(hsv[:, :, 1])
-        area = int(boundRect[2])*int(boundRect[3])
-        avg_saturation = sum_saturation / area
+        # hsv = cv2.cvtColor(frame[int(boundRect[1]):int(boundRect[1] + boundRect[3]),int(boundRect[0]):int(boundRect[0] + boundRect[2])], cv2.COLOR_RGB2HSV)
+        # sum_saturation = np.sum(hsv[:, :, 1])
+        # area = int(boundRect[2])*int(boundRect[3])
+        # avg_saturation = sum_saturation / area
 
-        print(avg_saturation)
-        if avg_saturation>self.facemask_saturation:
-            return False
-        return True
+        # print(avg_saturation)
+        # if avg_saturation>self.facemask_saturation:
+        #     return False
+        # return True
+
+
+
+
+
 
 class FaceDetection:
     def __init__(self, model = CAFFEMODEL, proto = PROTOTEXTPATH):
