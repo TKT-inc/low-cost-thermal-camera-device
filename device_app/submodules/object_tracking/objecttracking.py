@@ -4,25 +4,43 @@ from collections import OrderedDict
 import numpy as np
 
 class ObjectInfo():
-	def __init__(self, coor, rgb, scale, max_stack = 3):
+	def __init__(self, coor, rgb, scale, max_rec_stack = 3, max_temp_stack=6, fever_temp=38):
 		self.coor = coor
 		self.name = "None"
 		self.id = "None"
 		self.temperature = "None"
+		self.record_temperature = 0
 		self.have_mask = False
 		self.face_rgb = rgb[int(coor[1]*scale):int(coor[3]*scale), int(coor[0]*scale):int(coor[2]*scale)]
 		self.rec_stacks = []
-		self.max_stack = max_stack
+		self.max_rec_stack = max_rec_stack
+		self.temp_stacks = []
+		self.max_temp_stack = max_temp_stack
+		self.fever_temp = fever_temp
 	
 	def updateNameAndId(self, name, id):
 		self.rec_stacks.append((name, id))
-		if (len(self.rec_stacks) == self.max_stack + 1):
+		if (len(self.rec_stacks) == self.max_rec_stack + 1):
 			self.rec_stacks.pop(0)
 			self.name, self.id = max(self.rec_stacks, key=self.rec_stacks.count)
 		else:
 			self.name = name
 			self.id = id
 
+	def updateTemperature(self, temp):
+		self.temp_stacks.append(temp)
+
+		if (len(self.temp_stacks) == self.max_temp_stack):
+			self.temp_stacks.pop(0)
+
+		self.record_temperature = np.average(self.temp_stacks) 
+		self.temperature = "{:.2f}".format(temp) + " oC"
+
+	def gotFever(self):
+		if(self.record_temperature >= self.fever_temp):
+			return True
+		return False
+	
 
 class CentroidTracker():
 	def __init__(self, maxDisappeared=25):

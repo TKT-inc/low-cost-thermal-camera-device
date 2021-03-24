@@ -16,15 +16,11 @@ iotHub:
 
 camera:
     rgb:
-        source: 'nvarguscamerasrc exposuretimerange="20000000 20000000" ! video/x-raw(memory:NVMM), 
+        source: 'nvarguscamerasrc exposuretimerange="10000000 10000000" ! video/x-raw(memory:NVMM), 
         width=(int)1920, height=(int)1080,format=(string)NV12, 
         framerate=(fraction)29/1 ! nvvidconv flip-method=2 ! video/x-raw, 
         format=(string)BGRx ! videoconvert ! video/x-raw, 
         format=(string)BGR ! appsink max-buffers=1 drop=True'
-        # source : 'nvarguscamerasrc exposuretimerange="5000000 5000000" ! video/x-raw(memory:NVMM), 
-        # width=(int)1920, height=(int)1080,format=(string)NV12, 
-        # framerate=(fraction)29/1 ! nvvidconv flip-method=2 ! video/x-raw, 
-        # format=(string)BGR !! appsink'
         scaleWidth: 768
         scaleHeight: 432
     thermal: 
@@ -47,7 +43,7 @@ transMatrix: [[1.151494864164938514150549053738359361886978149414062500000000,-0
 
 
 
-maxDisFramesObjectTracking: 40
+maxDisFramesObjectTracking: 30
 
 thresholdFaceMaskDetection: 75
 
