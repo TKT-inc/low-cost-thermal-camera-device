@@ -217,8 +217,9 @@ class LightFaceDetection:
         picked_box_probs[:, 3] *= height
         return picked_box_probs[:, :4].astype(np.int32), np.array(picked_labels), picked_box_probs[:, 4]
 
-    def detectFaces(self, frame):
+    def detectFaces(self, frame, bright=20):
         rect = cv2.resize(frame, (self.width, self.height))
+        rect = cv2.convertScaleAbs(rect, beta=bright)
         rect = cv2.cvtColor(rect, cv2.COLOR_BGR2RGB)
         self.net.setInput(cv2.dnn.blobFromImage(rect, 1 / self.image_std, (self.width, self.height), 127))
         boxes, scores = self.net.forward(["boxes", "scores"])

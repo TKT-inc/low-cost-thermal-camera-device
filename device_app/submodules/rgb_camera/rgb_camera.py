@@ -6,7 +6,7 @@ class RgbCam:
     def __init__(self, src, width, height):
         self.width = width
         self.height = height
-        self.capture = cv2.VideoCapture(src)
+        self.capture = cv2.VideoCapture(src, cv2.CAP_GSTREAMER)
         _, self.ori = self.capture.read()
         self.frame = cv2.resize(self.ori, (self.width, self.height))
         # self.capture.set(cv2.CAP_PROP_EXPOSURE, 40)

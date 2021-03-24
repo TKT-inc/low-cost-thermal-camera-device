@@ -125,8 +125,6 @@ class DeviceAppFunctions():
         start = time.time()
         self.frame, self.ori = self.rgb.getFrame()
         rects = self.faceDetect.detectFaces(self.frame)
-        # img_points = self.landmarkDetect.detectLandmark(self.frame, rects)
-        # print(img_points)
 
         if (self.MODE == 'NORMAL'):
             self.objects, self.deletedObject = self.ct.update(rects, self.ori, RGB_SCALE)
@@ -153,7 +151,7 @@ class DeviceAppFunctions():
             time.sleep(0.3)
 
 
-        # print('time frame: {:.5f}'.format(time.time() - start))
+        print('time frame: {:.5f}'.format(time.time() - start))
         self.displayFrame = self.frame
         return "NORMAL"
 
