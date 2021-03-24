@@ -117,8 +117,8 @@ class MainWindow(QtWidgets.QMainWindow):
     
     def accept_input_register_name(self):
         keyboard.Hide()
-        self.deviceFuntion.send_registered_info_to_server(self.dlg.name_edit.text())
         self.selectNormalMode()
+        self.deviceFuntion.send_registered_info_to_server(self.dlg.name_edit.text())
 
     def cancel_input_register_name(self):
         keyboard.Hide()
@@ -128,11 +128,11 @@ class MainWindow(QtWidgets.QMainWindow):
         label_of_face.setStyleSheet(label_of_face.styleSheet() + ("background-color: rgb(147, 255, 165);"))
 
     def selectNormalMode(self):
-        self.deviceFuntion.select_normal_mode()
         self.main_display_monitor = self.rgb_frame
         self.stackedWidget.setCurrentWidget(self.home_page)
         self.resetStyleBtn("btn_home")
         self.btn_home.setStyleSheet(self.selectMenu(self.btn_home.styleSheet()))
+        self.deviceFuntion.select_normal_mode()
 
     def selectRegisterMode(self):
         self.deviceFuntion.select_register_mode()
