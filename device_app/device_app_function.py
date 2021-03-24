@@ -151,7 +151,7 @@ class DeviceAppFunctions():
             time.sleep(0.3)
 
 
-        print('time frame: {:.5f}'.format(time.time() - start))
+        # print('time frame: {:.5f}'.format(time.time() - start))
         self.displayFrame = self.frame
         return "NORMAL"
 

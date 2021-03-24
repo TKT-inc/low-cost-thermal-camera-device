@@ -24,12 +24,26 @@ def measureTemperature(color,temp, objects, object_measurement, H_matrix, offset
             thermal_start_x, thermal_start_y = convertRGBToThermalCoor(coordinates[0], coordinates[1], H)
             thermal_end_x, thermal_end_y = convertRGBToThermalCoor(coordinates[2], coordinates[3], H)
             
-            cv2.rectangle(color, (int(thermal_start_x), int(thermal_start_y)), (int(thermal_end_x), int(thermal_end_y)), (255, 255, 255), 3)
-            
-            thermal_matrix = temp[int(thermal_start_y/8):int(thermal_end_y/8), int(thermal_start_x/8):int(thermal_end_x/8)]
-            top_max_indices = (-np.array(thermal_matrix)).argpartition(number_max, axis=None)[:number_max]
-            # measured_temp = np.max(thermal_matrix)
-            measured_temp = np.average(thermal_matrix[np.unravel_index(top_max_indices, thermal_matrix.shape)])
+            cv2.rectangle(color, (thermal_start_x, thermal_start_y), (thermal_end_x, thermal_end_y), (0, 0, 0), 4)
+            x_start = int(thermal_start_x/8)
+            x_end = int(thermal_end_x/8)
+            y_start = int(thermal_start_y/8)
+            y_end = int(thermal_end_y/8)
+
+            if (x_start == x_end):
+                x_end += 1
+            if (y_start == y_end):
+                y_end += 1
+
+            thermal_matrix = temp[y_start:y_end, x_start:x_end]
+            # print(thermal_matrix)
+            # print((x_end - x_start)*(y_end - y_start))
+            if ((x_end - x_start)*(y_end - y_start) > number_max):
+                top_max_indices = (-np.array(thermal_matrix)).argpartition(number_max, axis=None)[:number_max]
+                # measured_temp = np.max(thermal_matrix)
+                measured_temp = np.average(thermal_matrix[np.unravel_index(top_max_indices, thermal_matrix.shape)])
+            else:
+                measured_temp = np.average(thermal_matrix)
             
             face_area = (coordinates[2]-coordinates[0])*(coordinates[3]-coordinates[1])*(scale*2)
             offset_temp += measureOffsetTempOfDistance(face_area, coefficient, intercept)
