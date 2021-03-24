@@ -2,7 +2,7 @@ buildingId: 1
 deviceId: 'test-device'
 
 periodTime:
-    measureTemp: 1
+    measureTemp: 0.8
     sendRecMess: 2
 
 iotHub:
@@ -16,11 +16,15 @@ iotHub:
 
 camera:
     rgb:
-        source: "nvarguscamerasrc ! video/x-raw(memory:NVMM), 
+        source: 'nvarguscamerasrc exposuretimerange="20000000 20000000" ! video/x-raw(memory:NVMM), 
         width=(int)1920, height=(int)1080,format=(string)NV12, 
         framerate=(fraction)29/1 ! nvvidconv flip-method=2 ! video/x-raw, 
         format=(string)BGRx ! videoconvert ! video/x-raw, 
-        format=(string)BGR ! appsink"
+        format=(string)BGR ! appsink max-buffers=1 drop=True'
+        # source : 'nvarguscamerasrc exposuretimerange="5000000 5000000" ! video/x-raw(memory:NVMM), 
+        # width=(int)1920, height=(int)1080,format=(string)NV12, 
+        # framerate=(fraction)29/1 ! nvvidconv flip-method=2 ! video/x-raw, 
+        # format=(string)BGR !! appsink'
         scaleWidth: 768
         scaleHeight: 432
     thermal: 
@@ -29,33 +33,39 @@ camera:
         scaleHeight: 480
     
 faceDetection:
-    modelSsd: "./submodules/face_detection/models/res10_300x300_ssd_iter_140000.caffemodel"
-    protoSsd: "./submodules/face_detection/models/deploy.prototxt.txt"
-    modelSlim320: "./submodules/face_detection/models/slim-320.caffemodel"
-    protoSlim320: "./submodules/face_detection/models/slim-320.prototxt"
-    modelRfb320: "./submodules/face_detection/models/RFB-320.caffemodel"
-    protoRfb320: "./submodules/face_detection/models/RFB-320.prototxt"
-    onnxSlim320: "./submodules/face_detection/models/version-slim-320_simplified.onnx" 
+    modelSsd: "./device_app/submodules/face_detection/models/res10_300x300_ssd_iter_140000.caffemodel"
+    protoSsd: "./device_app/submodules/face_detection/models/deploy.prototxt.txt"
+    modelSlim320: "./device_app/submodules/face_detection/models/slim-320.caffemodel"
+    protoSlim320: "./device_app/submodules/face_detection/models/slim-320.prototxt"
+    modelRfb320: "./device_app/submodules/face_detection/models/RFB-320.caffemodel"
+    protoRfb320: "./device_app/submodules/face_detection/models/RFB-320.prototxt"
+    onnxSlim320: "./device_app/submodules/face_detection/models/version-slim-320_simplified.onnx"
+    landmarkDetectionModel: "./device_app/submodules/face_detection/models/landmarks.dat"
     faceSize: 600
 
-transMatrix: [[ 1.69051699e+00,  1.79461135e-01, -3.25437975e+02],
- [-6.29553165e-02,  1.81581827e+00, -2.28105166e+02],
- [ 1.64793732e-04,  2.73841290e-04,  1.00000000e+00]]
+transMatrix: [[1.151494864164938514150549053738359361886978149414062500000000,-0.063336065057558066371257154969498515129089355468750000000000,-145.215232485574176735099172219634056091308593750000000000000000],[-0.071721184806381371723560391728824470192193984985351562500000,1.216612020894769496948129017255268990993499755859375000000000,-132.841562546594104787800461053848266601562500000000000000000000],[-0.000188606674158853568736352035450920539005892351269721984863,-0.000281616226901529515848354723317470416077412664890289306641,1.000000000000000000000000000000000000000000000000000000000000]]
+
+
 
 maxDisFramesObjectTracking: 40
 
+thresholdFaceMaskDetection: 75
+
 registration:
-    numFontPics: 5
-    numLeftPics: 5
-    numRightPics: 5
+    numFontPics: 2
+    numLeftPics: 2
+    numRightPics: 2
     stackNumberPics: 6
-    leftThreshold: -22
-    rightThreshold: 22
+    leftThreshold: -18
+    rightThreshold: 15
     frontRange: 44
     frameBetweenCapture: 3
 
-offsetTemprture: 1.8
-numberMaxThermalPoints: 16
+measureTemperature:
+    offsetTemperature: 3
+    numberMaxThermalPoints: 16
+    offsetDistCoeffecient: -0.0000212
+    offsetDistIntercept: 1.654018585
 
 display:
     enableThermalFrame: False

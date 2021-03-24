@@ -5,25 +5,30 @@ import dlib
 from math import ceil
 from imutils import face_utils
 from submodules.face_detection.vision.ssd.config.fd_config import define_img_size
-CAFFEMODEL = "/models/res10_300x300_ssd_iter_140000.caffemodel"
-PROTOTEXTPATH = "/models/deploy.prototxt.txt"
 input_img_size = 480
 define_img_size(input_img_size)
 from submodules.face_detection.vision.ssd.mb_tiny_fd import create_mb_tiny_fd, create_mb_tiny_fd_predictor
 from submodules.face_detection.vision.ssd.mb_tiny_RFB_fd import create_Mb_Tiny_RFB_fd, create_Mb_Tiny_RFB_fd_predictor
 from submodules.face_detection.vision.utils.misc import Timer
 
-class LandmarkDetection:
-    def __init__ (self):
-        self.predictor = dlib.shape_predictor("./submodules/face_detection/models/landmarks.dat")
+CAFFEMODEL = "/models/res10_300x300_ssd_iter_140000.caffemodel"
+PROTOTEXTPATH = "/models/deploy.prototxt.txt"
+LANDMARK_DETECTION_MODEL = "./device_app/submodules/face_detection/models/landmarks.dat"
+MOUTH_CASCADE_FILE = './device_app/submodules/face_detection/models/haarcascade_mouth.xml'
 
-    def detectLandmark(self, frame, rects):
+class LandmarkDetection:
+    def __init__ (self, facemask_saturation = 100, model = LANDMARK_DETECTION_MODEL, mouth_cascade_file=MOUTH_CASCADE_FILE):
+        self.predictor = dlib.shape_predictor(model)
+        self.facemask_saturation = facemask_saturation
+        self.mouth_cascade = cv2.CascadeClassifier(mouth_cascade_file)
+
+    def detectLandmarkForRegister(self, frame, rects):
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        (h,w) = gray.shape[:2]
         if (len(rects) == 0):
             return None
         dlibRect = dlib.rectangle(rects[0][0], rects[0][1], rects[0][2], rects[0][3])
         shape = self.predictor(gray, dlibRect)
+        
         shape = face_utils.shape_to_np(shape)
         image_points = np.array([
                                 (shape[30][0], shape[30][1]),     # Nose tip
@@ -34,6 +39,23 @@ class LandmarkDetection:
                                 (shape[54][0], shape[54][1])      # Right mouth corner
                             ], dtype="double")
         return image_points
+
+    def faceMaskDetected(self, face):
+        # cv2.imwrite('./test/mask.png', face)
+        face = cv2.cvtColor(face, cv2.COLOR_BGR2GRAY)
+        h, w = face.shape
+        face = face[int(h*0.25):h, 0:w]
+        alpha = 1.25
+        beta = 0
+
+        face = cv2.convertScaleAbs(face, alpha=alpha, beta=beta)
+        mouth_rects = self.mouth_cascade.detectMultiScale(face, minNeighbors=5)
+        # cv2.imwrite('../test/' + str(len(mouth_rects)) + '.png', face)
+
+        if (len(mouth_rects) == 0):
+            return True
+        return False
+
 
 class FaceDetection:
     def __init__(self, model = CAFFEMODEL, proto = PROTOTEXTPATH):
@@ -79,7 +101,7 @@ class LightFaceDetection:
         self.image_std = 128.0
         self.center_variance = 0.1
         self.size_variance = 0.2
-        self.threshold = 0.7
+        self.threshold = 0.65
         self.strides = [8.0, 16.0, 32.0, 64.0]
         self.min_boxes = [[10.0, 16.0, 24.0], [32.0, 48.0], [64.0, 96.0], [128.0, 192.0, 256.0]]
         self.priors = self.define_img_size((self.width, self.height))
@@ -141,7 +163,7 @@ class LightFaceDetection:
                             w,
                             h
                         ])
-        print("priors nums:{}".format(len(priors)))
+        # print("priors nums:{}".format(len(priors)))
         return np.clip(priors, 0.0, 1.0)
 
     def center_form_to_corner_form(self, locations):
@@ -196,8 +218,9 @@ class LightFaceDetection:
         picked_box_probs[:, 3] *= height
         return picked_box_probs[:, :4].astype(np.int32), np.array(picked_labels), picked_box_probs[:, 4]
 
-    def detectFaces(self, frame):
+    def detectFaces(self, frame, bright=20):
         rect = cv2.resize(frame, (self.width, self.height))
+        rect = cv2.convertScaleAbs(rect, beta=bright)
         rect = cv2.cvtColor(rect, cv2.COLOR_BGR2RGB)
         self.net.setInput(cv2.dnn.blobFromImage(rect, 1 / self.image_std, (self.width, self.height), 127))
         boxes, scores = self.net.forward(["boxes", "scores"])

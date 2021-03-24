@@ -3,7 +3,7 @@ import json
 import uuid
 import cv2
 import yaml
-with open("../configuration.yaml") as ymlfile:
+with open("configuration.yaml") as ymlfile:
     cfg = yaml.safe_load(ymlfile)
 from threading import Thread
 import threading
