@@ -84,9 +84,11 @@ class MainWindow(QtWidgets.QMainWindow):
         records = self.deviceFuntion.get_records()
         for (objectID, obj) in records.items():
             current_time = datetime.now().strftime("%d-%m|%H:%M:%S")
-            self.addRecords(current_time, str(objectID) + '-' + obj.name, obj.temperature)
+            self.addRecords(current_time, str(objectID) + '-' + obj.name, obj.record_temperature)
             if (obj.have_mask is False):
                 self.addNoti(current_time, obj.name)
+            if (obj.gotFever() is True):
+                self.addNoti(current_time, obj.name, obj.record_temperature)
 
 
     #Close the application
@@ -148,7 +150,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.notifications.setItem(self.notifications.rowCount()-1, 0, QtWidgets.QTableWidgetItem(current_time))
 
         if (temp is not None):
-            noti = name + " got sick with " + temp
+            noti = name + " got sick with " + "{:.2f}".format(temp) + " oC"
         else:
             noti = name + " plase wear MASK!"
 
@@ -165,6 +167,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.history_record.item(self.history_record.rowCount()-1, 0).setFont(FONT_OF_TABLE)
         self.history_record.setItem(self.history_record.rowCount()-1, 1, QtWidgets.QTableWidgetItem(name))
         self.history_record.item(self.history_record.rowCount()-1, 1).setFont(FONT_OF_TABLE)
+        temperature = "{:.2f}".format(temperature) + " oC"
         self.history_record.setItem(self.history_record.rowCount()-1, 2, QtWidgets.QTableWidgetItem(temperature))
         self.history_record.item(self.history_record.rowCount()-1, 2).setFont(FONT_OF_TABLE)
 

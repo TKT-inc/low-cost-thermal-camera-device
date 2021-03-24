@@ -206,7 +206,7 @@ class DeviceAppFunctions():
             pic_str = pic_str.decode()
 
             if (ENABLE_SENDING_TO_CLOUD):
-                self.conn.send_record(BUILDING_ID, obj.id, obj.name, obj.temperature, pic_str)
+                self.conn.send_record(BUILDING_ID, obj.id, obj.name, obj.record_temperature, pic_str)
 
 
     def face_checking( self, rects):
