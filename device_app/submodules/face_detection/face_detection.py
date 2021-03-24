@@ -13,13 +13,14 @@ from submodules.face_detection.vision.utils.misc import Timer
 
 CAFFEMODEL = "/models/res10_300x300_ssd_iter_140000.caffemodel"
 PROTOTEXTPATH = "/models/deploy.prototxt.txt"
-LANDMARK_DETECTION_MODEL = "./submodules/face_detection/models/landmarks.dat"
+LANDMARK_DETECTION_MODEL = "./device_app/submodules/face_detection/models/landmarks.dat"
+MOUTH_CASCADE_FILE = './device_app/submodules/face_detection/models/haarcascade_mouth.xml'
 
 class LandmarkDetection:
-    def __init__ (self, facemask_saturation = 100, model = LANDMARK_DETECTION_MODEL):
+    def __init__ (self, facemask_saturation = 100, model = LANDMARK_DETECTION_MODEL, mouth_cascade_file=MOUTH_CASCADE_FILE):
         self.predictor = dlib.shape_predictor(model)
         self.facemask_saturation = facemask_saturation
-        self.mouth_cascade = cv2.CascadeClassifier('./submodules/face_detection/models/haarcascade_mouth.xml')
+        self.mouth_cascade = cv2.CascadeClassifier(mouth_cascade_file)
 
     def detectLandmarkForRegister(self, frame, rects):
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
@@ -40,7 +41,7 @@ class LandmarkDetection:
         return image_points
 
     def faceMaskDetected(self, face):
-        # cv2.imwrite('../test/mask.png', face)
+        # cv2.imwrite('./test/mask.png', face)
         face = cv2.cvtColor(face, cv2.COLOR_BGR2GRAY)
         h, w = face.shape
         face = face[int(h*0.25):h, 0:w]
@@ -162,7 +163,7 @@ class LightFaceDetection:
                             w,
                             h
                         ])
-        print("priors nums:{}".format(len(priors)))
+        # print("priors nums:{}".format(len(priors)))
         return np.clip(priors, 0.0, 1.0)
 
     def center_form_to_corner_form(self, locations):

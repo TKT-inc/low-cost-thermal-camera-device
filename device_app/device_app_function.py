@@ -1,9 +1,10 @@
+import sys
 import cv2
 import numpy as np
 import time
 import yaml
 import base64
-with open("../configuration.yaml") as ymlfile:
+with open("configuration.yaml") as ymlfile:
     cfg = yaml.safe_load(ymlfile)
 from collections import OrderedDict
 from threading import Thread

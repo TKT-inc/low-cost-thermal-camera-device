@@ -23,7 +23,7 @@ class MainWindow(QtWidgets.QMainWindow):
     def __init__(self, devviceFunction):
         super(MainWindow, self).__init__()
 
-        uic.loadUi("./guiModules/mainWindow.ui", self)
+        uic.loadUi("./device_app/guiModules/mainWindow.ui", self)
 
         QtWidgets.QApplication.instance().focusChanged.connect(self.handle_focuschanged)
 
@@ -86,7 +86,7 @@ class MainWindow(QtWidgets.QMainWindow):
             current_time = datetime.now().strftime("%d-%m|%H:%M:%S")
             self.addRecords(current_time, str(objectID) + '-' + obj.name, obj.temperature)
             if (obj.have_mask is False):
-                self.addNotiNoMask(current_time, obj.name)
+                self.addNoti(current_time, obj.name)
 
 
     #Close the application
@@ -210,11 +210,13 @@ class MainWindow(QtWidgets.QMainWindow):
 
     @QtCore.pyqtSlot("QWidget*", "QWidget*")
     def handle_focuschanged(self, old, now):
-        if now.objectName() == "name_edit":
-            keyboard.Show()
+        time.sleep(1)
+        # if now.objectName() == "name_edit":
+        #     keyboard.Show()
         # elif self.lineEdit == old:
         #     keyboard.Hide()
 
+    ## ==> SELECT
     def selectMenu(self, getStyle):
         select = getStyle + ("QPushButton { border-right: 8px solid rgb(44, 49, 60); }")
         return select
@@ -240,7 +242,7 @@ class MainWindow(QtWidgets.QMainWindow):
 class InputDlg(QtWidgets.QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
-        uic.loadUi("./guiModules/inputNameDialog.ui", self)
+        uic.loadUi("./device_app/guiModules/inputNameDialog.ui", self)
         self.setWindowFlags(QtCore.Qt.FramelessWindowHint)
 
 
