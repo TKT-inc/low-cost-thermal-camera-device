@@ -148,7 +148,7 @@ class DeviceAppFunctions():
                 self.displayFrame = self.frame
                 return status
         elif (self.MODE == 'WAITING'):
-            time.sleep(0.3)
+            time.sleep(0.1)
 
 
         # print('time frame: {:.5f}'.format(time.time() - start))

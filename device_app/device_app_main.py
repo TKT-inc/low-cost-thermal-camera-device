@@ -23,9 +23,9 @@ class MainWindow(QtWidgets.QMainWindow):
     def __init__(self, devviceFunction):
         super(MainWindow, self).__init__()
 
-        uic.loadUi("./guiModules/form.ui", self)
+        uic.loadUi("./guiModules/mainWindow.ui", self)
 
-        # QtWidgets.QApplication.instance().focusChanged.connect(self.handle_focuschanged)
+        QtWidgets.QApplication.instance().focusChanged.connect(self.handle_focuschanged)
 
         self.main_display_monitor = self.rgb_frame
 
@@ -36,7 +36,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.history_record.setColumnWidth(0, 130)
         self.history_record.setColumnWidth(1, 175)
         self.history_record.setColumnWidth(2, 75)
-        # self.history_record.verticalHeader().setDefaultSectionSize(10)
+        
+        self.notifications.setColumnWidth(0, 130)
 
         self.timerWorking = QtCore.QTimer()
         self.timerWorking.setTimerType(QtCore.Qt.PreciseTimer)
@@ -63,10 +64,10 @@ class MainWindow(QtWidgets.QMainWindow):
         self.btn_info.clicked.connect(self.Button)
         self.register_button.clicked.connect(self.Button)
 
+
     """
     Main processing of the application
     """
-
     #PROCESSING OF THE MAIN SYSTEM
     def working(self):
         status = self.deviceFuntion.process()
@@ -82,9 +83,10 @@ class MainWindow(QtWidgets.QMainWindow):
     def handleRecordsAndNotis(self):
         records = self.deviceFuntion.get_records()
         for (objectID, obj) in records.items():
-            self.addRecords(str(objectID) + '-' + obj.name, obj.temperature)
+            current_time = datetime.now().strftime("%d-%m|%H:%M:%S")
+            self.addRecords(current_time, str(objectID) + '-' + obj.name, obj.temperature)
             if (obj.have_mask is False):
-                self.addNotiNoMask(obj.name)
+                self.addNotiNoMask(current_time, obj.name)
 
 
     #Close the application
@@ -114,19 +116,13 @@ class MainWindow(QtWidgets.QMainWindow):
         self.dlg.accepted.connect(self.accept_input_register_name)
         self.dlg.rejected.connect(self.cancel_input_register_name)
         self.dlg.exec()
+        self.name_edit.setFocus()
     
-    def accept_input_register_name(self):
-        keyboard.Hide()
-        self.selectNormalMode()
-        self.deviceFuntion.send_registered_info_to_server(self.dlg.name_edit.text())
-
-    def cancel_input_register_name(self):
-        keyboard.Hide()
-        self.selectRegisterMode()
-
+    # Change color of the face register state
     def finishedFaceRegistrationStyle(self, label_of_face):
         label_of_face.setStyleSheet(label_of_face.styleSheet() + ("background-color: rgb(147, 255, 165);"))
 
+    #switch to normal mode (working mode)
     def selectNormalMode(self):
         self.main_display_monitor = self.rgb_frame
         self.stackedWidget.setCurrentWidget(self.home_page)
@@ -134,6 +130,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.btn_home.setStyleSheet(self.selectMenu(self.btn_home.styleSheet()))
         self.deviceFuntion.select_normal_mode()
 
+    # Switch to register mode
     def selectRegisterMode(self):
         self.deviceFuntion.select_register_mode()
         self.main_display_monitor = self.register_screen
@@ -144,26 +141,24 @@ class MainWindow(QtWidgets.QMainWindow):
         self.resetStyleBtn("btn_new_user")
         self.btn_new_user.setStyleSheet(self.selectMenu(self.btn_new_user.styleSheet()))
 
-
-    """
-    Handle inputs and signals of the application
-    """
-    def addNotiNoMask(self, name):
+    # Add notification when someone got fever or does not wear mask
+    def addNoti(self, current_time, name, temp=None):
         self.notifications.insertRow(self.notifications.rowCount())
-        noti = name + " does not have MASK!"
-        self.notifications.setItem(self.notifications.rowCount()-1, 0, QtWidgets.QTableWidgetItem(noti))
 
-    def addNotiFever(self, name, temp):
-        self.notifications.insertRow(self.notifications.rowCount())
-        noti = name + " got sick with " + temp
-        self.notifications.setItem(self.notifications.rowCount()-1, 0, QtWidgets.QTableWidgetItem(noti))
+        self.notifications.setItem(self.notifications.rowCount()-1, 0, QtWidgets.QTableWidgetItem(current_time))
 
-    def addRecords(self, name, temperature):
+        if (temp is not None):
+            noti = name + " got sick with " + temp
+        else:
+            noti = name + " plase wear MASK!"
+
+        self.notifications.setItem(self.notifications.rowCount()-1, 1, QtWidgets.QTableWidgetItem(noti))
+
+    # Add record info into the history record table
+    def addRecords(self, current_time, name, temperature):
         vbar = self.history_record.verticalScrollBar()
         _scroll = vbar.value() == vbar.maximum()
-        now = datetime.now()
         
-        current_time = now.strftime("%d-%m|%H:%M:%S")
         self.history_record.insertRow(self.history_record.rowCount())
 
         self.history_record.setItem(self.history_record.rowCount()-1, 0, QtWidgets.QTableWidgetItem(current_time))
@@ -175,6 +170,23 @@ class MainWindow(QtWidgets.QMainWindow):
 
         if(_scroll):
             self.history_record.scrollToBottom()
+
+
+
+    """
+    Handle inputs and signals of the application
+    """
+    
+    #Ok button when input register name
+    def accept_input_register_name(self):
+        keyboard.Hide()
+        self.selectNormalMode()
+        self.deviceFuntion.send_registered_info_to_server(self.dlg.name_edit.text())
+
+    #Cancel button when input register name
+    def cancel_input_register_name(self):
+        keyboard.Hide()
+        self.selectRegisterMode()
 
     #Handle all button of the application
     def Button(self):
@@ -228,7 +240,7 @@ class MainWindow(QtWidgets.QMainWindow):
 class InputDlg(QtWidgets.QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
-        uic.loadUi("./guiModules/dialog.ui", self)
+        uic.loadUi("./guiModules/inputNameDialog.ui", self)
         self.setWindowFlags(QtCore.Qt.FramelessWindowHint)
 
 
