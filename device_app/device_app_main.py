@@ -25,7 +25,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         uic.loadUi("./device_app/guiModules/mainWindow.ui", self)
 
-        QtWidgets.QApplication.instance().focusChanged.connect(self.handle_focuschanged)
+        # QtWidgets.QApplication.instance().focusChanged.connect(self.handle_focuschanged)
 
         self.main_display_monitor = self.rgb_frame
 
@@ -49,10 +49,10 @@ class MainWindow(QtWidgets.QMainWindow):
         self.timeHandleStatus.timeout.connect(self.handleRecordsAndNotis)
         self.timeHandleStatus.start(20)
 
-        self.timerRGB = QtCore.QTimer()
-        self.timerRGB.setTimerType(QtCore.Qt.PreciseTimer)
-        self.timerRGB.timeout.connect(self.display_main_frame)
-        self.timerRGB.start(20)
+        # self.timerRGB = QtCore.QTimer()
+        # self.timerRGB.setTimerType(QtCore.Qt.PreciseTimer)
+        # self.timerRGB.timeout.connect(self.display_main_frame)
+        # self.timerRGB.start(20)
 
         self.timerThermal = QtCore.QTimer()
         self.timerThermal.setTimerType(QtCore.Qt.PreciseTimer)
@@ -78,6 +78,11 @@ class MainWindow(QtWidgets.QMainWindow):
             self.finishedFaceRegistrationStyle(self.face_left)
         elif (status == "REGISTER_DONE_FRONT"):
             self.finishedFaceRegistrationStyle(self.face_front)
+
+        frame = self.deviceFuntion.get_rgb_frame()
+        height, width, _ = frame.shape
+        qimg = QtGui.QImage(frame.data, width, height, 3*width, QtGui.QImage.Format_RGB888).rgbSwapped()
+        self.main_display_monitor.setPixmap(QtGui.QPixmap(qimg))
 
     #Handle status of working process
     def handleRecordsAndNotis(self):
@@ -126,15 +131,14 @@ class MainWindow(QtWidgets.QMainWindow):
 
     #switch to normal mode (working mode)
     def selectNormalMode(self):
+        self.deviceFuntion.select_normal_mode()
         self.main_display_monitor = self.rgb_frame
         self.stackedWidget.setCurrentWidget(self.home_page)
         self.resetStyleBtn("btn_home")
         self.btn_home.setStyleSheet(self.selectMenu(self.btn_home.styleSheet()))
-        self.deviceFuntion.select_normal_mode()
 
     # Switch to register mode
     def selectRegisterMode(self):
-        self.deviceFuntion.select_register_mode()
         self.main_display_monitor = self.register_screen
         self.face_left.setStyleSheet(self.face_left.styleSheet().replace("background-color: rgb(147, 255, 165);", ""))
         self.face_right.setStyleSheet(self.face_right.styleSheet().replace("background-color: rgb(147, 255, 165);", ""))
@@ -142,9 +146,12 @@ class MainWindow(QtWidgets.QMainWindow):
         self.stackedWidget.setCurrentWidget(self.new_user)
         self.resetStyleBtn("btn_new_user")
         self.btn_new_user.setStyleSheet(self.selectMenu(self.btn_new_user.styleSheet()))
+        self.deviceFuntion.select_register_mode()
 
     # Add notification when someone got fever or does not wear mask
     def addNoti(self, current_time, name, temp=None):
+        vbar = self.notifications.verticalScrollBar()
+        _scroll = vbar.value() == vbar.maximum()
         self.notifications.insertRow(self.notifications.rowCount())
 
         self.notifications.setItem(self.notifications.rowCount()-1, 0, QtWidgets.QTableWidgetItem(current_time))
@@ -155,6 +162,9 @@ class MainWindow(QtWidgets.QMainWindow):
             noti = name + " plase wear MASK!"
 
         self.notifications.setItem(self.notifications.rowCount()-1, 1, QtWidgets.QTableWidgetItem(noti))
+
+        if(_scroll):
+            self.notifications.scrollToBottom()
 
     # Add record info into the history record table
     def addRecords(self, current_time, name, temperature):

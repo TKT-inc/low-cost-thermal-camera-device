@@ -127,7 +127,7 @@ color: rgb(210, 210, 210);</string>
       </property>
       <property name="styleSheet">
        <string notr="true">QPushButton {	
-	background-image: url(&quot;./guiModules/icons/16x16/cil-home.png&quot;);
+	background-image: url(&quot;./device_app/guiModules/icons/16x16/cil-home.png&quot;);
 	background-position: left center;
     background-repeat: no-repeat;
 	border: none;
@@ -180,7 +180,7 @@ QPushButton:pressed {
       </property>
       <property name="styleSheet">
        <string notr="true">QPushButton {	
-	background-image: url(&quot;./guiModules/icons/20x20/cil-settings.png&quot;);
+	background-image: url(&quot;./device_app/guiModules/icons/20x20/cil-settings.png&quot;);
 	background-position: left center;
     background-repeat: no-repeat;
 	border: none;
@@ -233,7 +233,7 @@ QPushButton:pressed {
       </property>
       <property name="styleSheet">
        <string notr="true">QPushButton {	
-	background-image: url(&quot;./guiModules/icons/20x20/cil-exit-to-app.png&quot;);
+	background-image: url(&quot;./device_app/guiModules/icons/20x20/cil-exit-to-app.png&quot;);
 	background-position: left center;
     background-repeat: no-repeat;
 	border: none;
@@ -286,7 +286,7 @@ QPushButton:pressed {
       </property>
       <property name="styleSheet">
        <string notr="true">QPushButton {	
-	background-image: url(&quot;./guiModules/icons/16x16/cil-user-follow.png&quot;);
+	background-image: url(&quot;./device_app/guiModules/icons/16x16/cil-user-follow.png&quot;);
 	background-position: left center;
     background-repeat: no-repeat;
 	border: none;
@@ -339,7 +339,7 @@ QPushButton:pressed {
       </property>
       <property name="styleSheet">
        <string notr="true">QPushButton {	
-	background-image: url(&quot;./guiModules/icons/16x16/cil-notes.png&quot;);
+	background-image: url(&quot;./device_app/guiModules/icons/16x16/cil-notes.png&quot;);
 	background-position: left center;
     background-repeat: no-repeat;
 	border: none;

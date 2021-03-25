@@ -165,14 +165,15 @@ class DeviceAppFunctions():
             try:
                 objects_measurement = self.objects
                 ct_temp = self.ct
+                self.lep.update()
                 self.rgb_temp, rgb_ori = self.rgb.getFrame()
-                thermal, temp = self.lep.getFrame()        
+                thermal, temp = self.lep.getFrame()
                 raw = thermal
 
                 thermal = cv2.resize(thermal,(THERMAL_WIDTH,THERMAL_HEIGHT))
                 self.color = cv2.applyColorMap(thermal, cv2.COLORMAP_JET)
                 
-                rects_measurement = self.faceDetectTemp.detectFaces(self.rgb_temp)
+                rects_measurement = self.faceDetectTemp.detectFaces(self.rgb_temp, 35)
                 objects_measurement, _ = ct_temp.update(rects_measurement,rgb_ori,RGB_SCALE)
 
                 for (objectID, obj) in self.objects.items():

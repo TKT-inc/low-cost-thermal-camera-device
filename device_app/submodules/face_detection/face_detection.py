@@ -41,12 +41,13 @@ class LandmarkDetection:
         return image_points
 
     def faceMaskDetected(self, face):
-        # cv2.imwrite('./test/mask.png', face)
+        
         face = cv2.cvtColor(face, cv2.COLOR_BGR2GRAY)
         h, w = face.shape
         face = face[int(h*0.25):h, 0:w]
-        alpha = 1.25
-        beta = 0
+        alpha = 1.4
+        beta = 5
+        # cv2.imwrite('./test/mask.png', face)
 
         face = cv2.convertScaleAbs(face, alpha=alpha, beta=beta)
         mouth_rects = self.mouth_cascade.detectMultiScale(face, minNeighbors=5)

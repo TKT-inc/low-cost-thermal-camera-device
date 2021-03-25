@@ -2,7 +2,7 @@ import numpy as np
 import cv2 as cv
 import math
 import yaml
-with open("configuration.yaml") as ymlfile:
+with open("../configuration.yaml") as ymlfile:
     cfg = yaml.safe_load(ymlfile)
 from pylepton import Lepton
 
