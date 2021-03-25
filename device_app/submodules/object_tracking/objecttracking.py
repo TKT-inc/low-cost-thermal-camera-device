@@ -43,7 +43,7 @@ class ObjectInfo():
 	
 
 class CentroidTracker():
-	def __init__(self, maxDisappeared=25):
+	def __init__(self, maxDisappeared=25, max_rec_stack = 3, max_temp_stack=6, fever_temp=38):
 		# initialize the next unique object ID along with two ordered
 		# dictionaries used to keep track of mapping a given object
 		# ID to its centroid and number of consecutive frames it has
@@ -57,6 +57,9 @@ class CentroidTracker():
 		# need to deregister the object from tracking
 		self.maxDisappeared = maxDisappeared
 		self.counted = False
+		self.max_rec_stack = max_rec_stack
+		self.max_temp_stack = max_temp_stack
+		self.fever_temp = fever_temp
 
 	def getCentroid(self, coor):
 		cX = int((coor[0] + coor[2]) / 2.0)
@@ -66,7 +69,7 @@ class CentroidTracker():
 	def register(self, coor, rgb, scale):
 		# when registering an object we use the next available object
 		# ID to store the centroid
-		obj = ObjectInfo(coor, rgb, scale)
+		obj = ObjectInfo(coor, rgb, scale, self.max_rec_stack, self.max_temp_stack, self.fever_temp)
 		self.objects[self.nextObjectID] = obj
 		self.disappeared[self.nextObjectID] = 0
 		self.nextObjectID += 1

@@ -53,7 +53,10 @@ TIME_MEASURE_TEMP = cfg['periodTime']['measureTemp']
 TIME_SEND_REC = cfg['periodTime']['sendRecMess']
 
 # Set up tracking params
-MAX_DISAPEARED_FRAMES = cfg['maxDisFramesObjectTracking']
+MAX_DISAPEARED_FRAMES = cfg['personTracking']['NoOfDisapearFrames']
+BUFFER_TEMP = cfg['personTracking']['bufSizeTempPersonTracking']
+BUFFER_NAME_ID = cfg['personTracking']['bufSizeNameAndIdPersonTracking']
+THRESHOLD_TEMP_FEVER = cfg['personTracking']['thresholdTempOfFever']
 
 # Set up registeration params
 NUM_FRONT_PICS = cfg['registration']['numFontPics']
@@ -113,7 +116,7 @@ class DeviceAppFunctions():
 
 
     def init_object_tracking(self):
-        self.ct = CentroidTracker(MAX_DISAPEARED_FRAMES)
+        self.ct = CentroidTracker(MAX_DISAPEARED_FRAMES, BUFFER_NAME_ID, BUFFER_TEMP, THRESHOLD_TEMP_FEVER)
         self.trackableObjects = {}
         self.objects, _ = self.ct.update([],[],RGB_SCALE)
 
