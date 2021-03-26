@@ -308,11 +308,64 @@ QPushButton:pressed {
        <string>New</string>
       </property>
      </widget>
-     <widget class="QPushButton" name="btn_info">
+     <widget class="QPushButton" name="btn_calib">
       <property name="geometry">
        <rect>
         <x>0</x>
         <y>190</y>
+        <width>70</width>
+        <height>60</height>
+       </rect>
+      </property>
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="minimumSize">
+       <size>
+        <width>0</width>
+        <height>60</height>
+       </size>
+      </property>
+      <property name="font">
+       <font>
+        <family>Segoe UI</family>
+       </font>
+      </property>
+      <property name="layoutDirection">
+       <enum>Qt::LeftToRight</enum>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">QPushButton {	
+	background-image: url(&quot;./device_app/guiModules/icons/16x16/cil-speedometer.png&quot;);
+	background-position: left center;
+    background-repeat: no-repeat;
+	border: none;
+	border-left: 28px solid rgb(27, 29, 35);
+	background-color: rgb(27, 29, 35);
+	text-align: left;
+	padding-left: 45px;
+}
+QPushButton:hover {
+	background-color: rgb(33, 37, 43);
+	border-left: 28px solid rgb(33, 37, 43);
+}
+QPushButton:pressed {	
+	background-color: rgb(85, 170, 255);
+	border-left: 28px solid rgb(85, 170, 255);
+}</string>
+      </property>
+      <property name="text">
+       <string>New</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="btn_info">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>250</y>
         <width>70</width>
         <height>60</height>
        </rect>
@@ -655,7 +708,9 @@ background-color: rgb(150, 150, 150);</string>
         <property name="font">
          <font>
           <family>Segoe UI</family>
-          <pointsize>12</pointsize>
+          <pointsize>24</pointsize>
+          <weight>75</weight>
+          <bold>true</bold>
          </font>
         </property>
         <property name="styleSheet">
@@ -674,11 +729,18 @@ QPushButton:pressed {
 }</string>
         </property>
         <property name="text">
-         <string>New User</string>
+         <string>New
+User</string>
         </property>
         <property name="icon">
          <iconset>
-          <normaloff>icons/20x20/cil-user-follow.png</normaloff>icons/20x20/cil-user-follow.png</iconset>
+          <normaloff>icons/24x24/cil-user-follow.png</normaloff>icons/24x24/cil-user-follow.png</iconset>
+        </property>
+        <property name="iconSize">
+         <size>
+          <width>24</width>
+          <height>24</height>
+         </size>
         </property>
        </widget>
        <widget class="QTableWidget" name="notifications">
@@ -1643,7 +1705,98 @@ border-radius: 20px;	</string>
         </property>
        </widget>
       </widget>
-      <widget class="QWidget" name="page"/>
+      <widget class="QWidget" name="calibrate"/>
+      <widget class="QWidget" name="product_info">
+       <widget class="QLabel" name="label_3">
+        <property name="geometry">
+         <rect>
+          <x>510</x>
+          <y>40</y>
+          <width>201</width>
+          <height>191</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="pixmap">
+         <pixmap>./images/logo.png</pixmap>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label_4">
+        <property name="geometry">
+         <rect>
+          <x>400</x>
+          <y>220</y>
+          <width>421</width>
+          <height>61</height>
+         </rect>
+        </property>
+        <property name="font">
+         <font>
+          <pointsize>26</pointsize>
+          <weight>75</weight>
+          <bold>true</bold>
+         </font>
+        </property>
+        <property name="text">
+         <string>TKT Incoperation</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label_5">
+        <property name="geometry">
+         <rect>
+          <x>190</x>
+          <y>270</y>
+          <width>871</width>
+          <height>191</height>
+         </rect>
+        </property>
+        <property name="font">
+         <font>
+          <pointsize>16</pointsize>
+         </font>
+        </property>
+        <property name="text">
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;justify&quot;&gt;This system combining a low-cost thermal camera and a standard RGB camera for screening fever combined with surveillance. &lt;br/&gt;&lt;/p&gt;&lt;p align=&quot;justify&quot;&gt;This proposed system can be applied in many areas, from universities to buildings, withthe minimum cost and maximum performance&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        </property>
+        <property name="scaledContents">
+         <bool>false</bool>
+        </property>
+        <property name="wordWrap">
+         <bool>true</bool>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label_6">
+        <property name="geometry">
+         <rect>
+          <x>500</x>
+          <y>510</y>
+          <width>191</width>
+          <height>141</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:14pt;&quot;&gt;Trần Đình Tiến &lt;/span&gt;&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:14pt;&quot;&gt;Nguyễn Việt Khoa&lt;/span&gt;&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:14pt;&quot;&gt;Nhan Ngọc Thiện&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label_7">
+        <property name="geometry">
+         <rect>
+          <x>510</x>
+          <y>470</y>
+          <width>211</width>
+          <height>41</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:16pt; font-weight:600; text-decoration: underline;&quot;&gt;Project's members&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        </property>
+       </widget>
+      </widget>
      </widget>
     </widget>
    </widget>

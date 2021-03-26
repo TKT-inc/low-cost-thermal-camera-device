@@ -9,6 +9,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5 import uic
 from datetime import datetime
 from device_app_function import DeviceAppFunctions
+from guiModules.ui_components import *
 
 bus = dbus.SessionBus()
 proxy = bus.get_object("org.onboard.Onboard", "/org/onboard/Onboard/Keyboard")
@@ -19,23 +20,32 @@ FONT_OF_TABLE.setPointSize(16)
 FONT_OF_TABLE.setBold(True)
 
 class MainWindow(QtWidgets.QMainWindow):
-    def __init__(self, devviceFunction):
+    def __init__(self):
         super(MainWindow, self).__init__()
-
-        uic.loadUi("./device_app/guiModules/mainWindow.ui", self)
+        self.deviceFuntion = DeviceAppFunctions()
+        self.startMainWindow()
+        # self.startLoginWindow()
 
         # QtWidgets.QApplication.instance().focusChanged.connect(self.handle_focuschanged)
-
-        self.main_display_monitor = self.rgb_frame
-
-        self.deviceFuntion = deviceFunction
+        
         self.shortcut_quit = QtWidgets.QShortcut(QtGui.QKeySequence('Ctrl+Q'), self)
         self.shortcut_quit.activated.connect(self.closeApp)
+
+        # self.a = QtWidgets.QShortcut(QtGui.QKeySequence('Ctrl+A'), self)
+        # self.a.activated.connect(lambda: self.startMainWindow())
+
+    """
+    Controle windows
+    """
+    def startMainWindow(self):
+        uic.loadUi("./device_app/guiModules/mainWindow.ui", self)
+
+        self.main_display_monitor = self.rgb_frame        
 
         self.history_record.setColumnWidth(0, 130)
         self.history_record.setColumnWidth(1, 175)
         self.history_record.setColumnWidth(2, 75)
-        
+
         self.notifications.setColumnWidth(0, 130)
 
         self.timerWorking = QtCore.QTimer()
@@ -63,6 +73,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.btn_info.clicked.connect(self.Button)
         self.register_button.clicked.connect(self.Button)
 
+    def startLoginWindow(self):
+
+        uic.loadUi("./device_app/guiModules/loginWindow.ui", self)
 
     """
     Main processing of the application
@@ -124,12 +137,13 @@ class MainWindow(QtWidgets.QMainWindow):
         label_of_face.setStyleSheet(label_of_face.styleSheet() + ("background-color: rgb(147, 255, 165);"))
 
     #switch to normal mode (working mode)
-    def selectNormalMode(self):
-        self.deviceFuntion.select_normal_mode()
+    def selectNormalMode(self):       
         self.main_display_monitor = self.rgb_frame
         self.stackedWidget.setCurrentWidget(self.home_page)
         self.resetStyleBtn("btn_home")
         self.btn_home.setStyleSheet(self.selectMenu(self.btn_home.styleSheet()))
+        if (self.deviceFuntion.getMode() != 'NORMAL'):
+            self.deviceFuntion.select_normal_mode() 
 
     # Switch to register mode
     def selectRegisterMode(self):
@@ -140,7 +154,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.stackedWidget.setCurrentWidget(self.new_user)
         self.resetStyleBtn("btn_new_user")
         self.btn_new_user.setStyleSheet(self.selectMenu(self.btn_new_user.styleSheet()))
-        self.deviceFuntion.select_register_mode()
+        if (self.deviceFuntion.getMode() != 'REGISTER'):
+            self.deviceFuntion.select_register_mode() 
+        
 
     # Add notification when someone got fever or does not wear mask
     def addNoti(self, current_time, name, temp=None):
@@ -210,14 +226,19 @@ class MainWindow(QtWidgets.QMainWindow):
 
         # PAGE INFO
         if btnWidget.objectName() == "btn_info":
-            self.stackedWidget.setCurrentWidget(self.page)
-            self.resetStyleBtn("btn_widgets")
+            self.stackedWidget.setCurrentWidget(self.product_info)
+            self.resetStyleBtn("btn_info")
+            btnWidget.setStyleSheet(self.selectMenu(btnWidget.styleSheet()))
+
+        if btnWidget.objectName() == "btn_calib":
+            self.stackedWidget.setCurrentWidget(self.calibrate)
+            self.resetStyleBtn("btn_calib")
             btnWidget.setStyleSheet(self.selectMenu(btnWidget.styleSheet()))
 
 
-    @QtCore.pyqtSlot("QWidget*", "QWidget*")
-    def handle_focuschanged(self, old, now):
-        time.sleep(1)
+    # @QtCore.pyqtSlot("QWidget*", "QWidget*")
+    # def handle_focuschanged(self, old, now):
+    #     time.sleep(1)
         # if now.objectName() == "name_edit":
         #     keyboard.Show()
         # elif self.lineEdit == old:
@@ -246,20 +267,11 @@ class MainWindow(QtWidgets.QMainWindow):
                 w.setStyleSheet(self.deselectMenu(w.styleSheet()))
 
 
-class InputDlg(QtWidgets.QDialog):
-    def __init__(self, parent=None):
-        super().__init__(parent)
-        uic.loadUi("./device_app/guiModules/inputNameDialog.ui", self)
-        self.setWindowFlags(QtCore.Qt.FramelessWindowHint)
-
-
-
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
     app.setApplicationName('TKT')
 
-    deviceFunction = DeviceAppFunctions()
-    window = MainWindow(deviceFunction)
+    window = MainWindow()
     window.show()
     
     sys.exit(app.exec_())

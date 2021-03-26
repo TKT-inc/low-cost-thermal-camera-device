@@ -94,7 +94,8 @@ class DeviceAppFunctions():
         self.init_object_tracking()
         self.init_conn()
 
-        Thread(target=self.measure_thread,daemon=True).start()
+        self.measureTemp = Thread(target=self.measure_thread,daemon=True)
+        self.measureTemp.start()
 
         self.process()
 
@@ -244,6 +245,9 @@ class DeviceAppFunctions():
         cy = y + y1
         return (cx,cy)
 
+    def getMode(self):
+        return self.MODE
+
     def get_rgb_frame(self):
         return self.displayFrame
 
@@ -256,13 +260,14 @@ class DeviceAppFunctions():
     def select_register_mode(self):
         self.store_registered_imgs = None
         self.MODE = 'REGISTER'
-        del self.objects, self.ct, self.trackableObjects
         self.register = CaptureRegisterFace(NUM_FRONT_PICS,NUM_LEFT_PICS,NUM_RIGHT_PICS, LEFT_THRESHOLD, RIGHT_THRESHOLD, FRONT_RANGE, STACK_NUMBER, FRAMES_BETWEEN_CAP)
 
     def select_normal_mode(self):
         self.init_object_tracking()
-        self.init_model()
-        Thread(target=self.measure_thread, daemon=True).start()
+        # self.init_model()
+        self.measureTemp.join()
+        self.measureTemp = Thread(target=self.measure_thread, daemon=True)
+        self.measureTemp.start()
         self.MODE = 'NORMAL'
         self.conn.restart_listener(self.objects)
 
