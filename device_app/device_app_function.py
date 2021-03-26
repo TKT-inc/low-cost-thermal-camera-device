@@ -6,7 +6,6 @@ import yaml
 import base64
 with open("configuration.yaml") as ymlfile:
     cfg = yaml.safe_load(ymlfile)
-from collections import OrderedDict
 from threading import Thread
 from submodules.rgb_camera.rgb_camera import RgbCam
 from submodules.thermal_camera.thermal_camera import ThermalCam

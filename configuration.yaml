@@ -2,7 +2,7 @@ buildingId: 1
 deviceId: 'test-device'
 
 periodTime:
-    measureTemp: 0.9
+    measureTemp: 0.7
     sendRecMess: 2
 
 iotHub:

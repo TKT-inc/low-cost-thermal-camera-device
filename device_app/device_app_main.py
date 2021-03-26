@@ -2,7 +2,6 @@
 import sys
 import cv2
 import time
-import os
 import dbus
 from threading import Thread
 
@@ -49,10 +48,10 @@ class MainWindow(QtWidgets.QMainWindow):
         self.timeHandleStatus.timeout.connect(self.handleRecordsAndNotis)
         self.timeHandleStatus.start(20)
 
-        # self.timerRGB = QtCore.QTimer()
-        # self.timerRGB.setTimerType(QtCore.Qt.PreciseTimer)
-        # self.timerRGB.timeout.connect(self.display_main_frame)
-        # self.timerRGB.start(20)
+        self.timerRGB = QtCore.QTimer()
+        self.timerRGB.setTimerType(QtCore.Qt.PreciseTimer)
+        self.timerRGB.timeout.connect(self.display_main_frame)
+        self.timerRGB.start(20)
 
         self.timerThermal = QtCore.QTimer()
         self.timerThermal.setTimerType(QtCore.Qt.PreciseTimer)
@@ -78,11 +77,6 @@ class MainWindow(QtWidgets.QMainWindow):
             self.finishedFaceRegistrationStyle(self.face_left)
         elif (status == "REGISTER_DONE_FRONT"):
             self.finishedFaceRegistrationStyle(self.face_front)
-
-        frame = self.deviceFuntion.get_rgb_frame()
-        height, width, _ = frame.shape
-        qimg = QtGui.QImage(frame.data, width, height, 3*width, QtGui.QImage.Format_RGB888).rgbSwapped()
-        self.main_display_monitor.setPixmap(QtGui.QPixmap(qimg))
 
     #Handle status of working process
     def handleRecordsAndNotis(self):
