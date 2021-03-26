@@ -17,7 +17,7 @@ OFFSET_TEMPERATURE_DIST_INT = cfg['measureTemperature']['offsetDistIntercept']
 # ROTATION_VECTOR = 
 
 def measureTemperature(color,temp, objects, object_measurement, scale):
-    for (objectID, obj) in objects.items():
+    for (objectID, obj) in list(objects.items()):
         try:
             coordinates = object_measurement[objectID].coor
             thermal_start_x, thermal_start_y = convertRGBToThermalCoor(coordinates[0], coordinates[1])

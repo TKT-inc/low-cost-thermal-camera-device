@@ -78,23 +78,23 @@ class DeviceAppFunctions():
         self.MODE = 'NORMAL'
 
         #init the system
-        self.init_camera()
-        self.init_model()
-        self.init_object_tracking()
-        self.init_conn()
+        self.initCamera()
+        self.initModel()
+        self.initObjectTracking()
+        self.initIoTConnection()
 
-        self.measureTemp = Thread(target=self.measure_thread,daemon=True)
+        self.measureTemp = Thread(target=self.measureTemperatureAllPeople,daemon=True)
         self.measureTemp.start()
 
         self.process()
 
 
-    def init_camera(self):
+    def initCamera(self):
         self.rgb = RgbCam(RGB_SOURCE, RGB_WIDTH, RGB_HEIGHT)
         self.lep = ThermalCam(THERMAL_SOURCE)
 
 
-    def init_model(self):
+    def initModel(self):
         self.faceDetect = LightFaceDetection(PROTO_RFB320, MODEL_RFB320)
         self.faceDetectTemp = LightFaceDetection(PROTO_RFB320, MODEL_RFB320)
         # self.faceDetect = FaceDetection(MODEL_SSD, PROTO_SSD)
@@ -104,13 +104,13 @@ class DeviceAppFunctions():
         self.landmarkDetect = LandmarkDetection(FACEMASK_DETECTION_THRESHOLD, LANDMARK_MODEL)
 
 
-    def init_object_tracking(self):
+    def initObjectTracking(self):
         self.ct = CentroidTracker(MAX_DISAPEARED_FRAMES, BUFFER_NAME_ID, BUFFER_TEMP, THRESHOLD_TEMP_FEVER)
         # self.trackableObjects = {}
         self.objects, _ = self.ct.update([],[],RGB_SCALE)
 
 
-    def init_conn(self):
+    def initIoTConnection(self):
         self.conn = IotConn(self.MODE, CONNECTION_STRING_DEVICE, CONNECTION_STRING_BLOB , self.objects)
 
 
@@ -123,10 +123,10 @@ class DeviceAppFunctions():
             self.objects, self.deletedObject = self.ct.update(rects, self.ori, RGB_SCALE)
             
             if (self.deletedObject):
-                Thread(target=self.send_records, args=(self.deletedObject, ),daemon=True).start()
+                Thread(target=self.sendRecordsInfo, args=(self.deletedObject, ),daemon=True).start()
                 print("send records")
                 
-            self.drawInfoOnFrame(rects)
+            self.drawInfoOnFrameAndCheckRecognize(rects)
             
         elif (self.MODE == 'REGISTER'):
             if (len(rects) == 1):
@@ -153,7 +153,7 @@ class DeviceAppFunctions():
         self.displayFrame = self.frame
         return "NORMAL"
 
-    def measure_thread(self):
+    def measureTemperatureAllPeople(self):
         time.sleep(1)
         while (self.MODE == 'NORMAL'):
             try:
@@ -170,19 +170,42 @@ class DeviceAppFunctions():
                 rects_measurement = self.faceDetectTemp.detectFaces(self.rgb_temp, 35)
                 objects_measurement, _ = ct_temp.update(rects_measurement,rgb_ori,RGB_SCALE)
 
-                for (objectID, obj) in self.objects.items():
+                for (objectID, obj) in list(self.objects.items()):
                     obj.have_mask = self.landmarkDetect.faceMaskDetected(obj.face_rgb)
 
                 measureTemperature(self.color, temp, self.objects, objects_measurement,  RGB_SCALE)
                 
                               
             except Exception as identifier:
-                print('181  ' + identifier)
+                print(identifier)
             time.sleep(TIME_MEASURE_TEMP)
-            
 
 
-    def send_pics_for_rec(self, personID):
+    def sendRecordsInfo(self, DeletedObjects):
+        for (objectID, obj) in DeletedObjects.items():
+            _, buffer = cv2.imencode('.jpg', cv2.resize(obj.face_rgb,(FACE_SIZE,FACE_SIZE)))
+            pic_str = base64.b64encode(buffer)
+            pic_str = pic_str.decode()
+
+            if (ENABLE_SENDING_TO_CLOUD):
+                self.conn.sendRecord(BUILDING_ID, obj.id, obj.name, obj.record_temperature, pic_str)
+
+
+    def drawInfoOnFrameAndCheckRecognize( self, rects):
+        for (objectID, obj) in self.objects.items():
+            text = "ID {}".format(objectID)
+            centroid = obj.coor        
+            y = centroid[1] - 10 if centroid[1] - 10 > 10 else centroid[1] + 10
+            center = self.centroidDetect(centroid[0], centroid[1], centroid[2]-centroid[0], centroid[3]-centroid[1])
+            cv2.putText(self.frame, text + obj.name, (center[0] - 10, center[1] - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+            cv2.circle(self.frame, (center[0], center[1]), 4, (0, 255, 0), -1) 
+            cv2.putText(self.frame, str(obj.temperature), (centroid[0], y), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+            if not obj.sending_recs_img:
+                print('start sending msg')
+                Thread(target=self.sendImageForRec, args=(objectID,),daemon=True).start()
+                obj.sending_recs_img = True
+    
+    def sendImageForRec(self, personID):
         while personID in self.objects and self.MODE == 'NORMAL':
             try:
                 _, buffer = cv2.imencode('.jpg', cv2.resize(self.objects[personID].face_rgb, (FACE_SIZE,FACE_SIZE)))
@@ -190,35 +213,13 @@ class DeviceAppFunctions():
                 pic_str = pic_str.decode()
 
                 if (ENABLE_SENDING_TO_CLOUD):
-                    self.conn.message_sending(BUILDING_ID ,DEVICE_ID, personID, pic_str)
+                    self.conn.messageSending(BUILDING_ID ,DEVICE_ID, personID, pic_str)
                     
                 time.sleep(TIME_SEND_REC)
             except Exception as identifier:
                 pass
 
-
-    def send_records(self, DeletedObjects):
-        for (objectID, obj) in DeletedObjects.items():
-            _, buffer = cv2.imencode('.jpg', cv2.resize(obj.face_rgb,(FACE_SIZE,FACE_SIZE)))
-            pic_str = base64.b64encode(buffer)
-            pic_str = pic_str.decode()
-
-            if (ENABLE_SENDING_TO_CLOUD):
-                self.conn.send_record(BUILDING_ID, obj.id, obj.name, obj.record_temperature, pic_str)
-
-
-    def drawInfoOnFrame( self, rects):
-        for (objectID, obj) in self.objects.items():
-            text = "ID {}".format(objectID)
-            centroid = obj.coor        
-            y = centroid[1] - 10 if centroid[1] - 10 > 10 else centroid[1] + 10
-            center = self.centroid_detect(centroid[0], centroid[1], centroid[2]-centroid[0], centroid[3]-centroid[1])
-            cv2.putText(self.frame, text + obj.name, (center[0] - 10, center[1] - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
-            cv2.circle(self.frame, (center[0], center[1]), 4, (0, 255, 0), -1) 
-            cv2.putText(self.frame, str(obj.temperature), (centroid[0], y), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
-
-    
-    def centroid_detect(self, x, y, w, h):
+    def centroidDetect(self, x, y, w, h):
         x1 = int(w/2)
         y1 = int(h/2)
         cx = x + x1
@@ -228,30 +229,29 @@ class DeviceAppFunctions():
     def getMode(self):
         return self.MODE
 
-    def get_rgb_frame(self):
+    def getRgbFrame(self):
         return self.displayFrame
 
-    def get_thermal_frame(self):
+    def getThermalFrame(self):
         return self.color
 
-    def get_records(self):
+    def getRecordsInfo(self):
         return self.deletedObject
 
-    def select_register_mode(self):
+    def selectRegisterMode(self):
         self.store_registered_imgs = None
         self.MODE = 'REGISTER'
         self.register = CaptureRegisterFace(NUM_FRONT_PICS,NUM_LEFT_PICS,NUM_RIGHT_PICS, LEFT_THRESHOLD, RIGHT_THRESHOLD, FRONT_RANGE, STACK_NUMBER, FRAMES_BETWEEN_CAP)
 
-    def select_normal_mode(self):
-        self.init_object_tracking()
-        # self.init_model()
+    def selectNormalMode(self):
+        self.initObjectTracking()
         self.measureTemp.join()
-        self.measureTemp = Thread(target=self.measure_thread, daemon=True)
+        self.measureTemp = Thread(target=self.measureTemperatureAllPeople, daemon=True)
         self.measureTemp.start()
         self.MODE = 'NORMAL'
-        self.conn.restart_listener(self.objects)
+        self.conn.restartListener(self.objects)
 
-    def send_registered_info_to_server(self, name_of_new_user):
+    def sendRegisteredInfoToServer(self, name_of_new_user):
         if (self.store_registered_imgs is not None and ENABLE_SENDING_TO_CLOUD):
             Thread(target=self.conn.registerToAzure, args=(BUILDING_ID ,name_of_new_user, self.store_registered_imgs, FACE_SIZE, ), daemon=True).start()
         self.store_registered_imgs = None

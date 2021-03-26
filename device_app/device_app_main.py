@@ -60,12 +60,12 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.timerRGB = QtCore.QTimer()
         self.timerRGB.setTimerType(QtCore.Qt.PreciseTimer)
-        self.timerRGB.timeout.connect(self.display_main_frame)
+        self.timerRGB.timeout.connect(self.displayMainFrame)
         self.timerRGB.start(20)
 
         self.timerThermal = QtCore.QTimer()
         self.timerThermal.setTimerType(QtCore.Qt.PreciseTimer)
-        self.timerThermal.timeout.connect(self.display_thermal_frame)
+        self.timerThermal.timeout.connect(self.displayThermalFrame)
         self.timerThermal.start(1000)
 
         self.btn_home.clicked.connect(self.Button)
@@ -85,7 +85,7 @@ class MainWindow(QtWidgets.QMainWindow):
         status = self.deviceFuntion.process()
         if (status == "REGISTER_SUCCESS"):
             self.finishedFaceRegistrationStyle(self.face_right)
-            self.create_input_name_dialog()
+            self.createInputNameDialog()
         elif (status == "REGISTER_DONE_LEFT"):
             self.finishedFaceRegistrationStyle(self.face_left)
         elif (status == "REGISTER_DONE_FRONT"):
@@ -93,7 +93,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
     #Handle status of working process
     def handleRecordsAndNotis(self):
-        records = self.deviceFuntion.get_records()
+        records = self.deviceFuntion.getRecordsInfo()
         for (objectID, obj) in records.items():
             current_time = datetime.now().strftime("%d-%m|%H:%M:%S")
             self.addRecords(current_time, str(objectID) + '-' + obj.name, obj.record_temperature)
@@ -109,28 +109,27 @@ class MainWindow(QtWidgets.QMainWindow):
         app.quit()
 
     #Display main frame into rgb frame in homepage and register page
-    def display_main_frame(self):
-        frame = self.deviceFuntion.get_rgb_frame()
+    def displayMainFrame(self):
+        frame = self.deviceFuntion.getRgbFrame()
         height, width, _ = frame.shape
         qimg = QtGui.QImage(frame.data, width, height, 3*width, QtGui.QImage.Format_RGB888).rgbSwapped()
         self.main_display_monitor.setPixmap(QtGui.QPixmap(qimg))
 
     #Display thermal frame in homepage
-    def display_thermal_frame(self):
-        frame = self.deviceFuntion.get_thermal_frame()
+    def displayThermalFrame(self):
+        frame = self.deviceFuntion.getThermalFrame()
         frame = cv2.resize(frame, (self.thremal_frame.width(),self.thremal_frame.height()))
         height, width, _ = frame.shape
         qimg = QtGui.QImage(frame.data, width, height, 3*width, QtGui.QImage.Format_RGB888).rgbSwapped()
         self.thremal_frame.setPixmap(QtGui.QPixmap(qimg))
 
     #Create an input dialog to input person's info when finish face register
-    def create_input_name_dialog(self):
+    def createInputNameDialog(self):
         keyboard.Show()
         self.dlg = InputDlg(self)
-        self.dlg.accepted.connect(self.accept_input_register_name)
-        self.dlg.rejected.connect(self.cancel_input_register_name)
+        self.dlg.accepted.connect(self.acceptInputRegisterName)
+        self.dlg.rejected.connect(self.cancelInputRegisterName)
         self.dlg.exec()
-        self.name_edit.setFocus()
     
     # Change color of the face register state
     def finishedFaceRegistrationStyle(self, label_of_face):
@@ -143,7 +142,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.resetStyleBtn("btn_home")
         self.btn_home.setStyleSheet(self.selectMenu(self.btn_home.styleSheet()))
         if (self.deviceFuntion.getMode() != 'NORMAL'):
-            self.deviceFuntion.select_normal_mode() 
+            self.deviceFuntion.selectNormalMode() 
 
     # Switch to register mode
     def selectRegisterMode(self):
@@ -155,7 +154,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.resetStyleBtn("btn_new_user")
         self.btn_new_user.setStyleSheet(self.selectMenu(self.btn_new_user.styleSheet()))
         if (self.deviceFuntion.getMode() != 'REGISTER'):
-            self.deviceFuntion.select_register_mode() 
+            self.deviceFuntion.selectRegisterMode() 
         
 
     # Add notification when someone got fever or does not wear mask
@@ -201,13 +200,13 @@ class MainWindow(QtWidgets.QMainWindow):
     """
     
     #Ok button when input register name
-    def accept_input_register_name(self):
+    def acceptInputRegisterName(self):
         keyboard.Hide()
         self.selectNormalMode()
-        self.deviceFuntion.send_registered_info_to_server(self.dlg.name_edit.text())
+        self.deviceFuntion.sendRegisteredInfoToServer(self.dlg.name_edit.text())
 
     #Cancel button when input register name
-    def cancel_input_register_name(self):
+    def cancelInputRegisterName(self):
         keyboard.Hide()
         self.selectRegisterMode()
 

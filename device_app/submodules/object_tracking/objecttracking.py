@@ -17,6 +17,7 @@ class ObjectInfo():
 		self.temp_stacks = []
 		self.max_temp_stack = max_temp_stack
 		self.fever_temp = fever_temp
+		self.sending_recs_img = False
 	
 	def updateNameAndId(self, name, id):
 		self.rec_stacks.append((name, id))

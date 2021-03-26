@@ -22,16 +22,16 @@ class IotConn:
         self.client = IoTHubDeviceClient.create_from_connection_string(connStringDevice)
         self.blob_service_client = BlobServiceClient.from_connection_string(connStringBlob)
         self.mode = mode
-        self.thread = Thread(target=self.message_listener, args=(self.client, objects,))
+        self.thread = Thread(target=self.messageListener, args=(self.client, objects,))
         self.thread.daemon = True
         self.thread.start()
 
-    def restart_listener(self, objects):
-        self.thread = Thread(target=self.message_listener, args=(self.client, objects,))
+    def restartListener(self, objects):
+        self.thread = Thread(target=self.messageListener, args=(self.client, objects,))
         self.thread.daemon = True
         self.thread.start()
 
-    def message_listener(self, client, objects):
+    def messageListener(self, client, objects):
         print("Start listening to server")
         while (self.mode == 'NORMAL'): 
             message = client.receive_message()
@@ -40,7 +40,7 @@ class IotConn:
             if int(json_data['trackingId']) in objects:
                 objects[int(json_data['trackingId'])].updateNameAndId(str(json_data['personName']), str(json_data['personId']))
 
-    def message_sending(self, buildingId, deviceId, trackingId, face_img):
+    def messageSending(self, buildingId, deviceId, trackingId, face_img):
         message = MSG_REC.format(buildingId=buildingId, deviceId=deviceId, trackingId=trackingId, face=face_img)
         message_object = Message(message)
         message_object.custom_properties["level"] = "recognize"
@@ -48,7 +48,7 @@ class IotConn:
         self.client.send_message(message_object)
         print( "Message sent" ) 
 
-    def send_record(self, buildingId, personID, name, temperature, face):
+    def sendRecord(self, buildingId, personID, name, temperature, face):
         message = MSG_RECORD.format(buildingId=buildingId, personID=personID, personName=name, temperature=temperature, face=face)
         message_object = Message(message)
         message_object.custom_properties["level"] = "store"
