@@ -50,6 +50,7 @@ color: rgb(210, 210, 210);</string>
     </property>
     <property name="styleSheet">
      <string notr="true">background-color: rgb(75, 79, 87);
+     background-color: rgb(226, 255, 241);
 
 </string>
     </property>

@@ -2,8 +2,8 @@ buildingId: 1
 deviceId: 'test-device'
 
 periodTime:
-    measureTemp: 0.7
-    sendRecMess: 2
+    measureTemp: 0.6
+    sendRecMess: 1.5
 
 iotHub:
     connectionStringDevice: "HostName=thesis-hub.azure-devices.net;DeviceId=test-device;SharedAccessKey=E/uKH6XK6G2NLCYWQxu26+mrNBKmecm0I4WU2A1FfrY="
@@ -58,9 +58,6 @@ measureTemperature:
     numberMaxThermalPoints: 16
     offsetDistCoeffecient: -0.0000212
     offsetDistIntercept: 1.654018585
-
-display:
-    enableThermalFrame: False
 
 personTracking:
     NoOfDisapearFrames: 30

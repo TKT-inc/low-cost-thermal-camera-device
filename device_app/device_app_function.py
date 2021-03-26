@@ -11,7 +11,6 @@ from submodules.rgb_camera.rgb_camera import RgbCam
 from submodules.thermal_camera.thermal_camera import ThermalCam
 from submodules.face_detection.face_detection import FaceDetection, LightFaceDetection, FaceDetectionLightRfb, LandmarkDetection
 from submodules.object_tracking.objecttracking import CentroidTracker
-from submodules.object_tracking.Tracker import TrackableObject
 from submodules.measure_temperature.measure_temperature import measureTemperature
 from submodules.iot_hub.iot_conn import IotConn
 from submodules.capture_register.capture_register import CaptureRegisterFace
@@ -44,9 +43,6 @@ ONNX_SLIM320 = cfg['faceDetection']['onnxSlim320']
 FACE_SIZE = cfg['faceDetection']['faceSize']
 LANDMARK_MODEL = cfg['faceDetection']['landmarkDetectionModel']
 
-# Set up mapping param between 2 cameras
-H_MATRIX = cfg['transMatrix']
-
 # Set up time params
 TIME_MEASURE_TEMP = cfg['periodTime']['measureTemp']
 TIME_SEND_REC = cfg['periodTime']['sendRecMess']
@@ -68,14 +64,7 @@ FRONT_RANGE = cfg['registration']['frontRange']
 FRAMES_BETWEEN_CAP = cfg['registration']['frameBetweenCapture']
 
 # Flags of mode
-ENABLE_SHOW_THERMAL_FRAME = cfg['display']['enableThermalFrame']
 ENABLE_SENDING_TO_CLOUD = cfg['iotHub']['enableSending']
-
-#setup offset temperature
-OFFSET_TEMPERATURE_USER = cfg['measureTemperature']['offsetTemperature']
-NUMBER_MAX_THERMAL_POINTS = cfg['measureTemperature']['numberMaxThermalPoints']
-OFFSET_TEMPERATURE_DIST_COEF = cfg['measureTemperature']['offsetDistCoeffecient']
-OFFSET_TEMPERATURE_DIST_INT = cfg['measureTemperature']['offsetDistIntercept']
 
 #setup threshold of face mask detection
 FACEMASK_DETECTION_THRESHOLD = cfg['thresholdFaceMaskDetection']
@@ -117,7 +106,7 @@ class DeviceAppFunctions():
 
     def init_object_tracking(self):
         self.ct = CentroidTracker(MAX_DISAPEARED_FRAMES, BUFFER_NAME_ID, BUFFER_TEMP, THRESHOLD_TEMP_FEVER)
-        self.trackableObjects = {}
+        # self.trackableObjects = {}
         self.objects, _ = self.ct.update([],[],RGB_SCALE)
 
 
@@ -137,7 +126,7 @@ class DeviceAppFunctions():
                 Thread(target=self.send_records, args=(self.deletedObject, ),daemon=True).start()
                 print("send records")
                 
-            self.face_checking(rects)
+            self.drawInfoOnFrame(rects)
             
         elif (self.MODE == 'REGISTER'):
             if (len(rects) == 1):
@@ -151,6 +140,11 @@ class DeviceAppFunctions():
 
                 self.displayFrame = self.frame
                 return status
+        elif (self.MODE == 'CALIBRATING'):
+            # self.objects, self.deletedObject = self.ct.update(rects, self.ori, RGB_SCALE)
+            # if (self.objects.items):
+            time.sleep(0.1)
+
         elif (self.MODE == 'WAITING'):
             time.sleep(0.1)
 
@@ -179,11 +173,11 @@ class DeviceAppFunctions():
                 for (objectID, obj) in self.objects.items():
                     obj.have_mask = self.landmarkDetect.faceMaskDetected(obj.face_rgb)
 
-                measureTemperature(self.color, temp, self.objects, objects_measurement, H_MATRIX, OFFSET_TEMPERATURE_USER, NUMBER_MAX_THERMAL_POINTS ,OFFSET_TEMPERATURE_DIST_COEF, OFFSET_TEMPERATURE_DIST_INT, RGB_SCALE)
+                measureTemperature(self.color, temp, self.objects, objects_measurement,  RGB_SCALE)
                 
                               
             except Exception as identifier:
-                print(identifier)
+                print('181  ' + identifier)
             time.sleep(TIME_MEASURE_TEMP)
             
 
@@ -213,29 +207,15 @@ class DeviceAppFunctions():
                 self.conn.send_record(BUILDING_ID, obj.id, obj.name, obj.record_temperature, pic_str)
 
 
-    def face_checking( self, rects):
+    def drawInfoOnFrame( self, rects):
         for (objectID, obj) in self.objects.items():
             text = "ID {}".format(objectID)
             centroid = obj.coor        
             y = centroid[1] - 10 if centroid[1] - 10 > 10 else centroid[1] + 10
             center = self.centroid_detect(centroid[0], centroid[1], centroid[2]-centroid[0], centroid[3]-centroid[1])
-
-            if objectID in self.objects:
-                cv2.putText(self.frame, text + obj.name, (center[0] - 10, center[1] - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
-            else:
-                cv2.putText(self.frame, text, (center[0] - 10, center[1] - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+            cv2.putText(self.frame, text + obj.name, (center[0] - 10, center[1] - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
             cv2.circle(self.frame, (center[0], center[1]), 4, (0, 255, 0), -1) 
-            to = self.trackableObjects.get(objectID, None)
-
-            # if there is no existing trackable object, create one
-            if to is None:
-                to = TrackableObject(objectID, centroid)
-                Thread(target=self.send_pics_for_rec, args=(objectID,),daemon=True).start()
-            elif (not to.counted):
-                to.counted = True
-
             cv2.putText(self.frame, str(obj.temperature), (centroid[0], y), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
-            self.trackableObjects[objectID] = to
 
     
     def centroid_detect(self, x, y, w, h):
