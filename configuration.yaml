@@ -64,3 +64,5 @@ personTracking:
     bufSizeTempPersonTracking: 6
     bufSizeNameAndIdPersonTracking: 3
     thresholdTempOfFever: 38
+
+calibrationTimeForUser: 5

@@ -72,6 +72,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.btn_new_user.clicked.connect(self.Button)
         self.btn_info.clicked.connect(self.Button)
         self.register_button.clicked.connect(self.Button)
+        self.btn_calib.clicked.connect(self.Button)
 
     def startLoginWindow(self):
 
@@ -90,6 +91,10 @@ class MainWindow(QtWidgets.QMainWindow):
             self.finishedFaceRegistrationStyle(self.face_left)
         elif (status == "REGISTER_DONE_FRONT"):
             self.finishedFaceRegistrationStyle(self.face_front)
+        elif (status == "CALIBRATE_TOO_MUCH_PEOPLE"):
+            print('one person please')
+        elif (status == "CALIBRATE_SUCCESS"):
+            self.createInputGroundTruthTemp()
 
     #Handle status of working process
     def handleRecordsAndNotis(self):
@@ -111,6 +116,7 @@ class MainWindow(QtWidgets.QMainWindow):
     #Display main frame into rgb frame in homepage and register page
     def displayMainFrame(self):
         frame = self.deviceFuntion.getRgbFrame()
+        frame = cv2.resize(frame, (self.main_display_monitor.width(),self.main_display_monitor.height()))
         height, width, _ = frame.shape
         qimg = QtGui.QImage(frame.data, width, height, 3*width, QtGui.QImage.Format_RGB888).rgbSwapped()
         self.main_display_monitor.setPixmap(QtGui.QPixmap(qimg))
@@ -126,9 +132,17 @@ class MainWindow(QtWidgets.QMainWindow):
     #Create an input dialog to input person's info when finish face register
     def createInputNameDialog(self):
         keyboard.Show()
-        self.dlg = InputDlg(self)
+        self.dlg = InputNameDlg(self)
         self.dlg.accepted.connect(self.acceptInputRegisterName)
         self.dlg.rejected.connect(self.cancelInputRegisterName)
+        self.dlg.exec()
+
+    # Create an input dialog to input the ground truth temperature
+    def createInputGroundTruthTemp(self):
+        keyboard.Show()
+        self.dlg = InputTempDlg(self)
+        self.dlg.accepted.connect(self.acceptInputTempCalibrate)
+        self.dlg.rejected.connect(self.cancelInputTempCalibrate)
         self.dlg.exec()
     
     # Change color of the face register state
@@ -155,8 +169,16 @@ class MainWindow(QtWidgets.QMainWindow):
         self.btn_new_user.setStyleSheet(self.selectMenu(self.btn_new_user.styleSheet()))
         if (self.deviceFuntion.getMode() != 'REGISTER'):
             self.deviceFuntion.selectRegisterMode() 
-        
 
+    def selectCalibrateMode(self):
+        self.main_display_monitor = self.calibrate_screen
+        self.deviceFuntion.selectCalibrateMode()
+        self.stackedWidget.setCurrentWidget(self.calibrate)
+        self.resetStyleBtn("btn_calib")
+        self.btn_calib.setStyleSheet(self.selectMenu(self.btn_new_user.styleSheet()))
+        btnWidget.setStyleSheet(self.selectMenu(btnWidget.styleSheet()))
+
+        
     # Add notification when someone got fever or does not wear mask
     def addNoti(self, current_time, name, temp=None):
         vbar = self.notifications.verticalScrollBar()
@@ -210,6 +232,17 @@ class MainWindow(QtWidgets.QMainWindow):
         keyboard.Hide()
         self.selectRegisterMode()
 
+    def acceptInputTempCalibrate(self):
+        keyboard.Hide()
+        self.selectNormalMode()
+        status, temp = self.deviceFuntion.createUserTemperatureOffset(self.dlg.temperature_edit.text())
+        print(status)
+        print(temp)
+    
+    def cancelInputTempCalibrate(self):
+        keyboard.Hide()
+        self.selectCalibrateMode()
+
     #Handle all button of the application
     def Button(self):
         # GET BT CLICKED
@@ -230,9 +263,8 @@ class MainWindow(QtWidgets.QMainWindow):
             btnWidget.setStyleSheet(self.selectMenu(btnWidget.styleSheet()))
 
         if btnWidget.objectName() == "btn_calib":
-            self.stackedWidget.setCurrentWidget(self.calibrate)
-            self.resetStyleBtn("btn_calib")
-            btnWidget.setStyleSheet(self.selectMenu(btnWidget.styleSheet()))
+            self.selectCalibrateMode()
+
 
 
     # @QtCore.pyqtSlot("QWidget*", "QWidget*")

@@ -1705,7 +1705,47 @@ border-radius: 20px;	</string>
         </property>
        </widget>
       </widget>
-      <widget class="QWidget" name="calibrate"/>
+      <widget class="QWidget" name="calibrate">
+       <widget class="QLabel" name="calibrate_screen">
+        <property name="geometry">
+         <rect>
+          <x>80</x>
+          <y>110</y>
+          <width>1061</width>
+          <height>601</height>
+         </rect>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">background-color: rgb(197, 255, 231);</string>
+        </property>
+        <property name="text">
+         <string>TextLabel</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label_9">
+        <property name="geometry">
+         <rect>
+          <x>390</x>
+          <y>40</y>
+          <width>481</width>
+          <height>51</height>
+         </rect>
+        </property>
+        <property name="font">
+         <font>
+          <pointsize>28</pointsize>
+          <weight>75</weight>
+          <bold>true</bold>
+         </font>
+        </property>
+        <property name="text">
+         <string>Calibrating temperature</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+       </widget>
+      </widget>
       <widget class="QWidget" name="product_info">
        <widget class="QLabel" name="label_3">
         <property name="geometry">
