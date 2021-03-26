@@ -2,7 +2,7 @@ import numpy as np
 import cv2 as cv
 import math
 import yaml
-with open("configuration.yaml") as ymlfile:
+with open("../configuration.yaml") as ymlfile:
     cfg = yaml.safe_load(ymlfile)
 from pylepton import Lepton
 
@@ -137,7 +137,10 @@ while (1):
         k = cv.waitKey(1) & 0xFF
         if k == ord('q'):
             print('create plan view')
-            get_plan_view(src_list, dst_list)
+            #get_plan_view(src_list, dst_list)
+            cv.imwrite("thermal-map.png", thermal_frame)
+            cv.imwrite("rgb-map.png", rgb_ori)
+            print("Complete")
             cv.destroyAllWindows()
             break
     except Exception as identifier:
