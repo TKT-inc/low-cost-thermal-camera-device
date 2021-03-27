@@ -68,11 +68,14 @@ class MainWindow(QtWidgets.QMainWindow):
         self.timerThermal.timeout.connect(self.displayThermalFrame)
         self.timerThermal.start(1000)
 
-        self.btn_home.clicked.connect(self.Button)
-        self.btn_new_user.clicked.connect(self.Button)
-        self.btn_info.clicked.connect(self.Button)
-        self.register_button.clicked.connect(self.Button)
-        self.btn_calib.clicked.connect(self.Button)
+        self.btn_home.clicked.connect(self.button)
+        self.btn_new_user.clicked.connect(self.button)
+        self.btn_info.clicked.connect(self.button)
+        self.register_button.clicked.connect(self.button)
+        self.btn_calib.clicked.connect(self.button)
+        self.settings.clicked.connect(self.button)
+
+        self.temp_slider.valueChanged.connect(self.tempSliderValueHandle)
 
     def startLoginWindow(self):
 
@@ -175,10 +178,16 @@ class MainWindow(QtWidgets.QMainWindow):
         self.deviceFuntion.selectCalibrateMode()
         self.stackedWidget.setCurrentWidget(self.calibrate)
         self.resetStyleBtn("btn_calib")
-        self.btn_calib.setStyleSheet(self.selectMenu(self.btn_new_user.styleSheet()))
+        self.btn_calib.setStyleSheet(self.selectMenu(self.btn_calib.styleSheet()))
         if (self.deviceFuntion.getMode() != 'CALIBRATE'):
             self.deviceFuntion.selectRegisterMode() 
 
+    def selectSettingMode(self):
+        if (self.deviceFuntion.getMode() != 'NORMAL'):
+            self.deviceFuntion.selectNormalMode()
+        self.stackedWidget.setCurrentWidget(self.setting)
+        self.resetStyleBtn("settings")
+        self.settings.setStyleSheet(self.selectMenu(self.settings.styleSheet()))
         
     # Add notification when someone got fever or does not wear mask
     def addNoti(self, current_time, name, temp=None):
@@ -244,10 +253,17 @@ class MainWindow(QtWidgets.QMainWindow):
         keyboard.Hide()
         self.selectCalibrateMode()
 
+    #Handle all slider
+    def tempSliderValueHandle(self, value):
+        temp = self.temp_slider.value()
+        temp = str(float(temp/100)) + 'oC'
+        self.temp_label.setText(temp)
+
     #Handle all button of the application
-    def Button(self):
+    def button(self):
         # GET BT CLICKED
         btnWidget = self.sender()
+
 
         # PAGE HOME
         if btnWidget.objectName() == "btn_home":
@@ -257,15 +273,18 @@ class MainWindow(QtWidgets.QMainWindow):
         if btnWidget.objectName() == "btn_new_user" or btnWidget.objectName() == "register_button":
             self.selectRegisterMode()
 
+        # PAGE FOR CALIBRATION
+        if btnWidget.objectName() == "btn_calib":
+            self.selectCalibrateMode()
+
         # PAGE INFO
         if btnWidget.objectName() == "btn_info":
             self.stackedWidget.setCurrentWidget(self.product_info)
             self.resetStyleBtn("btn_info")
             btnWidget.setStyleSheet(self.selectMenu(btnWidget.styleSheet()))
 
-        if btnWidget.objectName() == "btn_calib":
-            self.selectCalibrateMode()
-
+        if btnWidget.objectName() == "settings":
+            self.selectSettingMode()        
 
 
     # @QtCore.pyqtSlot("QWidget*", "QWidget*")
