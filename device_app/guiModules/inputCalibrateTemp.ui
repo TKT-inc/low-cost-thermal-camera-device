@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>Dialog</class>
+ <widget class="QDialog" name="Dialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>400</width>
+    <height>236</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Dialog</string>
+  </property>
+  <property name="styleSheet">
+   <string notr="true">background-color: rgb(135,139,157);</string>
+  </property>
+  <widget class="QLabel" name="name">
+   <property name="geometry">
+    <rect>
+     <x>80</x>
+     <y>10</y>
+     <width>231</width>
+     <height>71</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>16</pointsize>
+    </font>
+   </property>
+   <property name="text">
+    <string>Temperature measured by other device</string>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignCenter</set>
+   </property>
+   <property name="wordWrap">
+    <bool>true</bool>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="temperature_edit">
+   <property name="geometry">
+    <rect>
+     <x>80</x>
+     <y>90</y>
+     <width>231</width>
+     <height>51</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">background-color: rgb(255, 255, 255);
+border: 2px solid rgb(200, 200, 200);
+border-radius: 20px;	</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="ok_btn">
+   <property name="geometry">
+    <rect>
+     <x>40</x>
+     <y>170</y>
+     <width>150</width>
+     <height>41</height>
+    </rect>
+   </property>
+   <property name="minimumSize">
+    <size>
+     <width>150</width>
+     <height>30</height>
+    </size>
+   </property>
+   <property name="font">
+    <font>
+     <family>Segoe UI</family>
+     <pointsize>12</pointsize>
+    </font>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">QPushButton {
+	border: 2px solid rgb(200, 200, 200);
+	border-radius: 20px;	
+	background-color: rgb(82, 89, 102);
+}
+QPushButton:hover {
+	background-color: rgb(77, 85, 90);
+	border: 2px solid rgb(61, 70, 86);
+}
+QPushButton:pressed {	
+	background-color: rgb(35, 40, 49);
+	border: 2px solid rgb(43, 50, 61);
+}</string>
+   </property>
+   <property name="text">
+    <string>OK</string>
+   </property>
+   <property name="icon">
+    <iconset>
+     <normaloff>../../thesis-device-app/device_app/guiModules/icons/20x20/cil-check.png</normaloff>../../thesis-device-app/device_app/guiModules/icons/20x20/cil-check.png</iconset>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="cancel_btn">
+   <property name="geometry">
+    <rect>
+     <x>210</x>
+     <y>170</y>
+     <width>150</width>
+     <height>41</height>
+    </rect>
+   </property>
+   <property name="minimumSize">
+    <size>
+     <width>150</width>
+     <height>30</height>
+    </size>
+   </property>
+   <property name="font">
+    <font>
+     <family>Segoe UI</family>
+     <pointsize>12</pointsize>
+    </font>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">QPushButton {
+	border: 2px solid rgb(200, 200, 200);
+	border-radius: 20px;	
+	background-color: rgb(82, 89, 102);
+}
+QPushButton:hover {
+	background-color: rgb(77, 85, 90);
+	border: 2px solid rgb(61, 70, 86);
+}
+QPushButton:pressed {	
+	background-color: rgb(35, 40, 49);
+	border: 2px solid rgb(43, 50, 61);
+}</string>
+   </property>
+   <property name="text">
+    <string>Cancel</string>
+   </property>
+   <property name="icon">
+    <iconset>
+     <normaloff>../../thesis-device-app/device_app/guiModules/icons/20x20/cil-x-circle.png</normaloff>../../thesis-device-app/device_app/guiModules/icons/20x20/cil-x-circle.png</iconset>
+   </property>
+  </widget>
+ </widget>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>ok_btn</sender>
+   <signal>clicked()</signal>
+   <receiver>Dialog</receiver>
+   <slot>accept()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>114</x>
+     <y>180</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>199</x>
+     <y>110</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cancel_btn</sender>
+   <signal>clicked()</signal>
+   <receiver>Dialog</receiver>
+   <slot>reject()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>284</x>
+     <y>180</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>199</x>
+     <y>110</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>

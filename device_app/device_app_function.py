@@ -6,6 +6,8 @@ import yaml
 import base64
 with open("configuration.yaml") as ymlfile:
     cfg = yaml.safe_load(ymlfile)
+with open("user_settings.yaml") as settings:
+    user_cfg = yaml.safe_load(settings)
 from threading import Thread
 from submodules.rgb_camera.rgb_camera import RgbCam
 from submodules.thermal_camera.thermal_camera import ThermalCam
@@ -17,7 +19,7 @@ from submodules.capture_register.capture_register import CaptureRegisterFace
 
 # Set up device params
 DEVICE_ID = cfg['deviceId']
-BUILDING_ID = cfg['buildingId']
+BUILDING_ID = user_cfg['buildingId']
 
 # Set up azure cloud params 
 CONNECTION_STRING_DEVICE = cfg['iotHub']['connectionStringDevice']
@@ -51,16 +53,16 @@ TIME_SEND_REC = cfg['periodTime']['sendRecMess']
 MAX_DISAPEARED_FRAMES = cfg['personTracking']['NoOfDisapearFrames']
 BUFFER_TEMP = cfg['personTracking']['bufSizeTempPersonTracking']
 BUFFER_NAME_ID = cfg['personTracking']['bufSizeNameAndIdPersonTracking']
-THRESHOLD_TEMP_FEVER = cfg['personTracking']['thresholdTempOfFever']
+THRESHOLD_TEMP_FEVER = user_cfg['feverTemperature']
 
 # Set up registeration params
 NUM_FRONT_PICS = cfg['registration']['numFontPics']
 NUM_LEFT_PICS = cfg['registration']['numLeftPics']
 NUM_RIGHT_PICS = cfg['registration']['numRightPics']
 STACK_NUMBER = cfg['registration']['stackNumberPics']
-LEFT_THRESHOLD = cfg['registration']['leftThreshold']
-RIGHT_THRESHOLD = cfg['registration']['rightThreshold']
-FRONT_RANGE = cfg['registration']['frontRange']
+LEFT_THRESHOLD = user_cfg['registration']['leftThreshold']
+RIGHT_THRESHOLD = user_cfg['registration']['rightThreshold']
+FRONT_RANGE = user_cfg['registration']['frontRange']
 FRAMES_BETWEEN_CAP = cfg['registration']['frameBetweenCapture']
 
 # Flags of mode
@@ -68,6 +70,12 @@ ENABLE_SENDING_TO_CLOUD = cfg['iotHub']['enableSending']
 
 #setup threshold of face mask detection
 FACEMASK_DETECTION_THRESHOLD = cfg['thresholdFaceMaskDetection']
+
+#setup calibration params
+CALIBRATE_TIME = user_cfg['calibrationTimeForUser']
+
+# user offset
+USER_TEMP_OFFSET = user_cfg['offsetTemperature']
 
 
 class DeviceAppFunctions():
@@ -119,7 +127,7 @@ class DeviceAppFunctions():
         self.frame, self.ori = self.rgb.getFrame()
         rects = self.faceDetect.detectFaces(self.frame)
 
-        if (self.MODE == 'NORMAL'):
+        if (self.MODE == 'NORMAL' or self.MODE == 'CALIBRATE'):
             self.objects, self.deletedObject = self.ct.update(rects, self.ori, RGB_SCALE)
             
             if (self.deletedObject):
@@ -140,27 +148,35 @@ class DeviceAppFunctions():
 
                 self.displayFrame = self.frame
                 return status
-        elif (self.MODE == 'CALIBRATING'):
-            # self.objects, self.deletedObject = self.ct.update(rects, self.ori, RGB_SCALE)
-            # if (self.objects.items):
-            time.sleep(0.1)
 
         elif (self.MODE == 'WAITING'):
             time.sleep(0.1)
 
+        self.displayFrame = self.frame
+
+        if (self.MODE == 'CALIBRATE'):
+            if (len(self.objects.items()) == 1):
+                if (self.calibrate_person_ID != list(self.objects.items())[0][0]):
+                    self.calibrate_time = time.time()
+                    self.calibrate_person_ID =  list(self.objects.items())[0][0]
+                    print ('reset' )
+                elif (time.time() - self.calibrate_time > CALIBRATE_TIME):
+                    self.camera_input_calibrate_temp = list(self.objects.items())[0][1].record_temperature
+                    return 'CALIBRATE_SUCCESS'
+            return 'CALIBRATE_TOO_MUCH_PEOPLE'
 
         # print('time frame: {:.5f}'.format(time.time() - start))
-        self.displayFrame = self.frame
+        
         return "NORMAL"
 
     def measureTemperatureAllPeople(self):
         time.sleep(1)
-        while (self.MODE == 'NORMAL'):
+        while (self.MODE == 'NORMAL' or self.MODE == 'CALIBRATE'):
             try:
                 objects_measurement = self.objects
                 ct_temp = self.ct
+                self.rgb_temp, rgb_ori = self.rgb.getCurrentFrame()
                 self.lep.update()
-                self.rgb_temp, rgb_ori = self.rgb.getFrame()
                 thermal, temp = self.lep.getFrame()
                 raw = thermal
 
@@ -173,7 +189,7 @@ class DeviceAppFunctions():
                 for (objectID, obj) in list(self.objects.items()):
                     obj.have_mask = self.landmarkDetect.faceMaskDetected(obj.face_rgb)
 
-                measureTemperature(self.color, temp, self.objects, objects_measurement,  RGB_SCALE)
+                measureTemperature(self.color, temp, self.objects, objects_measurement, USER_TEMP_OFFSET, RGB_SCALE)
                 
                               
             except Exception as identifier:
@@ -206,7 +222,7 @@ class DeviceAppFunctions():
                 obj.sending_recs_img = True
     
     def sendImageForRec(self, personID):
-        while personID in self.objects and self.MODE == 'NORMAL':
+        while personID in self.objects and (self.MODE == 'NORMAL' or self.MODE == 'CALIBRATE'):
             try:
                 _, buffer = cv2.imencode('.jpg', cv2.resize(self.objects[personID].face_rgb, (FACE_SIZE,FACE_SIZE)))
                 pic_str = base64.b64encode(buffer)
@@ -237,7 +253,7 @@ class DeviceAppFunctions():
 
     def getRecordsInfo(self):
         return self.deletedObject
-
+    
     def selectRegisterMode(self):
         self.store_registered_imgs = None
         self.MODE = 'REGISTER'
@@ -245,11 +261,26 @@ class DeviceAppFunctions():
 
     def selectNormalMode(self):
         self.initObjectTracking()
-        self.measureTemp.join()
-        self.measureTemp = Thread(target=self.measureTemperatureAllPeople, daemon=True)
-        self.measureTemp.start()
+        if (self.MODE != 'CALIBRATE'):
+            self.measureTemp.join()
+            self.measureTemp = Thread(target=self.measureTemperatureAllPeople, daemon=True)
+            self.measureTemp.start()
         self.MODE = 'NORMAL'
         self.conn.restartListener(self.objects)
+    
+    def selectCalibrateMode(self):
+        self.calibrate_person_ID = None
+        self.camera_input_calibrate_temp = None
+        self.MODE = 'CALIBRATE'
+
+    def createUserTemperatureOffset(self, ground_truth_temp):
+        global USER_TEMP_OFFSET
+        USER_TEMP_OFFSET = float(ground_truth_temp) - self.camera_input_calibrate_temp
+        user_cfg['offsetTemperature'] = float(USER_TEMP_OFFSET)
+        self.MODE = 'NORMAL'
+        with open("user_settings.yaml", "w") as f:
+            yaml.dump(user_cfg, f)
+        return ground_truth_temp, self.camera_input_calibrate_temp
 
     def sendRegisteredInfoToServer(self, name_of_new_user):
         if (self.store_registered_imgs is not None and ENABLE_SENDING_TO_CLOUD):

@@ -581,54 +581,6 @@ QComboBox QAbstractItemView {
 }
 
 /* SLIDERS */
-QSlider::groove:horizontal {
-    border-radius: 9px;
-    height: 18px;
-	margin: 0px;
-	background-color: rgb(52, 59, 72);
-}
-QSlider::groove:horizontal:hover {
-	background-color: rgb(55, 62, 76);
-}
-QSlider::handle:horizontal {
-    background-color: rgb(85, 170, 255);
-    border: none;
-    height: 18px;
-    width: 18px;
-    margin: 0px;
-	border-radius: 9px;
-}
-QSlider::handle:horizontal:hover {
-    background-color: rgb(105, 180, 255);
-}
-QSlider::handle:horizontal:pressed {
-    background-color: rgb(65, 130, 195);
-}
-
-QSlider::groove:vertical {
-    border-radius: 9px;
-    width: 18px;
-    margin: 0px;
-	background-color: rgb(52, 59, 72);
-}
-QSlider::groove:vertical:hover {
-	background-color: rgb(55, 62, 76);
-}
-QSlider::handle:vertical {
-    background-color: rgb(85, 170, 255);
-	border: none;
-    height: 18px;
-    width: 18px;
-    margin: 0px;
-	border-radius: 9px;
-}
-QSlider::handle:vertical:hover {
-    background-color: rgb(105, 180, 255);
-}
-QSlider::handle:vertical:pressed {
-    background-color: rgb(65, 130, 195);
-}
-
 </string>
      </property>
      <property name="frameShape">
@@ -693,8 +645,8 @@ background-color: rgb(150, 150, 150);</string>
        <widget class="QPushButton" name="register_button">
         <property name="geometry">
          <rect>
-          <x>20</x>
-          <y>50</y>
+          <x>30</x>
+          <y>60</y>
           <width>151</width>
           <height>151</height>
          </rect>
@@ -749,7 +701,7 @@ User</string>
           <x>240</x>
           <y>20</y>
           <width>531</width>
-          <height>211</height>
+          <height>231</height>
          </rect>
         </property>
         <property name="sizePolicy">
@@ -1100,7 +1052,7 @@ QHeaderView::section:vertical
         <property name="geometry">
          <rect>
           <x>860</x>
-          <y>350</y>
+          <y>340</y>
           <width>271</width>
           <height>31</height>
          </rect>
@@ -1153,9 +1105,9 @@ s</string>
         <property name="geometry">
          <rect>
           <x>780</x>
-          <y>440</y>
+          <y>430</y>
           <width>431</width>
-          <height>261</height>
+          <height>271</height>
          </rect>
         </property>
         <property name="sizePolicy">
@@ -1460,7 +1412,7 @@ QHeaderView::section:vertical
          <number>3</number>
         </property>
         <attribute name="horizontalHeaderVisible">
-         <bool>true</bool>
+         <bool>false</bool>
         </attribute>
         <attribute name="horizontalHeaderCascadingSectionResizes">
          <bool>true</bool>
@@ -1527,7 +1479,7 @@ QHeaderView::section:vertical
         <property name="geometry">
          <rect>
           <x>1100</x>
-          <y>400</y>
+          <y>390</y>
           <width>81</width>
           <height>31</height>
          </rect>
@@ -1555,7 +1507,7 @@ border-radius: 10px;</string>
         <property name="geometry">
          <rect>
           <x>920</x>
-          <y>400</y>
+          <y>390</y>
           <width>171</width>
           <height>31</height>
          </rect>
@@ -1583,7 +1535,7 @@ border-radius: 10px;</string>
         <property name="geometry">
          <rect>
           <x>790</x>
-          <y>400</y>
+          <y>390</y>
           <width>121</width>
           <height>31</height>
          </rect>
@@ -1705,7 +1657,47 @@ border-radius: 20px;	</string>
         </property>
        </widget>
       </widget>
-      <widget class="QWidget" name="calibrate"/>
+      <widget class="QWidget" name="calibrate">
+       <widget class="QLabel" name="calibrate_screen">
+        <property name="geometry">
+         <rect>
+          <x>90</x>
+          <y>110</y>
+          <width>1021</width>
+          <height>551</height>
+         </rect>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">background-color: rgb(197, 255, 231);</string>
+        </property>
+        <property name="text">
+         <string>TextLabel</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label_9">
+        <property name="geometry">
+         <rect>
+          <x>370</x>
+          <y>40</y>
+          <width>481</width>
+          <height>51</height>
+         </rect>
+        </property>
+        <property name="font">
+         <font>
+          <pointsize>28</pointsize>
+          <weight>75</weight>
+          <bold>true</bold>
+         </font>
+        </property>
+        <property name="text">
+         <string>Calibrating temperature</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+       </widget>
+      </widget>
       <widget class="QWidget" name="product_info">
        <widget class="QLabel" name="label_3">
         <property name="geometry">
@@ -1720,7 +1712,7 @@ border-radius: 20px;	</string>
          <string/>
         </property>
         <property name="pixmap">
-         <pixmap>./images/logo.png</pixmap>
+         <pixmap>images/logo.png</pixmap>
         </property>
        </widget>
        <widget class="QLabel" name="label_4">
@@ -1786,7 +1778,7 @@ border-radius: 20px;	</string>
        <widget class="QLabel" name="label_7">
         <property name="geometry">
          <rect>
-          <x>510</x>
+          <x>500</x>
           <y>470</y>
           <width>211</width>
           <height>41</height>
@@ -1797,11 +1789,230 @@ border-radius: 20px;	</string>
         </property>
        </widget>
       </widget>
+      <widget class="QWidget" name="setting">
+       <property name="styleSheet">
+        <string notr="true">QSlider::groove:horizontal {
+    border-radius: 9px;
+    height: 18px;
+	margin: 0px;
+	background-color: rgb(52, 59, 72);
+}
+QSlider::groove:horizontal:hover {
+	background-color: rgb(55, 62, 76);
+}
+QSlider::handle:horizontal {
+    background-color: rgb(85, 170, 255);
+    border: none;
+    height: 18px;
+    width: 18px;
+    margin: 0px;
+	border-radius: 9px;
+}
+QSlider::handle:horizontal:hover {
+    background-color: rgb(105, 180, 255);
+}
+QSlider::handle:horizontal:pressed {
+    background-color: rgb(65, 130, 195);
+}
+
+QSlider::groove:vertical {
+    border-radius: 9px;
+    width: 18px;
+    margin: 0px;
+	background-color: rgb(52, 59, 72);
+}
+QSlider::groove:vertical:hover {
+	background-color: rgb(55, 62, 76);
+}
+QSlider::handle:vertical {
+    background-color: rgb(85, 170, 255);
+	border: none;
+    height: 18px;
+    width: 18px;
+    margin: 0px;
+	border-radius: 9px;
+}
+QSlider::handle:vertical:hover {
+    background-color: rgb(105, 180, 255);
+}
+QSlider::handle:vertical:pressed {
+    background-color: rgb(65, 130, 195);
+}</string>
+       </property>
+       <widget class="QFrame" name="frame_2">
+        <property name="geometry">
+         <rect>
+          <x>0</x>
+          <y>0</y>
+          <width>601</width>
+          <height>721</height>
+         </rect>
+        </property>
+        <property name="frameShape">
+         <enum>QFrame::StyledPanel</enum>
+        </property>
+        <property name="frameShadow">
+         <enum>QFrame::Raised</enum>
+        </property>
+        <widget class="QLabel" name="label_10">
+         <property name="geometry">
+          <rect>
+           <x>80</x>
+           <y>30</y>
+           <width>441</width>
+           <height>51</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <pointsize>28</pointsize>
+           <weight>75</weight>
+           <bold>true</bold>
+          </font>
+         </property>
+         <property name="text">
+          <string>Calibration Settings</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+        <widget class="QLabel" name="label_8">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>110</y>
+           <width>361</width>
+           <height>41</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <pointsize>16</pointsize>
+          </font>
+         </property>
+         <property name="text">
+          <string>Setting fever threshold (celcious): </string>
+         </property>
+        </widget>
+        <widget class="QSlider" name="temp_slider">
+         <property name="geometry">
+          <rect>
+           <x>150</x>
+           <y>170</y>
+           <width>401</width>
+           <height>16</height>
+          </rect>
+         </property>
+         <property name="minimum">
+          <number>3700</number>
+         </property>
+         <property name="maximum">
+          <number>4100</number>
+         </property>
+         <property name="pageStep">
+          <number>1</number>
+         </property>
+         <property name="value">
+          <number>3900</number>
+         </property>
+         <property name="tracking">
+          <bool>true</bool>
+         </property>
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="tickPosition">
+          <enum>QSlider::TicksAbove</enum>
+         </property>
+        </widget>
+        <widget class="QLabel" name="temp_label">
+         <property name="geometry">
+          <rect>
+           <x>30</x>
+           <y>160</y>
+           <width>81</width>
+           <height>31</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <pointsize>12</pointsize>
+          </font>
+         </property>
+         <property name="text">
+          <string>TextLabel</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+       </widget>
+       <widget class="QFrame" name="frame_3">
+        <property name="geometry">
+         <rect>
+          <x>600</x>
+          <y>0</y>
+          <width>611</width>
+          <height>721</height>
+         </rect>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">background-color: rgb(95, 99, 107);</string>
+        </property>
+        <property name="frameShape">
+         <enum>QFrame::StyledPanel</enum>
+        </property>
+        <property name="frameShadow">
+         <enum>QFrame::Raised</enum>
+        </property>
+        <widget class="QLabel" name="label_11">
+         <property name="geometry">
+          <rect>
+           <x>90</x>
+           <y>30</y>
+           <width>441</width>
+           <height>51</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <pointsize>28</pointsize>
+           <weight>75</weight>
+           <bold>true</bold>
+          </font>
+         </property>
+         <property name="text">
+          <string>Register Settings</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+       </widget>
+      </widget>
      </widget>
     </widget>
    </widget>
   </widget>
  </widget>
  <resources/>
- <connections/>
+ <connections>
+ <connection>
+   <sender>temp_slider</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>temp_label</receiver>
+   <slot>setNum(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>419</x>
+     <y>175</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>132</x>
+     <y>164</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
 </ui>

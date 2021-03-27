@@ -68,10 +68,14 @@ class MainWindow(QtWidgets.QMainWindow):
         self.timerThermal.timeout.connect(self.displayThermalFrame)
         self.timerThermal.start(1000)
 
-        self.btn_home.clicked.connect(self.Button)
-        self.btn_new_user.clicked.connect(self.Button)
-        self.btn_info.clicked.connect(self.Button)
-        self.register_button.clicked.connect(self.Button)
+        self.btn_home.clicked.connect(self.button)
+        self.btn_new_user.clicked.connect(self.button)
+        self.btn_info.clicked.connect(self.button)
+        self.register_button.clicked.connect(self.button)
+        self.btn_calib.clicked.connect(self.button)
+        self.settings.clicked.connect(self.button)
+
+        self.temp_slider.valueChanged.connect(self.tempSliderValueHandle)
 
     def startLoginWindow(self):
 
@@ -90,6 +94,10 @@ class MainWindow(QtWidgets.QMainWindow):
             self.finishedFaceRegistrationStyle(self.face_left)
         elif (status == "REGISTER_DONE_FRONT"):
             self.finishedFaceRegistrationStyle(self.face_front)
+        elif (status == "CALIBRATE_TOO_MUCH_PEOPLE"):
+            print('one person please')
+        elif (status == "CALIBRATE_SUCCESS"):
+            self.createInputGroundTruthTemp()
 
     #Handle status of working process
     def handleRecordsAndNotis(self):
@@ -111,6 +119,7 @@ class MainWindow(QtWidgets.QMainWindow):
     #Display main frame into rgb frame in homepage and register page
     def displayMainFrame(self):
         frame = self.deviceFuntion.getRgbFrame()
+        frame = cv2.resize(frame, (self.main_display_monitor.width(),self.main_display_monitor.height()))
         height, width, _ = frame.shape
         qimg = QtGui.QImage(frame.data, width, height, 3*width, QtGui.QImage.Format_RGB888).rgbSwapped()
         self.main_display_monitor.setPixmap(QtGui.QPixmap(qimg))
@@ -126,9 +135,17 @@ class MainWindow(QtWidgets.QMainWindow):
     #Create an input dialog to input person's info when finish face register
     def createInputNameDialog(self):
         keyboard.Show()
-        self.dlg = InputDlg(self)
+        self.dlg = InputNameDlg(self)
         self.dlg.accepted.connect(self.acceptInputRegisterName)
         self.dlg.rejected.connect(self.cancelInputRegisterName)
+        self.dlg.exec()
+
+    # Create an input dialog to input the ground truth temperature
+    def createInputGroundTruthTemp(self):
+        keyboard.Show()
+        self.dlg = InputTempDlg(self)
+        self.dlg.accepted.connect(self.acceptInputTempCalibrate)
+        self.dlg.rejected.connect(self.cancelInputTempCalibrate)
         self.dlg.exec()
     
     # Change color of the face register state
@@ -155,8 +172,23 @@ class MainWindow(QtWidgets.QMainWindow):
         self.btn_new_user.setStyleSheet(self.selectMenu(self.btn_new_user.styleSheet()))
         if (self.deviceFuntion.getMode() != 'REGISTER'):
             self.deviceFuntion.selectRegisterMode() 
-        
 
+    def selectCalibrateMode(self):
+        self.main_display_monitor = self.calibrate_screen
+        self.deviceFuntion.selectCalibrateMode()
+        self.stackedWidget.setCurrentWidget(self.calibrate)
+        self.resetStyleBtn("btn_calib")
+        self.btn_calib.setStyleSheet(self.selectMenu(self.btn_calib.styleSheet()))
+        if (self.deviceFuntion.getMode() != 'CALIBRATE'):
+            self.deviceFuntion.selectRegisterMode() 
+
+    def selectSettingMode(self):
+        if (self.deviceFuntion.getMode() != 'NORMAL'):
+            self.deviceFuntion.selectNormalMode()
+        self.stackedWidget.setCurrentWidget(self.setting)
+        self.resetStyleBtn("settings")
+        self.settings.setStyleSheet(self.selectMenu(self.settings.styleSheet()))
+        
     # Add notification when someone got fever or does not wear mask
     def addNoti(self, current_time, name, temp=None):
         vbar = self.notifications.verticalScrollBar()
@@ -164,6 +196,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.notifications.insertRow(self.notifications.rowCount())
 
         self.notifications.setItem(self.notifications.rowCount()-1, 0, QtWidgets.QTableWidgetItem(current_time))
+        self.notifications.item(self.notifications.rowCount()-1, 0).setFont(FONT_OF_TABLE)
 
         if (temp is not None):
             noti = name + " got sick with " + "{:.2f}".format(temp) + " oC"
@@ -171,6 +204,7 @@ class MainWindow(QtWidgets.QMainWindow):
             noti = name + " plase wear MASK!"
 
         self.notifications.setItem(self.notifications.rowCount()-1, 1, QtWidgets.QTableWidgetItem(noti))
+        self.notifications.item(self.notifications.rowCount()-1, 1).setFont(FONT_OF_TABLE)
 
         if(_scroll):
             self.notifications.scrollToBottom()
@@ -210,10 +244,26 @@ class MainWindow(QtWidgets.QMainWindow):
         keyboard.Hide()
         self.selectRegisterMode()
 
+    def acceptInputTempCalibrate(self):
+        keyboard.Hide()
+        self.selectNormalMode()
+        status, temp = self.deviceFuntion.createUserTemperatureOffset(self.dlg.temperature_edit.text())
+    
+    def cancelInputTempCalibrate(self):
+        keyboard.Hide()
+        self.selectCalibrateMode()
+
+    #Handle all slider
+    def tempSliderValueHandle(self, value):
+        temp = self.temp_slider.value()
+        temp = str(float(temp/100)) + 'oC'
+        self.temp_label.setText(temp)
+
     #Handle all button of the application
-    def Button(self):
+    def button(self):
         # GET BT CLICKED
         btnWidget = self.sender()
+
 
         # PAGE HOME
         if btnWidget.objectName() == "btn_home":
@@ -223,16 +273,18 @@ class MainWindow(QtWidgets.QMainWindow):
         if btnWidget.objectName() == "btn_new_user" or btnWidget.objectName() == "register_button":
             self.selectRegisterMode()
 
+        # PAGE FOR CALIBRATION
+        if btnWidget.objectName() == "btn_calib":
+            self.selectCalibrateMode()
+
         # PAGE INFO
         if btnWidget.objectName() == "btn_info":
             self.stackedWidget.setCurrentWidget(self.product_info)
             self.resetStyleBtn("btn_info")
             btnWidget.setStyleSheet(self.selectMenu(btnWidget.styleSheet()))
 
-        if btnWidget.objectName() == "btn_calib":
-            self.stackedWidget.setCurrentWidget(self.calibrate)
-            self.resetStyleBtn("btn_calib")
-            btnWidget.setStyleSheet(self.selectMenu(btnWidget.styleSheet()))
+        if btnWidget.objectName() == "settings":
+            self.selectSettingMode()        
 
 
     # @QtCore.pyqtSlot("QWidget*", "QWidget*")

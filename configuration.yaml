@@ -1,4 +1,3 @@
-buildingId: 1
 deviceId: 'test-device'
 
 periodTime:
@@ -48,13 +47,9 @@ registration:
     numLeftPics: 2
     numRightPics: 2
     stackNumberPics: 6
-    leftThreshold: -18
-    rightThreshold: 15
-    frontRange: 44
     frameBetweenCapture: 3
 
 measureTemperature:
-    offsetTemperature: 3
     numberMaxThermalPoints: 16
     offsetDistCoeffecient: -0.0000212
     offsetDistIntercept: 1.654018585

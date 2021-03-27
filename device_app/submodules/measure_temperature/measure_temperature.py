@@ -10,15 +10,16 @@ with open("configuration.yaml") as ymlfile:
 TRANSFORM_MATRIX = cfg['transMatrix']
 
 #setup offset temperature
-OFFSET_TEMPERATURE_USER = cfg['measureTemperature']['offsetTemperature']
 NUMBER_MAX_THERMAL_POINTS = cfg['measureTemperature']['numberMaxThermalPoints']
 OFFSET_TEMPERATURE_DIST_COEF = cfg['measureTemperature']['offsetDistCoeffecient']
 OFFSET_TEMPERATURE_DIST_INT = cfg['measureTemperature']['offsetDistIntercept']
 # ROTATION_VECTOR = 
 
-def measureTemperature(color,temp, objects, object_measurement, scale):
+def measureTemperature(color,temp, objects, object_measurement, user_offset, scale):
     for (objectID, obj) in list(objects.items()):
         try:
+            if (obj.temporary_dissapear):
+                continue
             coordinates = object_measurement[objectID].coor
             thermal_start_x, thermal_start_y = convertRGBToThermalCoor(coordinates[0], coordinates[1])
             thermal_end_x, thermal_end_y = convertRGBToThermalCoor(coordinates[2], coordinates[3])
@@ -28,9 +29,9 @@ def measureTemperature(color,temp, objects, object_measurement, scale):
             measured_temp = measureTemperatureFromCoor(temp, (thermal_start_x, thermal_start_y), (thermal_end_x, thermal_end_y) )
             
             face_area = (coordinates[2]-coordinates[0])*(coordinates[3]-coordinates[1])*(scale*2)
-            offset_temp = OFFSET_TEMPERATURE_USER +  measureOffsetTempOfDistance(face_area)
-
-            temperature = (measured_temp/100.0) - 273.15 + OFFSET_TEMPERATURE_USER
+            offset_temp = user_offset +  measureOffsetTempOfDistance(face_area)
+            
+            temperature = (measured_temp/100.0) - 273.15 + offset_temp
             objects[objectID].updateTemperature(temperature)
         except Exception as identifier:
             print(identifier)

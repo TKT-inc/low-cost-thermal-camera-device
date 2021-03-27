@@ -18,6 +18,7 @@ class ObjectInfo():
 		self.max_temp_stack = max_temp_stack
 		self.fever_temp = fever_temp
 		self.sending_recs_img = False
+		self.temporary_dissapear = False
 	
 	def updateNameAndId(self, name, id):
 		self.rec_stacks.append((name, id))
@@ -92,6 +93,7 @@ class CentroidTracker():
 			# as disappeared
 			for objectID in list(self.disappeared.keys()):
 				self.disappeared[objectID] += 1
+				self.objects[objectID].temporary_dissapear = True
 				# if we have reached a maximum number of consecutive
 				# frames where a given object has been marked as
 				# missing, deregister it
@@ -171,6 +173,7 @@ class CentroidTracker():
 				# counter
 				objectID = objectIDs[row]
 				self.objects[objectID].coor = rects[col]
+				self.objects[objectID].temporary_dissapear = False
 				face = rgb[int(rects[col][1]*scale):int(rects[col][3]*scale), int(rects[col][0]*scale):int(rects[col][2]*scale)]
 				if (len(face) != 0):
 					self.objects[objectID].face_rgb =  face
@@ -197,6 +200,7 @@ class CentroidTracker():
 					# index and increment the disappeared counter
 					objectID = objectIDs[row]
 					self.disappeared[objectID] += 1
+					self.objects[objectID].temporary_dissapear = True
 
 					# check to see if the number of consecutive
 					# frames the object has been marked "disappeared"
