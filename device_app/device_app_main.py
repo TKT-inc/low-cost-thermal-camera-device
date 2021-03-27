@@ -176,7 +176,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.stackedWidget.setCurrentWidget(self.calibrate)
         self.resetStyleBtn("btn_calib")
         self.btn_calib.setStyleSheet(self.selectMenu(self.btn_new_user.styleSheet()))
-        btnWidget.setStyleSheet(self.selectMenu(btnWidget.styleSheet()))
+        if (self.deviceFuntion.getMode() != 'CALIBRATE'):
+            self.deviceFuntion.selectRegisterMode() 
 
         
     # Add notification when someone got fever or does not wear mask
@@ -238,8 +239,6 @@ class MainWindow(QtWidgets.QMainWindow):
         keyboard.Hide()
         self.selectNormalMode()
         status, temp = self.deviceFuntion.createUserTemperatureOffset(self.dlg.temperature_edit.text())
-        print(status)
-        print(temp)
     
     def cancelInputTempCalibrate(self):
         keyboard.Hide()
