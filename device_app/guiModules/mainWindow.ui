@@ -1941,10 +1941,80 @@ QSlider::handle:vertical:pressed {
           </font>
          </property>
          <property name="text">
-          <string>TextLabel</string>
+          <string>35</string>
          </property>
          <property name="alignment">
           <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+        <widget class="QSlider" name="time_calib_slider">
+         <property name="geometry">
+          <rect>
+           <x>150</x>
+           <y>320</y>
+           <width>401</width>
+           <height>16</height>
+          </rect>
+         </property>
+         <property name="minimum">
+          <number>2</number>
+         </property>
+         <property name="maximum">
+          <number>5</number>
+         </property>
+         <property name="pageStep">
+          <number>1</number>
+         </property>
+         <property name="value">
+          <number>5</number>
+         </property>
+         <property name="tracking">
+          <bool>true</bool>
+         </property>
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="tickPosition">
+          <enum>QSlider::TicksAbove</enum>
+         </property>
+        </widget>
+        <widget class="QLabel" name="time_calib_label">
+         <property name="geometry">
+          <rect>
+           <x>20</x>
+           <y>310</y>
+           <width>101</width>
+           <height>31</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <pointsize>12</pointsize>
+          </font>
+         </property>
+         <property name="text">
+          <string>1</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+        <widget class="QLabel" name="label_12">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>260</y>
+           <width>571</width>
+           <height>41</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <pointsize>16</pointsize>
+          </font>
+         </property>
+         <property name="text">
+          <string>Setting time for measure calibration temperature (second):</string>
          </property>
         </widget>
        </widget>
@@ -1989,6 +2059,58 @@ QSlider::handle:vertical:pressed {
           <set>Qt::AlignCenter</set>
          </property>
         </widget>
+        <widget class="QPushButton" name="save">
+         <property name="geometry">
+          <rect>
+           <x>430</x>
+           <y>640</y>
+           <width>151</width>
+           <height>51</height>
+          </rect>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>150</width>
+           <height>30</height>
+          </size>
+         </property>
+         <property name="font">
+          <font>
+           <family>Segoe UI</family>
+           <pointsize>16</pointsize>
+           <weight>75</weight>
+           <bold>true</bold>
+          </font>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">QPushButton {
+	border: 2px solid rgb(200, 200, 200);
+	border-radius: 20px;	
+	background-color: rgb(82, 89, 102);
+}
+QPushButton:hover {
+	background-color: rgb(77, 85, 90);
+	border: 2px solid rgb(61, 70, 86);
+}
+QPushButton:pressed {	
+	background-color: rgb(35, 40, 49);
+	border: 2px solid rgb(43, 50, 61);
+}</string>
+         </property>
+         <property name="text">
+          <string>   Save</string>
+         </property>
+         <property name="icon">
+          <iconset>
+           <normaloff>icons/24x24/cil-save.png</normaloff>icons/24x24/cil-save.png</iconset>
+         </property>
+         <property name="iconSize">
+          <size>
+           <width>24</width>
+           <height>24</height>
+          </size>
+         </property>
+        </widget>
        </widget>
       </widget>
      </widget>
@@ -1997,22 +2119,5 @@ QSlider::handle:vertical:pressed {
   </widget>
  </widget>
  <resources/>
- <connections>
- <connection>
-   <sender>temp_slider</sender>
-   <signal>valueChanged(int)</signal>
-   <receiver>temp_label</receiver>
-   <slot>setNum(int)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>419</x>
-     <y>175</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>132</x>
-     <y>164</y>
-    </hint>
-   </hints>
-  </connection>
- </connections>
+ <connections/>
 </ui>

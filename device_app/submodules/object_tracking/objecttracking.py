@@ -45,7 +45,7 @@ class ObjectInfo():
 	
 
 class CentroidTracker():
-	def __init__(self, maxDisappeared=25, max_rec_stack = 3, max_temp_stack=6, fever_temp=38):
+	def __init__(self, maxDisappeared=25, max_rec_stack = 3, max_temp_stack=6):
 		# initialize the next unique object ID along with two ordered
 		# dictionaries used to keep track of mapping a given object
 		# ID to its centroid and number of consecutive frames it has
@@ -61,17 +61,16 @@ class CentroidTracker():
 		self.counted = False
 		self.max_rec_stack = max_rec_stack
 		self.max_temp_stack = max_temp_stack
-		self.fever_temp = fever_temp
 
 	def getCentroid(self, coor):
 		cX = int((coor[0] + coor[2]) / 2.0)
 		cY = int((coor[1] + coor[3]) / 2.0)
 		return (cX, cY)
 
-	def register(self, coor, rgb, scale):
+	def register(self, coor, rgb, scale, fever_temp):
 		# when registering an object we use the next available object
 		# ID to store the centroid
-		obj = ObjectInfo(coor, rgb, scale, self.max_rec_stack, self.max_temp_stack, self.fever_temp)
+		obj = ObjectInfo(coor, rgb, scale, self.max_rec_stack, self.max_temp_stack, fever_temp)
 		self.objects[self.nextObjectID] = obj
 		self.disappeared[self.nextObjectID] = 0
 		self.nextObjectID += 1
@@ -82,24 +81,23 @@ class CentroidTracker():
 		del self.objects[objectID]
 		del self.disappeared[objectID]
 
-	def update(self, rects, rgb, scale):
+	def update(self, rects, rgb, scale, fever_temp=38):
 		# check to see if the list of input bounding box rectangles
 		# is empty
 		disappearedObjects = OrderedDict()
-		indexDisappeared = 0
 
 		if len(rects) == 0:
 			# loop over any existing tracked objects and mark them
 			# as disappeared
 			for objectID in list(self.disappeared.keys()):
 				self.disappeared[objectID] += 1
-				self.objects[objectID].temporary_dissapear = True
+				if self.disappeared[objectID] > 5:
+					self.objects[objectID].temporary_dissapear = True
 				# if we have reached a maximum number of consecutive
 				# frames where a given object has been marked as
 				# missing, deregister it
 				if self.disappeared[objectID] > self.maxDisappeared:
-					disappearedObjects[indexDisappeared] = self.objects[objectID]
-					indexDisappeared += 1
+					disappearedObjects[objectID] = self.objects[objectID]
 					self.deregister(objectID)
 
 			# return early as there are no centroids or tracking info
@@ -119,7 +117,7 @@ class CentroidTracker():
 		# centroids and register each of them
 		if len(self.objects) == 0:
 			for i in range(0, len(inputCentroids)):
-				self.register(rects[i], rgb, scale)
+				self.register(rects[i], rgb, scale, fever_temp)
 
 		# otherwise, are are currently tracking objects so we need to
 		# try to match the input centroids to existing object
@@ -200,14 +198,15 @@ class CentroidTracker():
 					# index and increment the disappeared counter
 					objectID = objectIDs[row]
 					self.disappeared[objectID] += 1
-					self.objects[objectID].temporary_dissapear = True
+
+					if self.disappeared[objectID] > 5:
+						self.objects[objectID].temporary_dissapear = True
 
 					# check to see if the number of consecutive
 					# frames the object has been marked "disappeared"
 					# for warrants deregistering the object
 					if self.disappeared[objectID] > self.maxDisappeared:
-						disappearedObjects[indexDisappeared] = self.objects[objectID]
-						indexDisappeared += 1
+						disappearedObjects[objectID] = self.objects[objectID]
 						self.deregister(objectID)
 
 			# otherwise, if the number of input centroids is greater
@@ -215,7 +214,7 @@ class CentroidTracker():
 			# register each new input centroid as a trackable object
 			else:
 				for col in unusedCols:
-					self.register(rects[col],rgb, scale)
+					self.register(rects[col],rgb, scale, fever_temp)
 
 		# return the set of trackable objects
 		return self.objects, disappearedObjects

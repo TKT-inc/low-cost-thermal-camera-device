@@ -1,7 +1,7 @@
 buildingId: 1
-calibrationTimeForUser: 2
-feverTemperature: 38
-offsetTemperature: 0
+calibrationTimeForUser: 4
+feverTemperature: 37.0
+offsetTemperature: 5.736844081666636
 registration:
   frontRange: 44
   leftThreshold: -18

@@ -44,6 +44,7 @@ PROTO_RFB320 = cfg['faceDetection']['protoRfb320']
 ONNX_SLIM320 = cfg['faceDetection']['onnxSlim320']
 FACE_SIZE = cfg['faceDetection']['faceSize']
 LANDMARK_MODEL = cfg['faceDetection']['landmarkDetectionModel']
+REC_THRESHOLD = cfg['faceDetection']['threshold']
 
 # Set up time params
 TIME_MEASURE_TEMP = cfg['periodTime']['measureTemp']
@@ -103,8 +104,8 @@ class DeviceAppFunctions():
 
 
     def initModel(self):
-        self.faceDetect = LightFaceDetection(PROTO_RFB320, MODEL_RFB320)
-        self.faceDetectTemp = LightFaceDetection(PROTO_RFB320, MODEL_RFB320)
+        self.faceDetect = LightFaceDetection(PROTO_RFB320, MODEL_RFB320, REC_THRESHOLD)
+        self.faceDetectTemp = LightFaceDetection(PROTO_RFB320, MODEL_RFB320, REC_THRESHOLD)
         # self.faceDetect = FaceDetection(MODEL_SSD, PROTO_SSD)
         # self.faceDetectTemp = FaceDetection(MODEL_SSD, PROTO_SSD)
         #self.faceDetect = FaceDetectionLightRfb()
@@ -113,9 +114,9 @@ class DeviceAppFunctions():
 
 
     def initObjectTracking(self):
-        self.ct = CentroidTracker(MAX_DISAPEARED_FRAMES, BUFFER_NAME_ID, BUFFER_TEMP, THRESHOLD_TEMP_FEVER)
+        self.ct = CentroidTracker(MAX_DISAPEARED_FRAMES, BUFFER_NAME_ID, BUFFER_TEMP)
         # self.trackableObjects = {}
-        self.objects, _ = self.ct.update([],[],RGB_SCALE)
+        self.objects, _ = self.ct.update([],[],RGB_SCALE, THRESHOLD_TEMP_FEVER)
 
 
     def initIoTConnection(self):
@@ -128,7 +129,7 @@ class DeviceAppFunctions():
         rects = self.faceDetect.detectFaces(self.frame)
 
         if (self.MODE == 'NORMAL' or self.MODE == 'CALIBRATE'):
-            self.objects, self.deletedObject = self.ct.update(rects, self.ori, RGB_SCALE)
+            self.objects, self.deletedObject = self.ct.update(rects, self.ori, RGB_SCALE, THRESHOLD_TEMP_FEVER)
             
             if (self.deletedObject):
                 Thread(target=self.sendRecordsInfo, args=(self.deletedObject, ),daemon=True).start()
@@ -208,7 +209,7 @@ class DeviceAppFunctions():
 
 
     def drawInfoOnFrameAndCheckRecognize( self, rects):
-        for (objectID, obj) in self.objects.items():
+        for (objectID, obj) in list(self.objects.items()):
             text = "ID {}".format(objectID)
             centroid = obj.coor        
             y = centroid[1] - 10 if centroid[1] - 10 > 10 else centroid[1] + 10
@@ -253,6 +254,9 @@ class DeviceAppFunctions():
 
     def getRecordsInfo(self):
         return self.deletedObject
+
+    def getSettingsParam(self):
+        return CALIBRATE_TIME, THRESHOLD_TEMP_FEVER
     
     def selectRegisterMode(self):
         self.store_registered_imgs = None
@@ -260,6 +264,8 @@ class DeviceAppFunctions():
         self.register = CaptureRegisterFace(NUM_FRONT_PICS,NUM_LEFT_PICS,NUM_RIGHT_PICS, LEFT_THRESHOLD, RIGHT_THRESHOLD, FRONT_RANGE, STACK_NUMBER, FRAMES_BETWEEN_CAP)
 
     def selectNormalMode(self):
+        global USER_TEMP_OFFSET
+        USER_TEMP_OFFSET = user_cfg['offsetTemperature']
         self.initObjectTracking()
         if (self.MODE != 'CALIBRATE'):
             self.measureTemp.join()
@@ -269,18 +275,29 @@ class DeviceAppFunctions():
         self.conn.restartListener(self.objects)
     
     def selectCalibrateMode(self):
+        global USER_TEMP_OFFSET
+        USER_TEMP_OFFSET = 0
+        self.initObjectTracking()
         self.calibrate_person_ID = None
         self.camera_input_calibrate_temp = None
         self.MODE = 'CALIBRATE'
 
     def createUserTemperatureOffset(self, ground_truth_temp):
-        global USER_TEMP_OFFSET
+        global USER_TEMP_OFFSET, user_cfg
         USER_TEMP_OFFSET = float(ground_truth_temp) - self.camera_input_calibrate_temp
         user_cfg['offsetTemperature'] = float(USER_TEMP_OFFSET)
         self.MODE = 'NORMAL'
         with open("user_settings.yaml", "w") as f:
             yaml.dump(user_cfg, f)
-        return ground_truth_temp, self.camera_input_calibrate_temp
+        
+    def updateSettingParams(self, time_calib=CALIBRATE_TIME, temp_fever=THRESHOLD_TEMP_FEVER):
+        global CALIBRATE_TIME, THRESHOLD_TEMP_FEVER, user_cfg
+        THRESHOLD_TEMP_FEVER = temp_fever
+        CALIBRATE_TIME = time_calib
+        user_cfg['feverTemperature'] = float(THRESHOLD_TEMP_FEVER)
+        user_cfg['calibrationTimeForUser'] = int(CALIBRATE_TIME)
+        with open("user_settings.yaml", "w") as f:
+            yaml.dump(user_cfg, f)
 
     def sendRegisteredInfoToServer(self, name_of_new_user):
         if (self.store_registered_imgs is not None and ENABLE_SENDING_TO_CLOUD):

@@ -91,7 +91,7 @@ class FaceDetection:
         return self.rects
 
 class LightFaceDetection:
-    def __init__(self, proto, model, width = 320, height = 240):
+    def __init__(self, proto, model, threshold, width = 320, height = 240):
         self.rects = []
         #self.net = cv2.dnn.readNetFromONNX(onnx)
         self.net = cv2.dnn.readNetFromCaffe(proto, model)
@@ -102,7 +102,7 @@ class LightFaceDetection:
         self.image_std = 128.0
         self.center_variance = 0.1
         self.size_variance = 0.2
-        self.threshold = 0.65
+        self.threshold = threshold
         self.strides = [8.0, 16.0, 32.0, 64.0]
         self.min_boxes = [[10.0, 16.0, 24.0], [32.0, 48.0], [64.0, 96.0], [128.0, 192.0, 256.0]]
         self.priors = self.define_img_size((self.width, self.height))

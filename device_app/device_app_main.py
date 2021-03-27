@@ -40,7 +40,10 @@ class MainWindow(QtWidgets.QMainWindow):
     def startMainWindow(self):
         uic.loadUi("./device_app/guiModules/mainWindow.ui", self)
 
-        self.main_display_monitor = self.rgb_frame        
+        self.main_display_monitor = self.rgb_frame   
+
+        self.selectStandardMenu("btn_home")  
+        self.stackedWidget.setCurrentWidget(self.home_page)
 
         self.history_record.setColumnWidth(0, 130)
         self.history_record.setColumnWidth(1, 175)
@@ -74,8 +77,10 @@ class MainWindow(QtWidgets.QMainWindow):
         self.register_button.clicked.connect(self.button)
         self.btn_calib.clicked.connect(self.button)
         self.settings.clicked.connect(self.button)
+        self.save.clicked.connect(self.button)
 
         self.temp_slider.valueChanged.connect(self.tempSliderValueHandle)
+        self.time_calib_slider.valueChanged.connect(self.timeSliderValueHandle)
 
     def startLoginWindow(self):
 
@@ -106,9 +111,9 @@ class MainWindow(QtWidgets.QMainWindow):
             current_time = datetime.now().strftime("%d-%m|%H:%M:%S")
             self.addRecords(current_time, str(objectID) + '-' + obj.name, obj.record_temperature)
             if (obj.have_mask is False):
-                self.addNoti(current_time, obj.name)
+                self.addNoti(current_time, str(objectID) + '-' + obj.name)
             if (obj.gotFever() is True):
-                self.addNoti(current_time, obj.name, obj.record_temperature)
+                self.addNoti(current_time, str(objectID) + '-' + obj.name, obj.record_temperature)
 
 
     #Close the application
@@ -185,9 +190,25 @@ class MainWindow(QtWidgets.QMainWindow):
     def selectSettingMode(self):
         if (self.deviceFuntion.getMode() != 'NORMAL'):
             self.deviceFuntion.selectNormalMode()
+        time_calib, temp = self.deviceFuntion.getSettingsParam()
+        self.time_calib_slider.setValue(time_calib)
+        self.temp_slider.setValue(temp*100)
         self.stackedWidget.setCurrentWidget(self.setting)
         self.resetStyleBtn("settings")
         self.settings.setStyleSheet(self.selectMenu(self.settings.styleSheet()))
+
+    def selectInfoPage(self):
+        self.stackedWidget.setCurrentWidget(self.product_info)
+        self.resetStyleBtn("btn_info")
+        btnWidget.setStyleSheet(self.selectMenu(btnWidget.styleSheet()))
+        if (self.deviceFuntion.getMode() != 'NORMAL'):
+            self.deviceFuntion.selectNormalMode()
+
+    def saveSettingParam(self):
+        time = self.time_calib_slider.value()
+        temp = float(self.temp_slider.value()/100)
+        self.deviceFuntion.updateSettingParams(time_calib=time, temp_fever=temp)
+        self.selectNormalMode()
         
     # Add notification when someone got fever or does not wear mask
     def addNoti(self, current_time, name, temp=None):
@@ -246,24 +267,29 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def acceptInputTempCalibrate(self):
         keyboard.Hide()
+        self.deviceFuntion.createUserTemperatureOffset(self.dlg.temperature_edit.text())
         self.selectNormalMode()
-        status, temp = self.deviceFuntion.createUserTemperatureOffset(self.dlg.temperature_edit.text())
     
     def cancelInputTempCalibrate(self):
         keyboard.Hide()
         self.selectCalibrateMode()
 
-    #Handle all slider
-    def tempSliderValueHandle(self, value):
+    #Handle all temp slider
+    def tempSliderValueHandle(self):
         temp = self.temp_slider.value()
         temp = str(float(temp/100)) + 'oC'
         self.temp_label.setText(temp)
+
+    #Handle time slider
+    def timeSliderValueHandle(self):
+        time = self.time_calib_slider.value()
+        time = str(time) + ' seconds'
+        self.time_calib_label.setText(time)
 
     #Handle all button of the application
     def button(self):
         # GET BT CLICKED
         btnWidget = self.sender()
-
 
         # PAGE HOME
         if btnWidget.objectName() == "btn_home":
@@ -279,12 +305,13 @@ class MainWindow(QtWidgets.QMainWindow):
 
         # PAGE INFO
         if btnWidget.objectName() == "btn_info":
-            self.stackedWidget.setCurrentWidget(self.product_info)
-            self.resetStyleBtn("btn_info")
-            btnWidget.setStyleSheet(self.selectMenu(btnWidget.styleSheet()))
+            self.selectInfoPage()
 
         if btnWidget.objectName() == "settings":
-            self.selectSettingMode()        
+            self.selectSettingMode()      
+
+        if btnWidget.objectName() == "save":
+            self.saveSettingParam()  
 
 
     # @QtCore.pyqtSlot("QWidget*", "QWidget*")
@@ -307,7 +334,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
     ## ==> START SELECTION
     def selectStandardMenu(self, widget):
-        for w in self.ui.menu.findChildren(QtWidgets.QPushButton):
+        for w in self.menu.findChildren(QtWidgets.QPushButton):
             if w.objectName() == widget:
                 w.setStyleSheet(self.selectMenu(w.styleSheet()))
 
