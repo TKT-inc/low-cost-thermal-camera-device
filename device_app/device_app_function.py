@@ -171,8 +171,8 @@ class DeviceAppFunctions():
             try:
                 objects_measurement = self.objects
                 ct_temp = self.ct
+                self.rgb_temp, rgb_ori = self.rgb.getCurrentFrame()
                 self.lep.update()
-                self.rgb_temp, rgb_ori = self.rgb.getFrame()
                 thermal, temp = self.lep.getFrame()
                 raw = thermal
 
@@ -280,4 +280,5 @@ class DeviceAppFunctions():
     
     def stop(self):
         self.MODE = "OFF"
+        self.measureTemp.join()
         self.rgb.stop()

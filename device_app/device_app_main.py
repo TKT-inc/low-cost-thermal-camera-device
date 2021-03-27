@@ -186,6 +186,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.notifications.insertRow(self.notifications.rowCount())
 
         self.notifications.setItem(self.notifications.rowCount()-1, 0, QtWidgets.QTableWidgetItem(current_time))
+        self.notifications.item(self.notifications.rowCount()-1, 0).setFont(FONT_OF_TABLE)
 
         if (temp is not None):
             noti = name + " got sick with " + "{:.2f}".format(temp) + " oC"
@@ -193,6 +194,7 @@ class MainWindow(QtWidgets.QMainWindow):
             noti = name + " plase wear MASK!"
 
         self.notifications.setItem(self.notifications.rowCount()-1, 1, QtWidgets.QTableWidgetItem(noti))
+        self.notifications.item(self.notifications.rowCount()-1, 1).setFont(FONT_OF_TABLE)
 
         if(_scroll):
             self.notifications.scrollToBottom()

@@ -28,6 +28,14 @@ class RgbCam:
     def getFrame(self):
         return self.frame, self.ori
 
+    def getCurrentFrame(self):
+        cur_frame = self.frame.copy()
+        while True:
+            if (not np.all(cur_frame == self.frame)):
+                return self.frame, self.ori
+        return self.frame, self.ori
+
+
     def stop(self):
         self.working = False
         self.thread.join()

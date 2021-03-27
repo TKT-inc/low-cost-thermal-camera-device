@@ -19,6 +19,8 @@ OFFSET_TEMPERATURE_DIST_INT = cfg['measureTemperature']['offsetDistIntercept']
 def measureTemperature(color,temp, objects, object_measurement, scale):
     for (objectID, obj) in list(objects.items()):
         try:
+            if (obj.temporary_dissapear):
+                continue
             coordinates = object_measurement[objectID].coor
             thermal_start_x, thermal_start_y = convertRGBToThermalCoor(coordinates[0], coordinates[1])
             thermal_end_x, thermal_end_y = convertRGBToThermalCoor(coordinates[2], coordinates[3])
