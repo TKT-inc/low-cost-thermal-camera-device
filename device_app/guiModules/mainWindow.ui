@@ -609,8 +609,8 @@ QComboBox QAbstractItemView {
         <property name="geometry">
          <rect>
           <x>10</x>
-          <y>270</y>
-          <width>768</width>
+          <y>280</y>
+          <width>761</width>
           <height>432</height>
          </rect>
         </property>
@@ -628,10 +628,10 @@ background-color: rgb(150, 150, 150);</string>
        <widget class="QLabel" name="thremal_frame">
         <property name="geometry">
          <rect>
-          <x>810</x>
+          <x>790</x>
           <y>10</y>
-          <width>381</width>
-          <height>281</height>
+          <width>411</width>
+          <height>291</height>
          </rect>
         </property>
         <property name="styleSheet">
@@ -645,7 +645,7 @@ background-color: rgb(150, 150, 150);</string>
        <widget class="QPushButton" name="register_button">
         <property name="geometry">
          <rect>
-          <x>30</x>
+          <x>20</x>
           <y>60</y>
           <width>151</width>
           <height>151</height>
@@ -697,9 +697,9 @@ User</string>
         <property name="geometry">
          <rect>
           <x>240</x>
-          <y>20</y>
+          <y>10</y>
           <width>531</width>
-          <height>231</height>
+          <height>251</height>
          </rect>
         </property>
         <property name="sizePolicy">
@@ -911,7 +911,7 @@ User</string>
          <string notr="true">QTableWidget {	
 	background-color: #44445d;
 	padding: 10px;
-	border-radius: 5px;
+	border-radius: 12px;
 	gridline-color: rgb(255, 255, 255);
 	color: rgb(255, 255, 255);
 }
@@ -1050,7 +1050,7 @@ QHeaderView::section:vertical
         <property name="geometry">
          <rect>
           <x>860</x>
-          <y>310</y>
+          <y>320</y>
           <width>271</width>
           <height>31</height>
          </rect>
@@ -1103,7 +1103,7 @@ s</string>
         <property name="geometry">
          <rect>
           <x>790</x>
-          <y>350</y>
+          <y>360</y>
           <width>411</width>
           <height>351</height>
          </rect>
@@ -1317,7 +1317,7 @@ s</string>
          <string notr="true">QTableWidget {	
 	background-color:#44445d;
 	padding: 5px;
-	border-radius: 5px;
+	border-radius: 12px;
     gridline-color: rgb(255, 255, 255);
     color: rgb(255, 255, 255);
 }
