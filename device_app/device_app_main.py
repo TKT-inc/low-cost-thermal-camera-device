@@ -4,6 +4,10 @@ import cv2
 import time
 import dbus
 from threading import Thread
+import yaml
+
+with open("user_settings.yaml") as settings:
+    user_cfg = yaml.safe_load(settings)
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5 import uic
@@ -18,6 +22,13 @@ keyboard = dbus.Interface(proxy, "org.onboard.Onboard.Keyboard")
 FONT_OF_TABLE = QtGui.QFont()
 FONT_OF_TABLE.setPointSize(16)
 FONT_OF_TABLE.setBold(True)
+
+FONT_OF_TABLE_BIG= QtGui.QFont()
+FONT_OF_TABLE_BIG.setPointSize(20)
+FONT_OF_TABLE_BIG.setBold(True)
+
+LIMIT_NOTIFICATIONS = user_cfg['limitNotifications']
+LIMIT_RECORDS = user_cfg['limitRecords']
 
 class MainWindow(QtWidgets.QMainWindow):
     def __init__(self):
@@ -45,11 +56,15 @@ class MainWindow(QtWidgets.QMainWindow):
         self.selectStandardMenu("btn_home")  
         self.stackedWidget.setCurrentWidget(self.home_page)
 
-        self.history_record.setColumnWidth(0, 130)
-        self.history_record.setColumnWidth(1, 175)
-        self.history_record.setColumnWidth(2, 75)
+        self.history_record.setColumnWidth(0, 80)
+        self.history_record.setColumnWidth(1, 230)
+        self.history_record.setColumnWidth(2, 50)
+        self.history_record.verticalHeader().setDefaultSectionSize(50)
+        self.history_record.verticalHeader().sectionResizeMode(QtWidgets.QHeaderView.Fixed)
 
         self.notifications.setColumnWidth(0, 130)
+        self.notifications.verticalHeader().setDefaultSectionSize(30)
+        self.notifications.verticalHeader().sectionResizeMode(QtWidgets.QHeaderView.Fixed)
 
         self.timerWorking = QtCore.QTimer()
         self.timerWorking.setTimerType(QtCore.Qt.PreciseTimer)
@@ -79,8 +94,11 @@ class MainWindow(QtWidgets.QMainWindow):
         self.settings.clicked.connect(self.button)
         self.save.clicked.connect(self.button)
 
+
+        self.notis_slider.valueChanged.connect(self.notisSliderValueHandle)
         self.temp_slider.valueChanged.connect(self.tempSliderValueHandle)
         self.time_calib_slider.valueChanged.connect(self.timeSliderValueHandle)
+        self.records_slider.valueChanged.connect(self.recordsSliderValueHandle)
 
     def startLoginWindow(self):
 
@@ -108,12 +126,13 @@ class MainWindow(QtWidgets.QMainWindow):
     def handleRecordsAndNotis(self):
         records = self.deviceFuntion.getRecordsInfo()
         for (objectID, obj) in records.items():
-            current_time = datetime.now().strftime("%d-%m|%H:%M:%S")
-            self.addRecords(current_time, str(objectID) + '-' + obj.name, obj.record_temperature)
+            current_time = datetime.now()
+            self.addRecords(current_time, str(objectID) + '-' + obj.name, obj.record_temperature, obj.face_rgb)
             if (obj.have_mask is False):
                 self.addNoti(current_time, str(objectID) + '-' + obj.name)
             if (obj.gotFever() is True):
                 self.addNoti(current_time, str(objectID) + '-' + obj.name, obj.record_temperature)
+            del records[objectID]
 
 
     #Close the application
@@ -193,6 +212,8 @@ class MainWindow(QtWidgets.QMainWindow):
         time_calib, temp = self.deviceFuntion.getSettingsParam()
         self.time_calib_slider.setValue(time_calib)
         self.temp_slider.setValue(temp*100)
+        self.records_slider.setValue(LIMIT_RECORDS)
+        self.notis_slider.setValue(LIMIT_NOTIFICATIONS)
         self.stackedWidget.setCurrentWidget(self.setting)
         self.resetStyleBtn("settings")
         self.settings.setStyleSheet(self.selectMenu(self.settings.styleSheet()))
@@ -205,6 +226,13 @@ class MainWindow(QtWidgets.QMainWindow):
             self.deviceFuntion.selectNormalMode()
 
     def saveSettingParam(self):
+        global LIMIT_RECORDS, LIMIT_NOTIFICATIONS, user_cfg
+        LIMIT_RECORDS = self.records_slider.value()
+        LIMIT_NOTIFICATIONS = self.notis_slider.value()
+        user_cfg['limitNotifications'] = LIMIT_NOTIFICATIONS
+        user_cfg['limitRecords'] = LIMIT_RECORDS
+        with open("user_settings.yaml", "w") as f:
+            yaml.dump(user_cfg, f)
         time = self.time_calib_slider.value()
         temp = float(self.temp_slider.value()/100)
         self.deviceFuntion.updateSettingParams(time_calib=time, temp_fever=temp)
@@ -214,9 +242,14 @@ class MainWindow(QtWidgets.QMainWindow):
     def addNoti(self, current_time, name, temp=None):
         vbar = self.notifications.verticalScrollBar()
         _scroll = vbar.value() == vbar.maximum()
+
+        if (self.notifications.rowCount() >= LIMIT_NOTIFICATIONS):
+            self.notifications.removeRow(0)
+
         self.notifications.insertRow(self.notifications.rowCount())
 
-        self.notifications.setItem(self.notifications.rowCount()-1, 0, QtWidgets.QTableWidgetItem(current_time))
+        time = current_time.strftime("%d-%m|%H:%M:%S")
+        self.notifications.setItem(self.notifications.rowCount()-1, 0, QtWidgets.QTableWidgetItem(time))
         self.notifications.item(self.notifications.rowCount()-1, 0).setFont(FONT_OF_TABLE)
 
         if (temp is not None):
@@ -231,19 +264,43 @@ class MainWindow(QtWidgets.QMainWindow):
             self.notifications.scrollToBottom()
 
     # Add record info into the history record table
-    def addRecords(self, current_time, name, temperature):
+    def addRecords(self, current_time, name, temperature, face_rgb):
         vbar = self.history_record.verticalScrollBar()
         _scroll = vbar.value() == vbar.maximum()
         
-        self.history_record.insertRow(self.history_record.rowCount())
+        if (self.history_record.rowCount() >= LIMIT_RECORDS*2):
+            self.history_record.removeRow(0)
+            self.history_record.removeRow(0)
 
-        self.history_record.setItem(self.history_record.rowCount()-1, 0, QtWidgets.QTableWidgetItem(current_time))
-        self.history_record.item(self.history_record.rowCount()-1, 0).setFont(FONT_OF_TABLE)
-        self.history_record.setItem(self.history_record.rowCount()-1, 1, QtWidgets.QTableWidgetItem(name))
-        self.history_record.item(self.history_record.rowCount()-1, 1).setFont(FONT_OF_TABLE)
+        count = self.history_record.rowCount()
+        self.history_record.insertRow(count)
+        self.history_record.insertRow(count + 1)
+
+        self.history_record.setSpan(count, 0, 2, 1)
+        self.history_record.setSpan(count, 1, 1, 2)
+
+        try:
+            face = cv2.resize(face_rgb, (65,85))
+            height, width, _ = face.shape
+            qimg = QtGui.QImage(face.data, width, height, 3*width, QtGui.QImage.Format_RGB888).rgbSwapped()
+            qimg = QtGui.QPixmap(qimg)
+            img = QtWidgets.QLabel()
+            img.setPixmap(qimg)
+            img.setAlignment(QtCore.Qt.AlignCenter)
+            self.history_record.setCellWidget(count, 0, img)
+        except Exception as e:
+            print (e)
+            pass
+
+        time = QtWidgets.QTableWidgetItem(current_time.strftime("%d-%m-%Y   %H:%M:%S"))
+        time.setTextAlignment(QtCore.Qt.AlignCenter)
+        self.history_record.setItem(count, 1, time)
+        self.history_record.item(count, 1).setFont(FONT_OF_TABLE_BIG)
+        self.history_record.setItem(count + 1, 1, QtWidgets.QTableWidgetItem(name))
+        self.history_record.item(count + 1, 1).setFont(FONT_OF_TABLE)
         temperature = "{:.2f}".format(temperature) + " oC"
-        self.history_record.setItem(self.history_record.rowCount()-1, 2, QtWidgets.QTableWidgetItem(temperature))
-        self.history_record.item(self.history_record.rowCount()-1, 2).setFont(FONT_OF_TABLE)
+        self.history_record.setItem(count + 1, 2, QtWidgets.QTableWidgetItem(temperature))
+        self.history_record.item(count + 1, 2).setFont(FONT_OF_TABLE)
 
         if(_scroll):
             self.history_record.scrollToBottom()
@@ -273,6 +330,18 @@ class MainWindow(QtWidgets.QMainWindow):
     def cancelInputTempCalibrate(self):
         keyboard.Hide()
         self.selectCalibrateMode()
+
+    #Handle limit of records slider
+    def recordsSliderValueHandle(self):
+        records_limit = self.records_slider.value()
+        records_limit = str(records_limit) + " records"
+        self.records_label.setText(records_limit)
+
+    #Handle limit of notis slider
+    def notisSliderValueHandle(self):
+        notis_limit = self.notis_slider.value()
+        notis_limit = str(notis_limit) + ' notis'
+        self.notis_label.setText(notis_limit)
 
     #Handle all temp slider
     def tempSliderValueHandle(self):

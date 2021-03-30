@@ -9,6 +9,7 @@ with open("configuration.yaml") as ymlfile:
 with open("user_settings.yaml") as settings:
     user_cfg = yaml.safe_load(settings)
 from threading import Thread
+from collections import OrderedDict
 from submodules.rgb_camera.rgb_camera import RgbCam
 from submodules.thermal_camera.thermal_camera import ThermalCam
 from submodules.face_detection.face_detection import FaceDetection, LightFaceDetection, FaceDetectionLightRfb, LandmarkDetection
@@ -16,6 +17,7 @@ from submodules.object_tracking.objecttracking import CentroidTracker
 from submodules.measure_temperature.measure_temperature import measureTemperature
 from submodules.iot_hub.iot_conn import IotConn
 from submodules.capture_register.capture_register import CaptureRegisterFace
+from copy import deepcopy
 
 # Set up device params
 DEVICE_ID = cfg['deviceId']
@@ -86,6 +88,8 @@ class DeviceAppFunctions():
         self.rgb_temp = np.zeros((480,640,3), np.uint8)
         self.MODE = 'NORMAL'
 
+        self.deletedObjectRecord = OrderedDict()
+
         #init the system
         self.initCamera()
         self.initModel()
@@ -129,10 +133,10 @@ class DeviceAppFunctions():
         rects = self.faceDetect.detectFaces(self.frame)
 
         if (self.MODE == 'NORMAL' or self.MODE == 'CALIBRATE'):
-            self.objects, self.deletedObject = self.ct.update(rects, self.ori, RGB_SCALE, THRESHOLD_TEMP_FEVER)
+            self.objects,deletedObject = self.ct.update(rects, self.ori, RGB_SCALE, THRESHOLD_TEMP_FEVER)
             
-            if (self.deletedObject):
-                Thread(target=self.sendRecordsInfo, args=(self.deletedObject, ),daemon=True).start()
+            if (deletedObject):
+                Thread(target=self.sendRecordsInfo, args=(deletedObject, ),daemon=True).start()
                 print("send records")
                 
             self.drawInfoOnFrameAndCheckRecognize(rects)
@@ -174,8 +178,8 @@ class DeviceAppFunctions():
         time.sleep(1)
         while (self.MODE == 'NORMAL' or self.MODE == 'CALIBRATE'):
             try:
-                objects_measurement = self.objects
-                ct_temp = self.ct
+                objects_measurement = deepcopy(self.objects)
+                ct_temp = deepcopy(self.ct)
                 self.rgb_temp, rgb_ori = self.rgb.getCurrentFrame()
                 self.lep.update()
                 thermal, temp = self.lep.getFrame()
@@ -187,8 +191,6 @@ class DeviceAppFunctions():
                 rects_measurement = self.faceDetectTemp.detectFaces(self.rgb_temp, 35)
                 objects_measurement, _ = ct_temp.update(rects_measurement,rgb_ori,RGB_SCALE)
 
-                for (objectID, obj) in list(self.objects.items()):
-                    obj.have_mask = self.landmarkDetect.faceMaskDetected(obj.face_rgb)
 
                 measureTemperature(self.color, temp, self.objects, objects_measurement, USER_TEMP_OFFSET, RGB_SCALE)
                 
@@ -200,6 +202,7 @@ class DeviceAppFunctions():
 
     def sendRecordsInfo(self, DeletedObjects):
         for (objectID, obj) in DeletedObjects.items():
+            self.deletedObjectRecord[objectID] = obj
             _, buffer = cv2.imencode('.jpg', cv2.resize(obj.face_rgb,(FACE_SIZE,FACE_SIZE)))
             pic_str = base64.b64encode(buffer)
             pic_str = pic_str.decode()
@@ -253,7 +256,7 @@ class DeviceAppFunctions():
         return self.color
 
     def getRecordsInfo(self):
-        return self.deletedObject
+        return self.deletedObjectRecord
 
     def getSettingsParam(self):
         return CALIBRATE_TIME, THRESHOLD_TEMP_FEVER

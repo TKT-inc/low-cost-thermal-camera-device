@@ -38,7 +38,7 @@ class IotConn:
             message = message.data.decode('utf-8')
             json_data = json.loads(message, strict = False)
             if int(json_data['trackingId']) in objects:
-                objects[int(json_data['trackingId'])].updateNameAndId(str(json_data['personName']), str(json_data['personId']))
+                objects[int(json_data['trackingId'])].updateInfo(str(json_data['personName']), str(json_data['personId']), str(json_data['mask']))
 
     def messageSending(self, buildingId, deviceId, trackingId, face_img):
         message = MSG_REC.format(buildingId=buildingId, deviceId=deviceId, trackingId=trackingId, face=face_img)

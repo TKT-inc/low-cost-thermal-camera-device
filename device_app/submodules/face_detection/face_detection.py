@@ -11,8 +11,8 @@ from submodules.face_detection.vision.ssd.mb_tiny_fd import create_mb_tiny_fd, c
 from submodules.face_detection.vision.ssd.mb_tiny_RFB_fd import create_Mb_Tiny_RFB_fd, create_Mb_Tiny_RFB_fd_predictor
 from submodules.face_detection.vision.utils.misc import Timer
 
-CAFFEMODEL = "/models/res10_300x300_ssd_iter_140000.caffemodel"
-PROTOTEXTPATH = "/models/deploy.prototxt.txt"
+CAFFEMODEL = "./device_app/submodules/face_detection/models/res10_300x300_ssd_iter_140000.caffemodel"
+PROTOTEXTPATH = "./device_app/submodules/face_detection/models/deploy.prototxt.txt"
 LANDMARK_DETECTION_MODEL = "./device_app/submodules/face_detection/models/landmarks.dat"
 MOUTH_CASCADE_FILE = './device_app/submodules/face_detection/models/haarcascade_mouth.xml'
 
@@ -21,6 +21,7 @@ class LandmarkDetection:
         self.predictor = dlib.shape_predictor(model)
         self.facemask_saturation = facemask_saturation
         self.mouth_cascade = cv2.CascadeClassifier(mouth_cascade_file)
+        self.nose_cascade = cv2.CascadeClassifier("./device_app/submodules/face_detection/models/haarcascade_nose.xml")
 
     def detectLandmarkForRegister(self, frame, rects):
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
@@ -40,22 +41,23 @@ class LandmarkDetection:
                             ], dtype="double")
         return image_points
 
-    def faceMaskDetected(self, face):
+    # def faceMaskDetected(self, face):
         
-        face = cv2.cvtColor(face, cv2.COLOR_BGR2GRAY)
-        h, w = face.shape
-        face = face[int(h*0.25):h, 0:w]
-        alpha = 1.4
-        beta = 5
-        # cv2.imwrite('./test/mask.png', face)
+    #     face = cv2.cvtColor(face, cv2.COLOR_BGR2GRAY)
+    #     h, w = face.shape
+    #     face = face[int(h*0.25):h, 0:w]
+    #     alpha = 1.4
+    #     beta = 5
+    #     # cv2.imwrite('./test/mask.png', face)
 
-        face = cv2.convertScaleAbs(face, alpha=alpha, beta=beta)
-        mouth_rects = self.mouth_cascade.detectMultiScale(face, minNeighbors=5)
-        # cv2.imwrite('../test/' + str(len(mouth_rects)) + '.png', face)
+    #     face = cv2.convertScaleAbs(face, alpha=alpha, beta=beta)
+    #     mouth_rects = self.mouth_cascade.detectMultiScale(face, minNeighbors=5)
+    #     nose_rects = self.nose_cascade.detectMultiScale(face)
+    #     cv2.imwrite('./test/' + str(len(mouth_rects)) + '_' + str(len(nose_rects)) + '.png', face)
 
-        if (len(mouth_rects) == 0):
-            return True
-        return False
+    #     if (len(mouth_rects) == 0 and len(nose_rects) == 0):
+    #         return True
+    #     return False
 
 
 class FaceDetection:
@@ -262,8 +264,3 @@ class FaceDetectionLightRfb:
             cv2.rectangle(frame, (box[0], box[1]), (box[2], box[3]), (0, 255, 0), 4)
         return self.rects
         
-
-
-
-
-

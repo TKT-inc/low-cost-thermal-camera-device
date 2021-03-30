@@ -20,7 +20,8 @@ class ObjectInfo():
 		self.sending_recs_img = False
 		self.temporary_dissapear = False
 	
-	def updateNameAndId(self, name, id):
+	def updateInfo(self, name, id, have_mask):
+		self.have_mask = have_mask == "True"
 		self.rec_stacks.append((name, id))
 		if (len(self.rec_stacks) == self.max_rec_stack + 1):
 			self.rec_stacks.pop(0)
