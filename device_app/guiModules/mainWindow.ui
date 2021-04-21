@@ -137,12 +137,12 @@ color:#E0FBFC;</string>
 	padding-left: 45px;
 }
 QPushButton:hover {
-	background-color:#98C1D9;
-	border-left: 28px solid #98C1D9;
+	background-color:#61668c;
+	border-left: 28px solid #61668c;
 }
 QPushButton:pressed {	
-	background-color:#98C1D9;
-	border-left: 28px solid #98C1D9;
+	background-color:#61668c;
+	border-left: 28px solid #61668c;
 }</string>
       </property>
       <property name="text">
@@ -190,12 +190,12 @@ QPushButton:pressed {
 	padding-left: 45px;
 }
 QPushButton:hover {
-	background-color:#98C1D9;
-	border-left: 28px solid #98C1D9;
+	background-color:#61668c;
+	border-left: 28px solid #61668c;
 }
 QPushButton:pressed {	
-	background-color:#98C1D9;
-	border-left: 28px solid #98C1D9;
+	background-color:#61668c;
+	border-left: 28px solid #61668c;
 }</string>
       </property>
       <property name="text">
@@ -243,12 +243,12 @@ QPushButton:pressed {
 	padding-left: 45px;
 }
 QPushButton:hover {
-	background-color:#98C1D9;
-	border-left: 28px solid #98C1D9;
+	background-color:#61668c;
+	border-left: 28px solid #61668c;
 }
 QPushButton:pressed {	
-	background-color:#98C1D9;
-	border-left: 28px solid #98C1D9;
+	background-color:#61668c;
+	border-left: 28px solid #61668c;
 }</string>
       </property>
       <property name="text">
@@ -296,12 +296,12 @@ QPushButton:pressed {
 	padding-left: 45px;
 }
 QPushButton:hover {
-	background-color:#98C1D9;
-	border-left: 28px solid #98C1D9;
+	background-color:#61668c;
+	border-left: 28px solid #61668c;
 }
 QPushButton:pressed {	
-	background-color:#98C1D9;
-	border-left: 28px solid #98C1D9;
+	background-color:#61668c;
+	border-left: 28px solid #61668c;
 }</string>
       </property>
       <property name="text">
@@ -349,12 +349,12 @@ QPushButton:pressed {
 	padding-left: 45px;
 }
 QPushButton:hover {
-	background-color:#98C1D9;
-	border-left: 28px solid #98C1D9;
+	background-color:#61668c;
+	border-left: 28px solid #61668c;
 }
 QPushButton:pressed {	
-	background-color:#98C1D9;
-	border-left: 28px solid #98C1D9;
+	background-color:#61668c;
+	border-left: 28px solid #61668c;
 }</string>
       </property>
       <property name="text">
@@ -402,12 +402,12 @@ QPushButton:pressed {
 	padding-left: 45px;
 }
 QPushButton:hover {
-	background-color:#98C1D9;
-	border-left: 28px solid #98C1D9;
+	background-color:#61668c;
+	border-left: 28px solid #61668c;
 }
 QPushButton:pressed {	
-	background-color:#98C1D9;
-	border-left: 28px solid #98C1D9;
+	background-color:#61668c;
+	border-left: 28px solid #61668c;
 }</string>
       </property>
       <property name="text">

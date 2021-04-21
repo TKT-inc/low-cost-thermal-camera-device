@@ -1,4 +1,6 @@
-deviceId: 'test-device'
+deviceIdAzure: 'test-device'
+deviceLabel: 'TMC-2021-1-00000001'
+
 
 periodTime:
     measureTemp: 0.8
@@ -6,12 +8,13 @@ periodTime:
 
 iotHub:
     connectionStringDevice: "HostName=thesis-hub.azure-devices.net;DeviceId=test-device;SharedAccessKey=E/uKH6XK6G2NLCYWQxu26+mrNBKmecm0I4WU2A1FfrY="
-    connectionStringBlob: "DefaultEndpointsProtocol=https;AccountName=thesisbstorage;AccountKey=WdOJMq9wULxCEKKHHiI9lafWPjIpJpXuinasmDLO5F9zZObHDzrLxTszglLM0zCa+GILFbjZCTO0BjFEuUR/WQ==;EndpointSuffix=core.windows.net"
+    connectionStringBlob: "DefaultEndpointsProtocol=https;AccountName=tktrecordstorage;AccountKey=L5yEM18qRAUaAvYiFkwQC1T54rl+ceLvhu6EeDVXr1vOBfvMn6mzoAoagM/WBwUiQJy4gYxNM5aSiDQlzIxtsg==;EndpointSuffix=core.windows.net"
     msgFormat: 
         recMsg: '{{"buildingId":"{buildingId}","deviceId":"{deviceId}","trackingId": "{trackingId}","face": "{face}"}}'
-        recordMsg: '{{"buildingId":"{buildingId}","personId": "{personID}", "personName": "{personName}", "temperature":"{temperature}", "face":"{face}"}}'
+        recordMsg: '{{"method":"storeRecord","data":{{"deviceLabel":"{deviceLabel}","personId": "{personID}", "temperature":"{temperature}", "face":"{face}", "masked":"{masked}"}}}}'
         registerMsg: '{{"buildingId":"{buildingId}","personName": "{personName}","containerName":"{containerName}"}}'
-    enableSending: False
+        activeDeviceMsg: '{{"method":"loginDevice","data":{{"deviceId":"{deviceId}", "deviceLabel":"{deviceLabel}","pinCode": "{pinCode}"}}}}'
+    enableSending: True
 
 camera:
     rgb:

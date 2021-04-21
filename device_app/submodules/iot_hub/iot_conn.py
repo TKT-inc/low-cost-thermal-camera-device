@@ -15,6 +15,7 @@ from azure.storage.blob import BlobServiceClient, BlobClient, ContainerClient
 MSG_REC = cfg['iotHub']['msgFormat']['recMsg']
 MSG_REGISTER = cfg['iotHub']['msgFormat']['registerMsg']
 MSG_RECORD = cfg['iotHub']['msgFormat']['recordMsg']
+MSG_ACTIVE = cfg['iotHub']['msgFormat']['activeDeviceMsg']
 
 class IotConn:
     def __init__(self, mode, connStringDevice, connStringBlob, objects):
@@ -25,6 +26,7 @@ class IotConn:
         self.thread = Thread(target=self.messageListener, args=(self.client, objects,))
         self.thread.daemon = True
         self.thread.start()
+        self.activeDeviceStatus = None
 
     def restartListener(self, objects):
         self.thread = Thread(target=self.messageListener, args=(self.client, objects,))
@@ -33,12 +35,32 @@ class IotConn:
 
     def messageListener(self, client, objects):
         print("Start listening to server")
-        while (self.mode == 'NORMAL'): 
+        while (self.mode == 'NORMAL' or self.mode == 'WAITING'): 
             message = client.receive_message()
             message = message.data.decode('utf-8')
             json_data = json.loads(message, strict = False)
-            if int(json_data['trackingId']) in objects:
+            print(json_data)
+            if 'trackingId' in json_data and int(json_data['trackingId']) in objects:
                 objects[int(json_data['trackingId'])].updateInfo(str(json_data['personName']), str(json_data['personId']), str(json_data['mask']))
+            elif 'authorizeStatus' in json_data:
+                if json_data['authorizeStatus'] == 'SUCCESS':
+                    self.activeDeviceStatus = True
+                else:
+                    self.activeDeviceStatus = False
+
+    def activeDevice(self, deviceId, deviceLabel, pinCode):
+        message = MSG_ACTIVE.format(deviceId=deviceId, deviceLabel=deviceLabel, pinCode=pinCode)
+        message_object = Message(message)
+        message_object.custom_properties["level"] = "login"
+        # Send the message
+        self.client.send_message(message_object)
+        print( "Activating" ) 
+        startTime = time.time()
+        while (self.activeDeviceStatus is None) and (time.time() - startTime < 8):
+            time.sleep(0.2)
+        returnValue = (self.activeDeviceStatus is not None) and self.activeDeviceStatus
+        self.activeDeviceStatus = None
+        return returnValue
 
     def messageSending(self, buildingId, deviceId, trackingId, face_img):
         message = MSG_REC.format(buildingId=buildingId, deviceId=deviceId, trackingId=trackingId, face=face_img)
@@ -48,8 +70,8 @@ class IotConn:
         self.client.send_message(message_object)
         print( "Message sent" ) 
 
-    def sendRecord(self, buildingId, personID, name, temperature, face):
-        message = MSG_RECORD.format(buildingId=buildingId, personID=personID, personName=name, temperature=temperature, face=face)
+    def sendRecord(self, deviceLabel, personID, temperature, face, masked):
+        message = MSG_RECORD.format(deviceLabel=deviceLabel, personID=personID, temperature=temperature, face=face, masked=masked)
         message_object = Message(message)
         message_object.custom_properties["level"] = "store"
         # Send the message.

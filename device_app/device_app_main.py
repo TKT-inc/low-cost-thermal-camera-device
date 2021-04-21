@@ -14,6 +14,7 @@ from PyQt5 import uic
 from datetime import datetime
 from device_app_function import DeviceAppFunctions
 from guiModules.ui_components import *
+from guiModules.worker import *
 
 bus = dbus.SessionBus()
 proxy = bus.get_object("org.onboard.Onboard", "/org/onboard/Onboard/Keyboard")
@@ -33,8 +34,20 @@ LIMIT_RECORDS = user_cfg['limitRecords']
 class MainWindow(QtWidgets.QMainWindow):
     def __init__(self):
         super(MainWindow, self).__init__()
-        self.deviceFuntion = DeviceAppFunctions()
-        self.startMainWindow()
+        
+        # self.show()
+        self.startLoginWindow()
+        self.threadpool = QtCore.QThreadPool()
+
+        self.loading = LoadingDlg(self)
+        self.loading.show()
+        worker = Worker(self.initSystem)
+        worker.signals.finished.connect(self.loading.close)
+        self.threadpool.start(worker)
+        # self.deviceFuntion = DeviceAppFunctions()
+        # self.movie.stop()
+        # self.show()
+        # self.startMainWindow()
         # self.startLoginWindow()
 
         # QtWidgets.QApplication.instance().focusChanged.connect(self.handle_focuschanged)
@@ -45,8 +58,11 @@ class MainWindow(QtWidgets.QMainWindow):
         # self.a = QtWidgets.QShortcut(QtGui.QKeySequence('Ctrl+A'), self)
         # self.a.activated.connect(lambda: self.startMainWindow())
 
+    def initSystem(self):
+        self.deviceFuntion =  DeviceAppFunctions()
+        return
     """
-    Controle windows
+    Control windows
     """
     def startMainWindow(self):
         uic.loadUi("./device_app/guiModules/mainWindow.ui", self)
@@ -103,7 +119,9 @@ class MainWindow(QtWidgets.QMainWindow):
     def startLoginWindow(self):
 
         uic.loadUi("./device_app/guiModules/loginWindow.ui", self)
+        self.active_device_btn.clicked.connect(self.button)
 
+        
     """
     Main processing of the application
     """
@@ -134,6 +152,16 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.addNoti(current_time, str(objectID) + '-' + obj.name, obj.record_temperature)
             del records[objectID]
 
+    """
+    Active device functions
+    """
+    @QtCore.pyqtSlot(object)
+    def activeDevice(self, activatedStatus):
+        print(activatedStatus)
+        if (activatedStatus):
+            self.startMainWindow()
+        else:
+            self.noti = NotificationDlg('The PIN is not match. Please input again', self)
 
     #Close the application
     def closeApp(self):
@@ -156,6 +184,7 @@ class MainWindow(QtWidgets.QMainWindow):
         qimg = QtGui.QImage(frame.data, width, height, 3*width, QtGui.QImage.Format_RGB888).rgbSwapped()
         self.thremal_frame.setPixmap(QtGui.QPixmap(qimg))
 
+    
     #Create an input dialog to input person's info when finish face register
     def createInputNameDialog(self):
         keyboard.Show()
@@ -382,6 +411,13 @@ class MainWindow(QtWidgets.QMainWindow):
         if btnWidget.objectName() == "save":
             self.saveSettingParam()  
 
+        if btnWidget.objectName() == "active_device_btn":
+            self.loading.show()
+            worker = Worker(self.deviceFuntion.activateDevice, self.pin_code.text())
+            worker.signals.result.connect(self.activeDevice)
+            worker.signals.finished.connect(self.loading.close)
+            self.threadpool.start(worker)
+
 
     # @QtCore.pyqtSlot("QWidget*", "QWidget*")
     # def handle_focuschanged(self, old, now):
@@ -393,12 +429,12 @@ class MainWindow(QtWidgets.QMainWindow):
 
     ## ==> SELECT
     def selectMenu(self, getStyle):
-        select = getStyle + ("QPushButton { border-right: 8px solid rgb(44, 49, 60); }")
+        select = getStyle + ("QPushButton { background-color:#61668c; border-left: 28px solid #61668c; border-right: 11px solid rgb(44, 49, 60); }")
         return select
 
     ## ==> DESELECT
     def deselectMenu(self, getStyle):
-        deselect = getStyle.replace("QPushButton { border-right: 8px solid rgb(44, 49, 60); }", "")
+        deselect = getStyle.replace("QPushButton { background-color:#61668c; border-left: 28px solid #61668c; border-right: 11px solid rgb(44, 49, 60); }", "")
         return deselect
 
     ## ==> START SELECTION

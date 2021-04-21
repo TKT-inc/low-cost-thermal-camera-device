@@ -49,8 +49,7 @@ color: rgb(210, 210, 210);</string>
      </rect>
     </property>
     <property name="styleSheet">
-     <string notr="true">background-color: rgb(75, 79, 87);
-     background-color: rgb(226, 255, 241);
+     <string notr="true">background-color: #98C1D9;
 
 </string>
     </property>
@@ -63,16 +62,16 @@ color: rgb(210, 210, 210);</string>
     <widget class="QFrame" name="frame_2">
      <property name="geometry">
       <rect>
-       <x>440</x>
-       <y>190</y>
-       <width>441</width>
-       <height>321</height>
+       <x>430</x>
+       <y>200</y>
+       <width>431</width>
+       <height>291</height>
       </rect>
      </property>
      <property name="styleSheet">
-      <string notr="true">background-color: rgb(121, 175, 255);
-border-radius: 20px
-</string>
+      <string notr="true">background-color: #293241;
+border-radius: 20px;
+color: #E0FBFC;</string>
      </property>
      <property name="frameShape">
       <enum>QFrame::StyledPanel</enum>
@@ -83,10 +82,10 @@ border-radius: 20px
      <widget class="QLabel" name="label">
       <property name="geometry">
        <rect>
-        <x>170</x>
-        <y>30</y>
-        <width>111</width>
-        <height>41</height>
+        <x>30</x>
+        <y>20</y>
+        <width>371</width>
+        <height>61</height>
        </rect>
       </property>
       <property name="font">
@@ -96,8 +95,101 @@ border-radius: 20px
         <bold>true</bold>
        </font>
       </property>
+      <property name="styleSheet">
+       <string notr="true"/>
+      </property>
       <property name="text">
-       <string>LOGIN</string>
+       <string>ACTIVE THE DEVICE</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignCenter</set>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_2">
+      <property name="geometry">
+       <rect>
+        <x>60</x>
+        <y>50</y>
+        <width>311</width>
+        <height>91</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <pointsize>14</pointsize>
+       </font>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">background-color:transparent;</string>
+      </property>
+      <property name="text">
+       <string>Please input the PIN of this device</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignCenter</set>
+      </property>
+     </widget>
+     <widget class="QLineEdit" name="pin_code">
+      <property name="geometry">
+       <rect>
+        <x>80</x>
+        <y>140</y>
+        <width>271</width>
+        <height>51</height>
+       </rect>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">background-color: rgb(177, 177, 177);</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="active_device_btn">
+      <property name="geometry">
+       <rect>
+        <x>120</x>
+        <y>220</y>
+        <width>191</width>
+        <height>41</height>
+       </rect>
+      </property>
+      <property name="minimumSize">
+       <size>
+        <width>150</width>
+        <height>30</height>
+       </size>
+      </property>
+      <property name="font">
+       <font>
+        <family>Segoe UI</family>
+        <pointsize>16</pointsize>
+        <weight>75</weight>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">QPushButton {
+	border-radius: 20px;	
+	background-color: #db4959;
+	color: #293241;
+}
+QPushButton:hover {
+	background-color:#EE6C4D;
+}
+QPushButton:pressed {	
+	background-color: #EE6C4D;
+}</string>
+      </property>
+      <property name="text">
+       <string>Active</string>
+      </property>
+      <property name="icon">
+       <iconset>
+        <normaloff>icons/24x24/cil-check.png</normaloff>icons/24x24/cil-check.png</iconset>
+      </property>
+      <property name="iconSize">
+       <size>
+        <width>24</width>
+        <height>24</height>
+       </size>
       </property>
      </widget>
     </widget>

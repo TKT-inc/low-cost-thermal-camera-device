@@ -20,7 +20,8 @@ from submodules.capture_register.capture_register import CaptureRegisterFace
 from copy import deepcopy
 
 # Set up device params
-DEVICE_ID = cfg['deviceId']
+DEVICE_ID = cfg['deviceIdAzure']
+DEVICE_LABEL = cfg['deviceLabel']
 BUILDING_ID = user_cfg['buildingId']
 
 # Set up azure cloud params 
@@ -86,7 +87,7 @@ class DeviceAppFunctions():
     def __init__(self):
         self.color = np.zeros((480,640,3), np.uint8)
         self.rgb_temp = np.zeros((480,640,3), np.uint8)
-        self.MODE = 'NORMAL'
+        self.MODE = 'WAITING'
 
         self.deletedObjectRecord = OrderedDict()
 
@@ -155,7 +156,7 @@ class DeviceAppFunctions():
                 return status
 
         elif (self.MODE == 'WAITING'):
-            time.sleep(0.1)
+            time.sleep(0.02)
 
         self.displayFrame = self.frame
 
@@ -203,12 +204,13 @@ class DeviceAppFunctions():
     def sendRecordsInfo(self, DeletedObjects):
         for (objectID, obj) in DeletedObjects.items():
             self.deletedObjectRecord[objectID] = obj
+
             _, buffer = cv2.imencode('.jpg', cv2.resize(obj.face_rgb,(FACE_SIZE,FACE_SIZE)))
             pic_str = base64.b64encode(buffer)
             pic_str = pic_str.decode()
 
             if (ENABLE_SENDING_TO_CLOUD):
-                self.conn.sendRecord(BUILDING_ID, obj.id, obj.name, obj.record_temperature, pic_str)
+                self.conn.sendRecord( DEVICE_LABEL, obj.id, obj.record_temperature, pic_str, obj.have_mask)
 
 
     def drawInfoOnFrameAndCheckRecognize( self, rects):
@@ -308,6 +310,16 @@ class DeviceAppFunctions():
         self.store_registered_imgs = None
         print('Registered')
     
+    def activateDevice(self, pinCode):
+        status = self.conn.activeDevice(DEVICE_ID, DEVICE_LABEL, pinCode)
+        status = False
+        if (status):
+            self.selectNormalMode()
+        return status
+
+    def deactivateDevice(self):
+        self.MODE = 'WAITING'
+
     def stop(self):
         self.MODE = "OFF"
         self.rgb.stop()
