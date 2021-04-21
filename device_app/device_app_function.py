@@ -312,7 +312,6 @@ class DeviceAppFunctions():
     
     def activateDevice(self, pinCode):
         status = self.conn.activeDevice(DEVICE_ID, DEVICE_LABEL, pinCode)
-        status = False
         if (status):
             self.selectNormalMode()
         return status

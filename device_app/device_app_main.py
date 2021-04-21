@@ -65,7 +65,7 @@ class MainWindow(QtWidgets.QMainWindow):
     Control windows
     """
     def startMainWindow(self):
-        uic.loadUi("./device_app/guiModules/mainWindow.ui", self)
+        uic.loadUi("./device_app/guiModules/ui_files/mainWindow.ui", self)
 
         self.main_display_monitor = self.rgb_frame   
 
@@ -118,7 +118,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def startLoginWindow(self):
 
-        uic.loadUi("./device_app/guiModules/loginWindow.ui", self)
+        uic.loadUi("./device_app/guiModules/ui_files/loginWindow.ui", self)
         self.active_device_btn.clicked.connect(self.button)
 
         
@@ -157,7 +157,6 @@ class MainWindow(QtWidgets.QMainWindow):
     """
     @QtCore.pyqtSlot(object)
     def activeDevice(self, activatedStatus):
-        print(activatedStatus)
         if (activatedStatus):
             self.startMainWindow()
         else:
