@@ -1,7 +1,10 @@
 # import the necessary packages
 from scipy.spatial import distance as dist
 from collections import OrderedDict
+from datetime import datetime
 import numpy as np
+import base64
+import cv2
 
 class ObjectInfo():
 	def __init__(self, coor, rgb, scale, max_rec_stack = 3, max_temp_stack=6, fever_temp=38):
@@ -43,7 +46,36 @@ class ObjectInfo():
 		if(self.record_temperature >= self.fever_temp):
 			return True
 		return False
-	
+
+
+class RecordsObject():
+	def __init__(self, face_size):
+		self.records = OrderedDict()
+		self.face_size = face_size
+
+	def addNewRecord(self, objectId, obj):
+		self.records[objectId] = self.Record(id = obj.id, name=obj.name, record_temperature = obj.record_temperature, got_fever = obj.gotFever(), face_rgb = obj.face_rgb, have_mask = obj.have_mask, face_size= self.face_size)
+		
+	class Record():
+		def __init__(self, id, name, record_temperature, got_fever, face_rgb, have_mask, face_size):
+			self.id = id
+			self.name= name
+			self.record_temperature = record_temperature
+			self.got_fever = got_fever
+			self.face_rgb = face_rgb
+			self.have_mask = have_mask
+			self.face_size = face_size
+			self.record_time = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3]
+		
+		def convertBinaryImg(self):
+			_, buffer = cv2.imencode('.jpg', cv2.resize(self.face_rgb,(self.face_size,self.face_size)))
+			pic_str = base64.b64encode(buffer)
+			pic_str = pic_str.decode()
+			return pic_str
+
+		def jsonable(self):
+			return dict(id=self.id, record_temperature=self.record_temperature, pic_str=self.convertBinaryImg(), have_mask=self.have_mask )
+
 
 class CentroidTracker():
 	def __init__(self, maxDisappeared=25, max_rec_stack = 3, max_temp_stack=6):
@@ -82,10 +114,11 @@ class CentroidTracker():
 		del self.objects[objectID]
 		del self.disappeared[objectID]
 
+
 	def update(self, rects, rgb, scale, fever_temp=38):
 		# check to see if the list of input bounding box rectangles
 		# is empty
-		disappearedObjects = OrderedDict()
+		disappearedObjects = RecordsObject(600)
 
 		if len(rects) == 0:
 			# loop over any existing tracked objects and mark them
@@ -98,7 +131,7 @@ class CentroidTracker():
 				# frames where a given object has been marked as
 				# missing, deregister it
 				if self.disappeared[objectID] > self.maxDisappeared:
-					disappearedObjects[objectID] = self.objects[objectID]
+					disappearedObjects.addNewRecord(objectID, self.objects[objectID])
 					self.deregister(objectID)
 
 			# return early as there are no centroids or tracking info
@@ -207,7 +240,7 @@ class CentroidTracker():
 					# frames the object has been marked "disappeared"
 					# for warrants deregistering the object
 					if self.disappeared[objectID] > self.maxDisappeared:
-						disappearedObjects[objectID] = self.objects[objectID]
+						disappearedObjects.addNewRecord(objectID, self.objects[objectID])
 						self.deregister(objectID)
 
 			# otherwise, if the number of input centroids is greater

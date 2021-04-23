@@ -90,7 +90,7 @@ color:#E0FBFC;</string>
        <string/>
       </property>
       <property name="pixmap">
-       <pixmap>images/logo.png</pixmap>
+       <pixmap>../images/logo.png</pixmap>
       </property>
       <property name="scaledContents">
        <bool>true</bool>
@@ -1515,7 +1515,7 @@ border-radius: 20px;	</string>
          <string/>
         </property>
         <property name="pixmap">
-         <pixmap>images/face_left.png</pixmap>
+         <pixmap>../images/face_left.png</pixmap>
         </property>
         <property name="scaledContents">
          <bool>true</bool>
@@ -1539,7 +1539,7 @@ border-radius: 20px;	</string>
          <string/>
         </property>
         <property name="pixmap">
-         <pixmap>images/face_right.png</pixmap>
+         <pixmap>../images/face_right.png</pixmap>
         </property>
         <property name="scaledContents">
          <bool>true</bool>
@@ -1563,7 +1563,7 @@ border-radius: 20px;	</string>
          <string/>
         </property>
         <property name="pixmap">
-         <pixmap>images/face_front.png</pixmap>
+         <pixmap>../images/face_front.png</pixmap>
         </property>
         <property name="scaledContents">
          <bool>true</bool>
@@ -1625,7 +1625,7 @@ border-radius: 20px;	</string>
          <string/>
         </property>
         <property name="pixmap">
-         <pixmap>images/logo.png</pixmap>
+         <pixmap>../images/logo.png</pixmap>
         </property>
        </widget>
        <widget class="QLabel" name="label_4">

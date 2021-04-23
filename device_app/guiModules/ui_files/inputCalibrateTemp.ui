@@ -96,7 +96,7 @@ QPushButton:pressed {
    </property>
    <property name="icon">
     <iconset>
-     <normaloff>../../thesis-device-app/device_app/guiModules/icons/20x20/cil-check.png</normaloff>../../thesis-device-app/device_app/guiModules/icons/20x20/cil-check.png</iconset>
+     <normaloff>../../../thesis-device-app/device_app/guiModules/icons/20x20/cil-check.png</normaloff>../../thesis-device-app/device_app/guiModules/icons/20x20/cil-check.png</iconset>
    </property>
   </widget>
   <widget class="QPushButton" name="cancel_btn">

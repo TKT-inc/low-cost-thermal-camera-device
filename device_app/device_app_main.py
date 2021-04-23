@@ -5,6 +5,7 @@ import time
 import dbus
 from threading import Thread
 import yaml
+import json
 
 with open("user_settings.yaml") as settings:
     user_cfg = yaml.safe_load(settings)
@@ -15,6 +16,8 @@ from datetime import datetime
 from device_app_function import DeviceAppFunctions
 from guiModules.ui_components import *
 from guiModules.worker import *
+from datetime import datetime
+from testModules.nointernet_test import *
 
 bus = dbus.SessionBus()
 proxy = bus.get_object("org.onboard.Onboard", "/org/onboard/Onboard/Keyboard")
@@ -32,41 +35,39 @@ LIMIT_NOTIFICATIONS = user_cfg['limitNotifications']
 LIMIT_RECORDS = user_cfg['limitRecords']
 
 class MainWindow(QtWidgets.QMainWindow):
+
+    internetAvailable = pyqtSignal(bool)
+
     def __init__(self):
         super(MainWindow, self).__init__()
-        
+        self.suspend = False
         # self.show()
+
         self.startLoginWindow()
         self.threadpool = QtCore.QThreadPool()
-
         self.loading = LoadingDlg(self)
-        self.loading.show()
+        self.loading.display('1')
         worker = Worker(self.initSystem)
         worker.signals.finished.connect(self.loading.close)
+        worker.signals.finished.connect(keyboard.Show)
         self.threadpool.start(worker)
-        # self.deviceFuntion = DeviceAppFunctions()
-        # self.movie.stop()
-        # self.show()
-        # self.startMainWindow()
-        # self.startLoginWindow()
 
         # QtWidgets.QApplication.instance().focusChanged.connect(self.handle_focuschanged)
         
         self.shortcut_quit = QtWidgets.QShortcut(QtGui.QKeySequence('Ctrl+Q'), self)
         self.shortcut_quit.activated.connect(self.closeApp)
 
-        # self.a = QtWidgets.QShortcut(QtGui.QKeySequence('Ctrl+A'), self)
-        # self.a.activated.connect(lambda: self.startMainWindow())
-
     def initSystem(self):
-        self.deviceFuntion =  DeviceAppFunctions()
+        self.OfflineMode = False
+        self.deviceFuntion =  DeviceAppFunctions(self.internetAvailable)
+        self.internetAvailable.connect(self.getInternetStatus)
         return
     """
     Control windows
     """
     def startMainWindow(self):
         uic.loadUi("./device_app/guiModules/ui_files/mainWindow.ui", self)
-
+        keyboard.Hide()
         self.main_display_monitor = self.rgb_frame   
 
         self.selectStandardMenu("btn_home")  
@@ -121,34 +122,51 @@ class MainWindow(QtWidgets.QMainWindow):
         uic.loadUi("./device_app/guiModules/ui_files/loginWindow.ui", self)
         self.active_device_btn.clicked.connect(self.button)
 
-        
+    def activeOfflineMode(self):
+        timeString = str(datetime.utcnow())
+        try:
+            with open('offline_data/record_' + timeString +'.json') as f:
+                print('have record File')
+                # Do something with the file
+        except IOError:
+            print('donot have File')
+            with open('offline_data/record_' + timeString +'.json', 'w') as f:
+                f.write("")
+                f.close()
+
+
     """
     Main processing of the application
     """
     #PROCESSING OF THE MAIN SYSTEM
     def working(self):
-        status = self.deviceFuntion.process()
-        if (status == "REGISTER_SUCCESS"):
-            self.finishedFaceRegistrationStyle(self.face_right)
-            self.createInputNameDialog()
-        elif (status == "REGISTER_DONE_LEFT"):
-            self.finishedFaceRegistrationStyle(self.face_left)
-        elif (status == "REGISTER_DONE_FRONT"):
-            self.finishedFaceRegistrationStyle(self.face_front)
-        elif (status == "CALIBRATE_TOO_MUCH_PEOPLE"):
-            print('one person please')
-        elif (status == "CALIBRATE_SUCCESS"):
-            self.createInputGroundTruthTemp()
+        if (not self.suspend):
+            status = self.deviceFuntion.process()
+            if (status == "REGISTER_SUCCESS"):
+                self.finishedFaceRegistrationStyle(self.face_right)
+                self.createInputNameDialog()
+            elif (status == "REGISTER_DONE_LEFT"):
+                self.finishedFaceRegistrationStyle(self.face_left)
+            elif (status == "REGISTER_DONE_FRONT"):
+                self.finishedFaceRegistrationStyle(self.face_front)
+            elif (status == "CALIBRATE_TOO_MUCH_PEOPLE"):
+                print('one person please')
+            elif (status == "CALIBRATE_SUCCESS"):
+                self.createInputGroundTruthTemp()
 
     #Handle status of working process
     def handleRecordsAndNotis(self):
         records = self.deviceFuntion.getRecordsInfo()
-        for (objectID, obj) in records.items():
+        if records and self.OfflineMode:
+            print(json.dumps(list(records.items()), default=ComplexJsonHandler))
+            
+        for (objectID, obj) in list(records.items()):
+            # print(json.dumps(vars(obj)))
             current_time = datetime.now()
             self.addRecords(current_time, str(objectID) + '-' + obj.name, obj.record_temperature, obj.face_rgb)
             if (obj.have_mask is False):
                 self.addNoti(current_time, str(objectID) + '-' + obj.name)
-            if (obj.gotFever() is True):
+            if (obj.got_fever is True):
                 self.addNoti(current_time, str(objectID) + '-' + obj.name, obj.record_temperature)
             del records[objectID]
 
@@ -162,9 +180,17 @@ class MainWindow(QtWidgets.QMainWindow):
         else:
             self.noti = NotificationDlg('The PIN is not match. Please input again', self)
 
+    @QtCore.pyqtSlot(bool)
+    def getInternetStatus(self, internetStatus):
+        self.deviceFuntion.setInternetStatus(internetStatus)
+        print(internetStatus)
+
     #Close the application
     def closeApp(self):
-        self.deviceFuntion.stop()
+        try:
+            self.deviceFuntion.stop()
+        except:
+            pass
         app.quit()
 
     #Display main frame into rgb frame in homepage and register page
@@ -190,7 +216,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.dlg = InputNameDlg(self)
         self.dlg.accepted.connect(self.acceptInputRegisterName)
         self.dlg.rejected.connect(self.cancelInputRegisterName)
-        self.dlg.exec()
+        self.suspend = True
+        self.dlg.show()
 
     # Create an input dialog to input the ground truth temperature
     def createInputGroundTruthTemp(self):
@@ -198,7 +225,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.dlg = InputTempDlg(self)
         self.dlg.accepted.connect(self.acceptInputTempCalibrate)
         self.dlg.rejected.connect(self.cancelInputTempCalibrate)
-        self.dlg.exec()
+        self.suspend = True
+        self.dlg.show()
     
     # Change color of the face register state
     def finishedFaceRegistrationStyle(self, label_of_face):
@@ -222,6 +250,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.stackedWidget.setCurrentWidget(self.new_user)
         self.resetStyleBtn("btn_new_user")
         self.btn_new_user.setStyleSheet(self.selectMenu(self.btn_new_user.styleSheet()))
+        self.noti = NotificationDlg('Please rotate your face following the order: LEFT, FRONT, RIGHT', self)
         if (self.deviceFuntion.getMode() != 'REGISTER'):
             self.deviceFuntion.selectRegisterMode() 
 
@@ -341,21 +370,25 @@ class MainWindow(QtWidgets.QMainWindow):
     
     #Ok button when input register name
     def acceptInputRegisterName(self):
+        self.suspend = False
         keyboard.Hide()
         self.selectNormalMode()
         self.deviceFuntion.sendRegisteredInfoToServer(self.dlg.name_edit.text())
 
     #Cancel button when input register name
     def cancelInputRegisterName(self):
+        self.suspend = False
         keyboard.Hide()
         self.selectRegisterMode()
 
     def acceptInputTempCalibrate(self):
+        self.suspend = False
         keyboard.Hide()
         self.deviceFuntion.createUserTemperatureOffset(self.dlg.temperature_edit.text())
         self.selectNormalMode()
     
     def cancelInputTempCalibrate(self):
+        self.suspend = False
         keyboard.Hide()
         self.selectCalibrateMode()
 
@@ -411,7 +444,8 @@ class MainWindow(QtWidgets.QMainWindow):
             self.saveSettingParam()  
 
         if btnWidget.objectName() == "active_device_btn":
-            self.loading.show()
+            # disable_socket()
+            self.loading.display()
             worker = Worker(self.deviceFuntion.activateDevice, self.pin_code.text())
             worker.signals.result.connect(self.activeDevice)
             worker.signals.finished.connect(self.loading.close)
@@ -447,6 +481,14 @@ class MainWindow(QtWidgets.QMainWindow):
         for w in self.menu.findChildren(QtWidgets.QPushButton):
             if w.objectName() != widget:
                 w.setStyleSheet(self.deselectMenu(w.styleSheet()))
+
+
+def ComplexJsonHandler(Obj):
+    if hasattr(Obj, 'jsonable'):
+        return Obj.jsonable()
+    else:
+        return ""
+
 
 
 if __name__ == "__main__":

@@ -22,17 +22,21 @@ class NotificationDlg(QtWidgets.QDialog):
         self.exec()
 
 class LoadingDlg(QtWidgets.QDialog):
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, opacity='0.4'):
         super().__init__(parent)
         self.setWindowFlags(QtCore.Qt.FramelessWindowHint)
-        uic.loadUi("./device_app/guiModules/ui_files/loading.ui", self)
-
         self.resize(parent.size().width(), parent.size().height())
+        self.loading_label = QtWidgets.QLabel(self)
         self.loading_label.resize(227,227)
         self.loading_label.move(self.rect().center()- self.loading_label.rect().center())
-        self.setStyleSheet("background-color:rgba(0,0,0, 0.4);")
+        self.setStyleSheet("background-color:rgba(0,0,0,"+ opacity +");")
         self.loading_label.setStyleSheet("background-color: transparent;")
         self.movie = QtGui.QMovie('./device_app/guiModules/images/loading.gif')
         self.loading_label.setMovie(self.movie)
         self.movie.start()
         self.close()
+    
+    def display(self, opacity='0.4'):
+        self.setStyleSheet("background-color:rgba(0,0,0,"+ opacity +");")
+        self.show()
+    

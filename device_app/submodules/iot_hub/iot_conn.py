@@ -3,13 +3,15 @@ import json
 import uuid
 import cv2
 import yaml
+import asyncio
 with open("configuration.yaml") as ymlfile:
     cfg = yaml.safe_load(ymlfile)
 from threading import Thread
 import threading
 import time
-from azure.iot.device import IoTHubDeviceClient, Message, MethodResponse
-from azure.storage.blob import BlobServiceClient, BlobClient, ContainerClient
+from azure.iot.device.aio import IoTHubDeviceClient
+from azure.iot.device import Message
+from azure.storage.blob import BlobServiceClient
 
 
 MSG_REC = cfg['iotHub']['msgFormat']['recMsg']
@@ -17,44 +19,97 @@ MSG_REGISTER = cfg['iotHub']['msgFormat']['registerMsg']
 MSG_RECORD = cfg['iotHub']['msgFormat']['recordMsg']
 MSG_ACTIVE = cfg['iotHub']['msgFormat']['activeDeviceMsg']
 
+
+def get_or_create_eventloop():
+    try:
+        return asyncio.get_event_loop()
+    except RuntimeError as ex:
+        if "There is no current event loop in thread" in str(ex):
+            print('new event loop')
+            asyncio.set_event_loop(asyncio. SelectorEventLoop())
+            return asyncio.get_event_loop()
+
+def listeningEventLoopThread(fn, *args):
+    loop = get_or_create_eventloop()
+    asyncio.set_event_loop(loop)
+    loop.run_until_complete(fn(*args))
+    return loop
+
+def sendingEventLoopThread(loop):
+    asyncio.set_event_loop(loop)
+    loop.run_forever()
+
 class IotConn:
-    def __init__(self, mode, connStringDevice, connStringBlob, objects):
+    def __init__(self, internetStatus, mode, connStringDevice, connStringBlob, objects):
         # Create an IoT Hub client
-        self.client = IoTHubDeviceClient.create_from_connection_string(connStringDevice)
-        self.blob_service_client = BlobServiceClient.from_connection_string(connStringBlob)
         self.mode = mode
-        self.thread = Thread(target=self.messageListener, args=(self.client, objects,))
-        self.thread.daemon = True
-        self.thread.start()
         self.activeDeviceStatus = None
+        self.connectionAvailable = internetStatus
+        try:
+
+            self.client = IoTHubDeviceClient.create_from_connection_string(connStringDevice)
+            loop = get_or_create_eventloop()
+            loop.run_until_complete(self.client.connect())
+            # loop.run_in_executor(self.messageListener(self.client, objects))
+            
+            self.blob_service_client = BlobServiceClient.from_connection_string(connStringBlob)
+            
+            self.thread_listening = Thread(target=listeningEventLoopThread, args=(self.messageListener, self.client, objects,))
+            self.thread_listening.daemon = True
+            self.thread_listening.start()
+            
+            self.sending_event_loop = get_or_create_eventloop()
+            self.thread_sending = Thread(target=sendingEventLoopThread, args=(self.sending_event_loop, ))
+            self.thread_sending.daemon = True
+            self.thread_sending.start()
+            self.connectionAvailable.emit(True)
+
+        except:
+            self.connectionAvailable.emit(False)
 
     def restartListener(self, objects):
-        self.thread = Thread(target=self.messageListener, args=(self.client, objects,))
-        self.thread.daemon = True
-        self.thread.start()
+        if self.thread_listening.is_alive():
+            print("Is Alive")
+        else:
+            self.thread_listening = Thread(target=listeningEventLoopThread, args=(self.messageListener, self.client, objects,))
+            self.thread_listening.daemon = True
+            self.thread_listening.start()
 
-    def messageListener(self, client, objects):
+
+    async def messageListener(self, client, objects):
         print("Start listening to server")
-        while (self.mode == 'NORMAL' or self.mode == 'WAITING'): 
-            message = client.receive_message()
-            message = message.data.decode('utf-8')
-            json_data = json.loads(message, strict = False)
-            print(json_data)
-            if 'trackingId' in json_data and int(json_data['trackingId']) in objects:
-                objects[int(json_data['trackingId'])].updateInfo(str(json_data['personName']), str(json_data['personId']), str(json_data['mask']))
-            elif 'authorizeStatus' in json_data:
-                if json_data['authorizeStatus'] == 'SUCCESS':
-                    self.activeDeviceStatus = True
-                else:
-                    self.activeDeviceStatus = False
+        while (self.mode == 'NORMAL' or self.mode == 'OFF'): 
+            try:
+                message = await client.receive_message()
+                message = message.data.decode('utf-8')
+                json_data = json.loads(message, strict = False)
+                print(json_data)
+                if 'trackingId' in json_data and int(json_data['trackingId']) in objects:
+                    objects[int(json_data['trackingId'])].updateInfo(str(json_data['personName']), str(json_data['personId']), str(json_data['mask']))
+                elif 'authorizeStatus' in json_data:
+                    if json_data['authorizeStatus'] == 'SUCCESS':
+                        self.activeDeviceStatus = True
+                    else:
+                        self.activeDeviceStatus = False
+
+                self.connectionAvailable.emit(True)
+            except Exception as identifier:
+                print(identifier)
+                pass
+
+
+    async def handleSendMessage(self, msg):
+        done, pending = await asyncio.wait({self.client.send_message(msg)},  timeout=7.0)
+        if len(pending) > 0:
+            self.connectionAvailable.emit(False)
+        else:
+            self.connectionAvailable.emit(True)
 
     def activeDevice(self, deviceId, deviceLabel, pinCode):
         message = MSG_ACTIVE.format(deviceId=deviceId, deviceLabel=deviceLabel, pinCode=pinCode)
         message_object = Message(message)
-        message_object.custom_properties["level"] = "login"
-        # Send the message
-        self.client.send_message(message_object)
-        print( "Activating" ) 
+        message_object.custom_properties["level"] = "common"
+        asyncio.run_coroutine_threadsafe(self.handleSendMessage(message_object),self.sending_event_loop)
         startTime = time.time()
         while (self.activeDeviceStatus is None) and (time.time() - startTime < 8):
             time.sleep(0.2)
@@ -67,15 +122,15 @@ class IotConn:
         message_object = Message(message)
         message_object.custom_properties["level"] = "recognize"
         # Send the message.
-        self.client.send_message(message_object)
+        asyncio.run_coroutine_threadsafe(self.handleSendMessage(message_object),self.sending_event_loop)
         print( "Message sent" ) 
 
-    def sendRecord(self, deviceLabel, personID, temperature, face, masked):
-        message = MSG_RECORD.format(deviceLabel=deviceLabel, personID=personID, temperature=temperature, face=face, masked=masked)
+    def sendRecord(self, deviceLabel, personID, temperature, face, masked, recordTime):
+        message = MSG_RECORD.format(deviceLabel=deviceLabel, personID=personID, temperature=temperature, face=face, masked=masked, recordTime=recordTime)
         message_object = Message(message)
-        message_object.custom_properties["level"] = "store"
+        message_object.custom_properties["level"] = "common"
         # Send the message.
-        self.client.send_message(message_object)        
+        asyncio.run_coroutine_threadsafe(self.handleSendMessage(message_object),self.sending_event_loop)       
 
     def registerToAzure(self, buildingId, personName, imgs, size):
         containerName = str(uuid.uuid4())
@@ -101,7 +156,7 @@ class IotConn:
         # Set message property to level="register"
         message_object= Message(message)
         message_object.custom_properties["level"] = "register"
-        self.client.send_message(message_object)
+        asyncio.run_coroutine_threadsafe(self.handleSendMessage(message_object),self.sending_event_loop)
         print("Resgister sent to the server")
 
     def sendImageToBlob(self, images, containerName, size):

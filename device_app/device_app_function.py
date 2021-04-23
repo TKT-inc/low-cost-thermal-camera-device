@@ -84,18 +84,19 @@ USER_TEMP_OFFSET = user_cfg['offsetTemperature']
 
 class DeviceAppFunctions():
 
-    def __init__(self):
+    def __init__(self, internetSignal):
         self.color = np.zeros((480,640,3), np.uint8)
         self.rgb_temp = np.zeros((480,640,3), np.uint8)
-        self.MODE = 'WAITING'
+        self.MODE = 'OFF'
 
         self.deletedObjectRecord = OrderedDict()
+        self.INTERNET_AVAILABLE = True
 
         #init the system
         self.initCamera()
         self.initModel()
         self.initObjectTracking()
-        self.initIoTConnection()
+        self.initIoTConnection(internetSignal)
 
         self.measureTemp = Thread(target=self.measureTemperatureAllPeople,daemon=True)
         self.measureTemp.start()
@@ -124,8 +125,8 @@ class DeviceAppFunctions():
         self.objects, _ = self.ct.update([],[],RGB_SCALE, THRESHOLD_TEMP_FEVER)
 
 
-    def initIoTConnection(self):
-        self.conn = IotConn(self.MODE, CONNECTION_STRING_DEVICE, CONNECTION_STRING_BLOB , self.objects)
+    def initIoTConnection(self, internetStatus):
+        self.conn = IotConn(internetStatus, self.MODE, CONNECTION_STRING_DEVICE, CONNECTION_STRING_BLOB , self.objects)
 
 
     def process(self):
@@ -136,7 +137,7 @@ class DeviceAppFunctions():
         if (self.MODE == 'NORMAL' or self.MODE == 'CALIBRATE'):
             self.objects,deletedObject = self.ct.update(rects, self.ori, RGB_SCALE, THRESHOLD_TEMP_FEVER)
             
-            if (deletedObject):
+            if (deletedObject.records):
                 Thread(target=self.sendRecordsInfo, args=(deletedObject, ),daemon=True).start()
                 print("send records")
                 
@@ -202,15 +203,13 @@ class DeviceAppFunctions():
 
 
     def sendRecordsInfo(self, DeletedObjects):
-        for (objectID, obj) in DeletedObjects.items():
+        for (objectID, obj) in DeletedObjects.records.items():
+            # print(list(DeletedObjects.records.items())[0])
             self.deletedObjectRecord[objectID] = obj
+            pic_str = obj.convertBinaryImg()
 
-            _, buffer = cv2.imencode('.jpg', cv2.resize(obj.face_rgb,(FACE_SIZE,FACE_SIZE)))
-            pic_str = base64.b64encode(buffer)
-            pic_str = pic_str.decode()
-
-            if (ENABLE_SENDING_TO_CLOUD):
-                self.conn.sendRecord( DEVICE_LABEL, obj.id, obj.record_temperature, pic_str, obj.have_mask)
+            if (ENABLE_SENDING_TO_CLOUD and self.INTERNET_AVAILABLE):
+                self.conn.sendRecord( DEVICE_LABEL, obj.id, obj.record_temperature, pic_str, obj.have_mask, obj.record_time)
 
 
     def drawInfoOnFrameAndCheckRecognize( self, rects):
@@ -234,7 +233,7 @@ class DeviceAppFunctions():
                 pic_str = base64.b64encode(buffer)
                 pic_str = pic_str.decode()
 
-                if (ENABLE_SENDING_TO_CLOUD):
+                if (ENABLE_SENDING_TO_CLOUD and self.INTERNET_AVAILABLE):
                     self.conn.messageSending(BUILDING_ID ,DEVICE_ID, personID, pic_str)
                     
                 time.sleep(TIME_SEND_REC)
@@ -269,6 +268,9 @@ class DeviceAppFunctions():
         self.register = CaptureRegisterFace(NUM_FRONT_PICS,NUM_LEFT_PICS,NUM_RIGHT_PICS, LEFT_THRESHOLD, RIGHT_THRESHOLD, FRONT_RANGE, STACK_NUMBER, FRAMES_BETWEEN_CAP)
 
     def selectNormalMode(self):
+        if (self.MODE == 'NORMAL'):
+            return
+
         global USER_TEMP_OFFSET
         USER_TEMP_OFFSET = user_cfg['offsetTemperature']
         self.initObjectTracking()
@@ -305,20 +307,29 @@ class DeviceAppFunctions():
             yaml.dump(user_cfg, f)
 
     def sendRegisteredInfoToServer(self, name_of_new_user):
-        if (self.store_registered_imgs is not None and ENABLE_SENDING_TO_CLOUD):
+        if (self.store_registered_imgs is not None and ENABLE_SENDING_TO_CLOUD and self.INTERNET_AVAILABLE):
             Thread(target=self.conn.registerToAzure, args=(BUILDING_ID ,name_of_new_user, self.store_registered_imgs, FACE_SIZE, ), daemon=True).start()
         self.store_registered_imgs = None
         print('Registered')
     
     def activateDevice(self, pinCode):
-        status = self.conn.activeDevice(DEVICE_ID, DEVICE_LABEL, pinCode)
-        if (status):
-            self.selectNormalMode()
-        return status
+        if (self.INTERNET_AVAILABLE):
+            status = self.conn.activeDevice(DEVICE_ID, DEVICE_LABEL, pinCode)
+            if (status):
+                self.measureTemp.join()
+                self.measureTemp = Thread(target=self.measureTemperatureAllPeople, daemon=True)
+                self.measureTemp.start()
+                self.MODE = 'NORMAL'
+            return status
+        else:
+            return False
 
     def deactivateDevice(self):
-        self.MODE = 'WAITING'
+        self.MODE = 'OFF'
 
     def stop(self):
         self.MODE = "OFF"
         self.rgb.stop()
+
+    def setInternetStatus(self, status):
+        self.INTERNET_AVAILABLE = status

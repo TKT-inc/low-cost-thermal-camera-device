@@ -63,7 +63,7 @@ color: rgb(210, 210, 210);</string>
      <property name="geometry">
       <rect>
        <x>430</x>
-       <y>200</y>
+       <y>80</y>
        <width>431</width>
        <height>291</height>
       </rect>
@@ -138,8 +138,17 @@ color: #E0FBFC;</string>
         <height>51</height>
        </rect>
       </property>
+      <property name="font">
+       <font>
+        <pointsize>15</pointsize>
+       </font>
+      </property>
       <property name="styleSheet">
-       <string notr="true">background-color: rgb(177, 177, 177);</string>
+       <string notr="true">background-color: rgb(177, 177, 177);
+color: rgb(0, 0, 0);</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignCenter</set>
       </property>
      </widget>
      <widget class="QPushButton" name="active_device_btn">
@@ -183,7 +192,7 @@ QPushButton:pressed {
       </property>
       <property name="icon">
        <iconset>
-        <normaloff>icons/24x24/cil-check.png</normaloff>icons/24x24/cil-check.png</iconset>
+        <normaloff>../icons/24x24/cil-check.png</normaloff>../icons/24x24/cil-check.png</iconset>
       </property>
       <property name="iconSize">
        <size>
