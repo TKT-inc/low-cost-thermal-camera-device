@@ -1,7 +1,6 @@
 deviceIdAzure: 'test-device'
 deviceLabel: 'TMC-2021-1-00000001'
 
-
 periodTime:
     measureTemp: 0.8
     sendRecMess: 2.0
@@ -11,7 +10,7 @@ iotHub:
     connectionStringBlob: "DefaultEndpointsProtocol=https;AccountName=tktrecordstorage;AccountKey=L5yEM18qRAUaAvYiFkwQC1T54rl+ceLvhu6EeDVXr1vOBfvMn6mzoAoagM/WBwUiQJy4gYxNM5aSiDQlzIxtsg==;EndpointSuffix=core.windows.net"
     msgFormat: 
         recMsg: '{{"buildingId":"{buildingId}","deviceId":"{deviceId}","trackingId": "{trackingId}","face": "{face}"}}'
-        recordMsg: '{{"method":"storeRecord","data":{{"deviceLabel":"{deviceLabel}","personId": "{personID}", "temperature":"{temperature}", "face":"{face}", "masked":"{masked}", "recordTime":"{recordTime}"}}}}'
+        recordMsg: '{{"method":"storeRecord","data":{{"deviceLabel":"{deviceLabel}","personId": "{personID}", "temperature":"{temperature}", "face":"{face}", "masked":"{masked}", "recordTime":"{recordTime}" , "internetAvailable":"{internetAvailable}"}}}}'
         registerMsg: '{{"buildingId":"{buildingId}","personName": "{personName}","containerName":"{containerName}"}}'
         activeDeviceMsg: '{{"method":"loginDevice","data":{{"deviceId":"{deviceId}", "deviceLabel":"{deviceLabel}","pinCode": "{pinCode}"}}}}'
     enableSending: False

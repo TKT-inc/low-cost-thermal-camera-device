@@ -83,7 +83,7 @@ class IotConn:
                 message = await client.receive_message()
                 message = message.data.decode('utf-8')
                 json_data = json.loads(message, strict = False)
-                print(json_data)
+                # print(json_data)
                 if 'trackingId' in json_data and int(json_data['trackingId']) in objects:
                     objects[int(json_data['trackingId'])].updateInfo(str(json_data['personName']), str(json_data['personId']), str(json_data['mask']))
                 elif 'authorizeStatus' in json_data:
@@ -97,13 +97,23 @@ class IotConn:
                 print(identifier)
                 pass
 
+    def handleSendingStatus(self, result):
+        try:
+            result.result()
+            self.connectionAvailable.emit(True)
+        except Exception as e:
+            print(e)
+            self.connectionAvailable.emit(False)
 
     async def handleSendMessage(self, msg):
         done, pending = await asyncio.wait({self.client.send_message(msg)},  timeout=7.0)
         if len(pending) > 0:
             self.connectionAvailable.emit(False)
+            for task in pending:
+                task.add_done_callback(self.handleSendingStatus)
         else:
             self.connectionAvailable.emit(True)
+
 
     def activeDevice(self, deviceId, deviceLabel, pinCode):
         message = MSG_ACTIVE.format(deviceId=deviceId, deviceLabel=deviceLabel, pinCode=pinCode)
@@ -123,10 +133,10 @@ class IotConn:
         message_object.custom_properties["level"] = "recognize"
         # Send the message.
         asyncio.run_coroutine_threadsafe(self.handleSendMessage(message_object),self.sending_event_loop)
-        print( "Message sent" ) 
+        # print( "Message sent" ) 
 
-    def sendRecord(self, deviceLabel, personID, temperature, face, masked, recordTime):
-        message = MSG_RECORD.format(deviceLabel=deviceLabel, personID=personID, temperature=temperature, face=face, masked=masked, recordTime=recordTime)
+    def sendRecord(self, deviceLabel, personID, temperature, face, masked, recordTime, internetAvailable):
+        message = MSG_RECORD.format(deviceLabel=deviceLabel, personID=personID, temperature=temperature, face=face, masked=masked, recordTime=recordTime, internetAvailable=internetAvailable)
         message_object = Message(message)
         message_object.custom_properties["level"] = "common"
         # Send the message.

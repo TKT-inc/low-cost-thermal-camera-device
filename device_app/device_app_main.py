@@ -3,16 +3,13 @@ import sys
 import cv2
 import time
 import dbus
-from threading import Thread
 import yaml
-import json
 
 with open("user_settings.yaml") as settings:
     user_cfg = yaml.safe_load(settings)
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5 import uic
-from datetime import datetime
 from device_app_function import DeviceAppFunctions
 from guiModules.ui_components import *
 from guiModules.worker import *
@@ -48,13 +45,21 @@ class MainWindow(QtWidgets.QMainWindow):
         self.loading.display('1')
         worker = Worker(self.initSystem)
         worker.signals.finished.connect(self.loading.close)
-        worker.signals.finished.connect(keyboard.Show)
+        worker.signals.finished.connect(self.checkActivatedStatusFromConfig)
         self.threadpool.start(worker)
 
         # QtWidgets.QApplication.instance().focusChanged.connect(self.handle_focuschanged)
         
         self.shortcut_quit = QtWidgets.QShortcut(QtGui.QKeySequence('Ctrl+Q'), self)
         self.shortcut_quit.activated.connect(self.closeApp)
+
+    def checkActivatedStatusFromConfig(self):
+        activateCode = self.deviceFuntion.isDeviceActivated()
+        if not activateCode:
+            keyboard.Show()
+        else:
+            self.startMainWindow()
+
 
     def initSystem(self):
         self.OfflineMode = False
@@ -121,19 +126,6 @@ class MainWindow(QtWidgets.QMainWindow):
         uic.loadUi("./device_app/guiModules/ui_files/loginWindow.ui", self)
         self.active_device_btn.clicked.connect(self.button)
 
-    def activeOfflineMode(self):
-        timeString = str(datetime.utcnow())
-        try:
-            with open('offline_data/record_' + timeString +'.json') as f:
-                print('have record File')
-                # Do something with the file
-        except IOError:
-            print('donot have File')
-            with open('offline_data/record_' + timeString +'.json', 'w') as f:
-                f.write("")
-                f.close()
-
-
     """
     Main processing of the application
     """
@@ -156,11 +148,8 @@ class MainWindow(QtWidgets.QMainWindow):
     #Handle status of working process
     def handleRecordsAndNotis(self):
         records = self.deviceFuntion.getRecordsInfo()
-        if records and self.OfflineMode:
-            print(json.dumps(list(records.items()), default=ComplexJsonHandler))
             
         for (objectID, obj) in list(records.items()):
-            # print(json.dumps(vars(obj)))
             current_time = datetime.now()
             self.addRecords(current_time, str(objectID) + '-' + obj.name, obj.record_temperature, obj.face_rgb)
             if (obj.have_mask is False):
@@ -181,8 +170,12 @@ class MainWindow(QtWidgets.QMainWindow):
 
     @QtCore.pyqtSlot(bool)
     def getInternetStatus(self, internetStatus):
-        self.deviceFuntion.setInternetStatus(internetStatus)
-        print(internetStatus)
+        if (self.deviceFuntion.isInternetAvailable() != internetStatus):
+            self.deviceFuntion.setInternetStatus(internetStatus)
+        # if(not internetStatus):
+        #     print('**** DO NOT HAVE INTERNET ****')
+        # else:
+        #     print('**** INTERNET ON ****')
 
     #Close the application
     def closeApp(self):
@@ -443,7 +436,6 @@ class MainWindow(QtWidgets.QMainWindow):
             self.saveSettingParam()  
 
         if btnWidget.objectName() == "active_device_btn":
-            # disable_socket()
             self.loading.display()
             worker = Worker(self.deviceFuntion.activateDevice, self.pin_code.text())
             worker.signals.result.connect(self.activeDevice)
@@ -480,14 +472,6 @@ class MainWindow(QtWidgets.QMainWindow):
         for w in self.menu.findChildren(QtWidgets.QPushButton):
             if w.objectName() != widget:
                 w.setStyleSheet(self.deselectMenu(w.styleSheet()))
-
-
-def ComplexJsonHandler(Obj):
-    if hasattr(Obj, 'jsonable'):
-        return Obj.jsonable()
-    else:
-        return ""
-
 
 
 if __name__ == "__main__":

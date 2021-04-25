@@ -13,7 +13,7 @@ class ObjectInfo():
 		self.id = "None"
 		self.temperature = "None"
 		self.record_temperature = 0
-		self.have_mask = False
+		self.have_mask = "N/A"
 		self.face_rgb = rgb[int(coor[1]*scale):int(coor[3]*scale), int(coor[0]*scale):int(coor[2]*scale)]
 		self.rec_stacks = []
 		self.max_rec_stack = max_rec_stack
@@ -22,8 +22,10 @@ class ObjectInfo():
 		self.fever_temp = fever_temp
 		self.sending_recs_img = False
 		self.temporary_dissapear = False
+		self.internet_available = False
 	
 	def updateInfo(self, name, id, have_mask):
+		self.internet_available = True
 		self.have_mask = have_mask == "True"
 		self.rec_stacks.append((name, id))
 		if (len(self.rec_stacks) == self.max_rec_stack + 1):
@@ -54,10 +56,11 @@ class RecordsObject():
 		self.face_size = face_size
 
 	def addNewRecord(self, objectId, obj):
-		self.records[objectId] = self.Record(id = obj.id, name=obj.name, record_temperature = obj.record_temperature, got_fever = obj.gotFever(), face_rgb = obj.face_rgb, have_mask = obj.have_mask, face_size= self.face_size)
+		if (obj.record_temperature > 25 and obj.record_temperature < 42):
+			self.records[objectId] = self.Record(id = obj.id, name=obj.name, record_temperature = obj.record_temperature, got_fever = obj.gotFever(), face_rgb = obj.face_rgb, have_mask = obj.have_mask, face_size= self.face_size, internet_available=obj.internet_available)
 		
 	class Record():
-		def __init__(self, id, name, record_temperature, got_fever, face_rgb, have_mask, face_size):
+		def __init__(self, id, name, record_temperature, got_fever, face_rgb, have_mask, face_size, internet_available):
 			self.id = id
 			self.name= name
 			self.record_temperature = record_temperature
@@ -66,6 +69,7 @@ class RecordsObject():
 			self.have_mask = have_mask
 			self.face_size = face_size
 			self.record_time = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3]
+			self.internet_available = internet_available
 		
 		def convertBinaryImg(self):
 			_, buffer = cv2.imencode('.jpg', cv2.resize(self.face_rgb,(self.face_size,self.face_size)))
@@ -74,7 +78,7 @@ class RecordsObject():
 			return pic_str
 
 		def jsonable(self):
-			return dict(id=self.id, record_temperature=self.record_temperature, pic_str=self.convertBinaryImg(), have_mask=self.have_mask )
+			return dict(id=self.id, record_time=self.record_time, record_temperature=self.record_temperature, have_mask=self.have_mask , internet_available=self.internet_available, pic_str=self.convertBinaryImg())
 
 
 class CentroidTracker():

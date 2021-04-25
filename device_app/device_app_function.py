@@ -4,6 +4,9 @@ import numpy as np
 import time
 import yaml
 import base64
+import json
+import os
+import glob
 with open("configuration.yaml") as ymlfile:
     cfg = yaml.safe_load(ymlfile)
 with open("user_settings.yaml") as settings:
@@ -18,11 +21,13 @@ from submodules.measure_temperature.measure_temperature import measureTemperatur
 from submodules.iot_hub.iot_conn import IotConn
 from submodules.capture_register.capture_register import CaptureRegisterFace
 from copy import deepcopy
+from datetime import datetime
 
 # Set up device params
 DEVICE_ID = cfg['deviceIdAzure']
 DEVICE_LABEL = cfg['deviceLabel']
 BUILDING_ID = user_cfg['buildingId']
+ACTIVATE_DEVICE = user_cfg['activatedDevice']
 
 # Set up azure cloud params 
 CONNECTION_STRING_DEVICE = cfg['iotHub']['connectionStringDevice']
@@ -88,6 +93,7 @@ class DeviceAppFunctions():
         self.color = np.zeros((480,640,3), np.uint8)
         self.rgb_temp = np.zeros((480,640,3), np.uint8)
         self.MODE = 'OFF'
+        self.recordFilename = ''
 
         self.deletedObjectRecord = OrderedDict()
         self.INTERNET_AVAILABLE = True
@@ -204,13 +210,20 @@ class DeviceAppFunctions():
 
     def sendRecordsInfo(self, DeletedObjects):
         for (objectID, obj) in DeletedObjects.records.items():
-            # print(list(DeletedObjects.records.items())[0])
             self.deletedObjectRecord[objectID] = obj
             pic_str = obj.convertBinaryImg()
 
             if (ENABLE_SENDING_TO_CLOUD and self.INTERNET_AVAILABLE):
-                self.conn.sendRecord( DEVICE_LABEL, obj.id, obj.record_temperature, pic_str, obj.have_mask, obj.record_time)
-
+                print('____ start send records {:.5f}' .format(time.time()))
+                self.conn.sendRecord( DEVICE_LABEL, obj.id, obj.record_temperature, pic_str, obj.have_mask, obj.record_time, obj.internet_available)
+            elif (not self.INTERNET_AVAILABLE):
+                saveRecordsOfflineMode(self.recordFilename, obj)
+                
+    def sendOfflineRecords(self, listRecords):
+        print('send offline')
+        for obj in listRecords:
+            print(obj['id'])
+            self.conn.sendRecord( DEVICE_LABEL, obj['id'], obj['record_temperature'], obj['pic_str'], obj['have_mask'], obj['record_time'], obj['internet_available'])
 
     def drawInfoOnFrameAndCheckRecognize( self, rects):
         for (objectID, obj) in list(self.objects.items()):
@@ -222,7 +235,7 @@ class DeviceAppFunctions():
             cv2.circle(self.frame, (center[0], center[1]), 4, (0, 255, 0), -1) 
             cv2.putText(self.frame, str(obj.temperature), (centroid[0], y), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
             if not obj.sending_recs_img:
-                print('start sending msg')
+                # print('start sending msg')
                 Thread(target=self.sendImageForRec, args=(objectID,),daemon=True).start()
                 obj.sending_recs_img = True
     
@@ -234,6 +247,7 @@ class DeviceAppFunctions():
                 pic_str = pic_str.decode()
 
                 if (ENABLE_SENDING_TO_CLOUD and self.INTERNET_AVAILABLE):
+                    print('____ start send recognite {:.5f}' .format(time.time()))
                     self.conn.messageSending(BUILDING_ID ,DEVICE_ID, personID, pic_str)
                     
                 time.sleep(TIME_SEND_REC)
@@ -312,24 +326,84 @@ class DeviceAppFunctions():
         self.store_registered_imgs = None
         print('Registered')
     
+    def isDeviceActivated(self):
+        if (ACTIVATE_DEVICE):
+            self.turnDeviceToActivated()
+        return ACTIVATE_DEVICE
+
+    def turnDeviceToActivated(self):
+        self.measureTemp.join()
+        self.measureTemp = Thread(target=self.measureTemperatureAllPeople, daemon=True)
+        self.measureTemp.start()
+        self.MODE = 'NORMAL'
+        
     def activateDevice(self, pinCode):
+        global USER_TEMP_OFFSET, user_cfg
+
         if (self.INTERNET_AVAILABLE):
             status = self.conn.activeDevice(DEVICE_ID, DEVICE_LABEL, pinCode)
             if (status):
-                self.measureTemp.join()
-                self.measureTemp = Thread(target=self.measureTemperatureAllPeople, daemon=True)
-                self.measureTemp.start()
-                self.MODE = 'NORMAL'
-            return status
-        else:
-            return False
+                self.turnDeviceToActivated()
+                user_cfg['activatedDevice'] = status
+                ACTIVATE_DEVICE = status
+                with open("user_settings.yaml", "w") as f:
+                    yaml.dump(user_cfg, f)
+                return True
+        return False
 
     def deactivateDevice(self):
+        global USER_TEMP_OFFSET, user_cfg
         self.MODE = 'OFF'
+        user_cfg['activatedDevice'] = False
+        ACTIVATE_DEVICE = False
+        with open("user_settings.yaml", "w") as f:
+            yaml.dump(user_cfg, f)
 
     def stop(self):
         self.MODE = "OFF"
         self.rgb.stop()
 
     def setInternetStatus(self, status):
+        if (not status):
+            self.recordFilename = 'device_app/data/offline_records/records_since_' + str(datetime.utcnow()) +'.json'
+        else:
+            records = getAllOfflineRecords()
+            Thread(target=self.sendOfflineRecords ,args=(records,), daemon=True).start()
         self.INTERNET_AVAILABLE = status
+        print('INTERNET ' + str(status))
+
+    def isInternetAvailable(self):
+        return self.INTERNET_AVAILABLE
+
+
+def saveRecordsOfflineMode(fileName, record):
+    try:
+        with open(fileName, 'a') as f:
+            print('have record File')
+            json.dump(record, f, default=ComplexJsonHandler)
+            f.write(os.linesep)
+    except IOError:
+        with open(fileName) as f:
+            json.dump(record, f, default=ComplexJsonHandler)
+            f.write(os.linesep)
+            f.close()
+
+def getAllOfflineRecords():
+    try:
+        for filename in glob.glob('device_app/data/offline_records/records_since_*.json'):
+            with open(filename) as f:
+                my_list = [json.loads(line) for line in f]
+                os.remove(filename)
+                return my_list
+    except Exception as e:
+        print (e)
+        return list()
+
+def getRecordOfflineFile():
+    print('dead')
+
+def ComplexJsonHandler(Obj):
+    if hasattr(Obj, 'jsonable'):
+        return Obj.jsonable()
+    else:
+        return ""
