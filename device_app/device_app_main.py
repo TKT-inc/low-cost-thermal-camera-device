@@ -17,7 +17,6 @@ from device_app_function import DeviceAppFunctions
 from guiModules.ui_components import *
 from guiModules.worker import *
 from datetime import datetime
-from testModules.nointernet_test import *
 
 bus = dbus.SessionBus()
 proxy = bus.get_object("org.onboard.Onboard", "/org/onboard/Onboard/Keyboard")
