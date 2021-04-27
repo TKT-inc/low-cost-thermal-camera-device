@@ -333,10 +333,9 @@ class MainWindow(QtWidgets.QMainWindow):
             height, width, _ = face.shape
             qimg = QtGui.QImage(face.data, width, height, 3*width, QtGui.QImage.Format_RGB888).rgbSwapped()
             qimg = QtGui.QPixmap(qimg)
-            img = QtWidgets.QLabel()
-            img.setPixmap(qimg)
-            img.setAlignment(QtCore.Qt.AlignCenter)
-            self.history_record.setCellWidget(count, 0, img)
+            item = QtWidgets.QTableWidgetItem()
+            item.setData(QtCore.Qt.DecorationRole, qimg)
+            self.history_record.setItem(count, 0, item)
         except Exception as e:
             print (e)
             pass
@@ -353,7 +352,6 @@ class MainWindow(QtWidgets.QMainWindow):
 
         if(_scroll):
             self.history_record.scrollToBottom()
-
 
 
     """

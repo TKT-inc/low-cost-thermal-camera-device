@@ -37,7 +37,7 @@ QToolTip {
   <widget class="QWidget" name="centralwidget">
    <property name="styleSheet">
     <string notr="true">background: transparent;
-color:#E0FBFC;</string>
+color:#FFFFFF;</string>
    </property>
    <widget class="QFrame" name="frame">
     <property name="geometry">
@@ -49,7 +49,7 @@ color:#E0FBFC;</string>
      </rect>
     </property>
     <property name="styleSheet">
-     <string notr="true">background-color: #2b2c43;
+     <string notr="true">background-color: #999eca;
 
 </string>
     </property>
@@ -69,7 +69,7 @@ color:#E0FBFC;</string>
       </rect>
      </property>
      <property name="styleSheet">
-      <string notr="true">background-color: #444a7b;</string>
+      <string notr="true">background-color: #3E1257</string>
      </property>
      <property name="frameShape">
       <enum>QFrame::StyledPanel</enum>
@@ -131,8 +131,8 @@ color:#E0FBFC;</string>
 	background-position: left center;
     background-repeat: no-repeat;
 	border: none;
-	border-left: 28px solid #444a7b;
-	background-color: #444a7b;
+	border-left: 28px solid #3E1257;
+	background-color: #3E1257;
 	text-align: left;
 	padding-left: 45px;
 }
@@ -184,8 +184,8 @@ QPushButton:pressed {
 	background-position: left center;
     background-repeat: no-repeat;
 	border: none;
-    border-left: 28px solid #444a7b;
-	background-color: #444a7b;
+    border-left: 28px solid #3E1257;
+	background-color: #3E1257;
 	text-align: left;
 	padding-left: 45px;
 }
@@ -237,8 +237,8 @@ QPushButton:pressed {
 	background-position: left center;
     background-repeat: no-repeat;
 	border: none;
-	border-left: 28px solid #444a7b;
-	background-color: #444a7b;
+	border-left: 28px solid #3E1257;
+	background-color: #3E1257;
 	text-align: left;
 	padding-left: 45px;
 }
@@ -290,8 +290,8 @@ QPushButton:pressed {
 	background-position: left center;
     background-repeat: no-repeat;
 	border: none;
-	border-left: 28px solid #444a7b;
-	background-color: #444a7b;
+	border-left: 28px solid #3E1257;
+	background-color: #3E1257;
 	text-align: left;
 	padding-left: 45px;
 }
@@ -343,8 +343,8 @@ QPushButton:pressed {
 	background-position: left center;
     background-repeat: no-repeat;
 	border: none;
-	border-left: 28px solid #444a7b;
-	background-color: #444a7b;
+	border-left: 28px solid #3E1257;
+	background-color: #3E1257;
 	text-align: left;
 	padding-left: 45px;
 }
@@ -396,8 +396,8 @@ QPushButton:pressed {
 	background-position: left center;
     background-repeat: no-repeat;
 	border: none;
-	border-left: 28px solid #444a7b;
-	background-color: #444a7b;
+	border-left: 28px solid #3E1257;
+	background-color: #3E1257;
 	text-align: left;
 	padding-left: 45px;
 }
@@ -668,14 +668,14 @@ background-color: rgb(150, 150, 150);</string>
         <property name="styleSheet">
          <string notr="true">QPushButton {
 	border-radius: 20px;	
-	background-color: #db4959;
+	background-color: #901785;
 	color: #293241;
 }
 QPushButton:hover {
-	background-color:#EE6C4D;
+	background-color:#531463;
 }
 QPushButton:pressed {	
-	background-color: #EE6C4D;
+	background-color: #531463;
 }</string>
         </property>
         <property name="text">
@@ -723,9 +723,9 @@ User</string>
            <colorrole role="Button">
             <brush brushstyle="SolidPattern">
              <color alpha="255">
-              <red>68</red>
-              <green>68</green>
-              <blue>93</blue>
+              <red>41</red>
+              <green>17</green>
+              <blue>76</blue>
              </color>
             </brush>
            </colorrole>
@@ -750,18 +750,18 @@ User</string>
            <colorrole role="Base">
             <brush brushstyle="SolidPattern">
              <color alpha="255">
-              <red>68</red>
-              <green>68</green>
-              <blue>93</blue>
+              <red>41</red>
+              <green>17</green>
+              <blue>76</blue>
              </color>
             </brush>
            </colorrole>
            <colorrole role="Window">
             <brush brushstyle="SolidPattern">
              <color alpha="255">
-              <red>68</red>
-              <green>68</green>
-              <blue>93</blue>
+              <red>41</red>
+              <green>17</green>
+              <blue>76</blue>
              </color>
             </brush>
            </colorrole>
@@ -788,9 +788,9 @@ User</string>
            <colorrole role="Button">
             <brush brushstyle="SolidPattern">
              <color alpha="255">
-              <red>68</red>
-              <green>68</green>
-              <blue>93</blue>
+              <red>41</red>
+              <green>17</green>
+              <blue>76</blue>
              </color>
             </brush>
            </colorrole>
@@ -815,18 +815,18 @@ User</string>
            <colorrole role="Base">
             <brush brushstyle="SolidPattern">
              <color alpha="255">
-              <red>68</red>
-              <green>68</green>
-              <blue>93</blue>
+              <red>41</red>
+              <green>17</green>
+              <blue>76</blue>
              </color>
             </brush>
            </colorrole>
            <colorrole role="Window">
             <brush brushstyle="SolidPattern">
              <color alpha="255">
-              <red>68</red>
-              <green>68</green>
-              <blue>93</blue>
+              <red>41</red>
+              <green>17</green>
+              <blue>76</blue>
              </color>
             </brush>
            </colorrole>
@@ -853,9 +853,9 @@ User</string>
            <colorrole role="Button">
             <brush brushstyle="SolidPattern">
              <color alpha="255">
-              <red>68</red>
-              <green>68</green>
-              <blue>93</blue>
+              <red>41</red>
+              <green>17</green>
+              <blue>76</blue>
              </color>
             </brush>
            </colorrole>
@@ -880,18 +880,18 @@ User</string>
            <colorrole role="Base">
             <brush brushstyle="SolidPattern">
              <color alpha="255">
-              <red>68</red>
-              <green>68</green>
-              <blue>93</blue>
+              <red>41</red>
+              <green>17</green>
+              <blue>76</blue>
              </color>
             </brush>
            </colorrole>
            <colorrole role="Window">
             <brush brushstyle="SolidPattern">
              <color alpha="255">
-              <red>68</red>
-              <green>68</green>
-              <blue>93</blue>
+              <red>41</red>
+              <green>17</green>
+              <blue>76</blue>
              </color>
             </brush>
            </colorrole>
@@ -909,7 +909,7 @@ User</string>
         </property>
         <property name="styleSheet">
          <string notr="true">QTableWidget {	
-	background-color: #44445d;
+	background-color: #29114C;
 	padding: 10px;
 	border-radius: 12px;
 	gridline-color: rgb(255, 255, 255);
@@ -1129,9 +1129,9 @@ s</string>
            <colorrole role="Button">
             <brush brushstyle="SolidPattern">
              <color alpha="255">
-              <red>68</red>
-              <green>68</green>
-              <blue>93</blue>
+              <red>41</red>
+              <green>17</green>
+              <blue>76</blue>
              </color>
             </brush>
            </colorrole>
@@ -1156,18 +1156,18 @@ s</string>
            <colorrole role="Base">
             <brush brushstyle="SolidPattern">
              <color alpha="255">
-              <red>68</red>
-              <green>68</green>
-              <blue>93</blue>
+              <red>41</red>
+              <green>17</green>
+              <blue>76</blue>
              </color>
             </brush>
            </colorrole>
            <colorrole role="Window">
             <brush brushstyle="SolidPattern">
              <color alpha="255">
-              <red>68</red>
-              <green>68</green>
-              <blue>93</blue>
+              <red>41</red>
+              <green>17</green>
+              <blue>76</blue>
              </color>
             </brush>
            </colorrole>
@@ -1194,9 +1194,9 @@ s</string>
            <colorrole role="Button">
             <brush brushstyle="SolidPattern">
              <color alpha="255">
-              <red>68</red>
-              <green>68</green>
-              <blue>93</blue>
+              <red>41</red>
+              <green>17</green>
+              <blue>76</blue>
              </color>
             </brush>
            </colorrole>
@@ -1221,18 +1221,18 @@ s</string>
            <colorrole role="Base">
             <brush brushstyle="SolidPattern">
              <color alpha="255">
-              <red>68</red>
-              <green>68</green>
-              <blue>93</blue>
+              <red>41</red>
+              <green>17</green>
+              <blue>76</blue>
              </color>
             </brush>
            </colorrole>
            <colorrole role="Window">
             <brush brushstyle="SolidPattern">
              <color alpha="255">
-              <red>68</red>
-              <green>68</green>
-              <blue>93</blue>
+              <red>41</red>
+              <green>17</green>
+              <blue>76</blue>
              </color>
             </brush>
            </colorrole>
@@ -1259,9 +1259,9 @@ s</string>
            <colorrole role="Button">
             <brush brushstyle="SolidPattern">
              <color alpha="255">
-              <red>68</red>
-              <green>68</green>
-              <blue>93</blue>
+              <red>41</red>
+              <green>17</green>
+              <blue>76</blue>
              </color>
             </brush>
            </colorrole>
@@ -1286,18 +1286,18 @@ s</string>
            <colorrole role="Base">
             <brush brushstyle="SolidPattern">
              <color alpha="255">
-              <red>68</red>
-              <green>68</green>
-              <blue>93</blue>
+              <red>41</red>
+              <green>17</green>
+              <blue>76</blue>
              </color>
             </brush>
            </colorrole>
            <colorrole role="Window">
             <brush brushstyle="SolidPattern">
              <color alpha="255">
-              <red>68</red>
-              <green>68</green>
-              <blue>93</blue>
+              <red>41</red>
+              <green>17</green>
+              <blue>76</blue>
              </color>
             </brush>
            </colorrole>
@@ -1315,7 +1315,7 @@ s</string>
         </property>
         <property name="styleSheet">
          <string notr="true">QTableWidget {	
-	background-color:#44445d;
+	background-color:#29114C;
 	padding: 5px;
 	border-radius: 12px;
     gridline-color: rgb(255, 255, 255);
@@ -1581,7 +1581,7 @@ border-radius: 20px;	</string>
          </rect>
         </property>
         <property name="styleSheet">
-         <string notr="true">background-color: rgb(197, 255, 231);</string>
+         <string notr="true">background-color:#901785;</string>
         </property>
         <property name="text">
          <string>TextLabel</string>
@@ -1708,23 +1708,23 @@ border-radius: 20px;	</string>
     border-radius: 9px;
     height: 15px;
 	margin: 15px;
-	background-color: rgb(52, 59, 72);
+	background-color:#151040;
 }
 QSlider::groove:horizontal:hover {
-	background-color: rgb(55, 62, 76);
+	background-color:#151040;
 }
 QSlider::handle:horizontal {
-    background-color: rgb(85, 170, 255);
+    background-color: #7C1679;
     border: none;
     width: 40px;
     margin: -7px;
 	border-radius: 9px;
 }
 QSlider::handle:horizontal:hover {
-    background-color: rgb(105, 180, 255);
+    background-color: #A51890;
 }
 QSlider::handle:horizontal:pressed {
-    background-color: rgb(65, 130, 195);
+   background-color: #A51890;
 }
 </string>
        </property>
@@ -1803,13 +1803,25 @@ QSlider::handle:horizontal:pressed {
            <x>30</x>
            <y>520</y>
            <width>121</width>
-           <height>31</height>
+           <height>41</height>
           </rect>
          </property>
          <property name="font">
           <font>
+           <family>Fira Code</family>
            <pointsize>12</pointsize>
+           <weight>62</weight>
+           <italic>false</italic>
+           <bold>true</bold>
           </font>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">border :3px solid #151040;
+border-top-left-radius :10px;
+border-top-right-radius : 10px; 
+border-bottom-left-radius : 10px; 
+border-bottom-right-radius : 10px;
+font: 500 12pt &quot;Fira Code&quot;;</string>
          </property>
          <property name="text">
           <string>5 seconds</string>
@@ -1865,13 +1877,25 @@ QSlider::handle:horizontal:pressed {
            <x>30</x>
            <y>110</y>
            <width>121</width>
-           <height>31</height>
+           <height>41</height>
           </rect>
          </property>
          <property name="font">
           <font>
+           <family>Fira Code</family>
            <pointsize>12</pointsize>
+           <weight>62</weight>
+           <italic>false</italic>
+           <bold>true</bold>
           </font>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">border :3px solid #151040;
+border-top-left-radius :10px;
+border-top-right-radius : 10px; 
+border-bottom-left-radius : 10px; 
+border-bottom-right-radius : 10px;
+font: 500 12pt &quot;Fira Code&quot;;</string>
          </property>
          <property name="text">
           <string>10 notis</string>
@@ -1984,13 +2008,25 @@ QSlider::handle:horizontal:pressed {
            <x>30</x>
            <y>200</y>
            <width>121</width>
-           <height>31</height>
+           <height>41</height>
           </rect>
          </property>
          <property name="font">
           <font>
+           <family>Fira Code</family>
            <pointsize>12</pointsize>
+           <weight>62</weight>
+           <italic>false</italic>
+           <bold>true</bold>
           </font>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">border :3px solid #151040;
+border-top-left-radius :10px;
+border-top-right-radius : 10px; 
+border-bottom-left-radius : 10px; 
+border-bottom-right-radius : 10px;
+font: 500 12pt &quot;Fira Code&quot;;</string>
          </property>
          <property name="text">
           <string>10 records</string>
@@ -2005,13 +2041,25 @@ QSlider::handle:horizontal:pressed {
            <x>30</x>
            <y>290</y>
            <width>121</width>
-           <height>31</height>
+           <height>41</height>
           </rect>
          </property>
          <property name="font">
           <font>
+           <family>Fira Code</family>
            <pointsize>12</pointsize>
+           <weight>62</weight>
+           <italic>false</italic>
+           <bold>true</bold>
           </font>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">border :3px solid #151040;
+border-top-left-radius :10px;
+border-top-right-radius : 10px; 
+border-bottom-left-radius : 10px; 
+border-bottom-right-radius : 10px;
+font: 500 12pt &quot;Fira Code&quot;;</string>
          </property>
          <property name="text">
           <string>38 oC</string>
@@ -2080,7 +2128,7 @@ QSlider::handle:horizontal:pressed {
          </rect>
         </property>
         <property name="styleSheet">
-         <string notr="true">background-color: rgb(95, 99, 107);</string>
+         <string notr="true">background-color: #dadceb;</string>
         </property>
         <property name="frameShape">
          <enum>QFrame::StyledPanel</enum>

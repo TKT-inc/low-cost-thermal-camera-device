@@ -188,24 +188,27 @@ class DeviceAppFunctions():
             try:
                 objects_measurement = deepcopy(self.objects)
                 ct_temp = deepcopy(self.ct)
-                self.rgb_temp, rgb_ori = self.rgb.getCurrentFrame()
-                self.lep.update()
-                thermal, temp = self.lep.getFrame()
-                raw = thermal
-
-                thermal = cv2.resize(thermal,(THERMAL_WIDTH,THERMAL_HEIGHT))
-                self.color = cv2.applyColorMap(thermal, cv2.COLORMAP_JET)
                 
-                rects_measurement = self.faceDetectTemp.detectFaces(self.rgb_temp, 35)
-                objects_measurement, _ = ct_temp.update(rects_measurement,rgb_ori,RGB_SCALE)
+                if (self.lep.checkWorkingStatus()):
+                    self.rgb_temp, rgb_ori = self.rgb.getCurrentFrame()
+                    thermal, temp = self.lep.getFrame()
+                    raw = thermal
 
+                    thermal = cv2.resize(thermal,(THERMAL_WIDTH,THERMAL_HEIGHT))
+                    self.color = cv2.applyColorMap(thermal, cv2.COLORMAP_JET)
+                    
+                    rects_measurement = self.faceDetectTemp.detectFaces(self.rgb_temp, 35)
+                    objects_measurement, _ = ct_temp.update(rects_measurement,rgb_ori,RGB_SCALE)
+                    
+                    measureTemperature(self.color, temp, self.objects, objects_measurement, USER_TEMP_OFFSET, RGB_SCALE)
 
-                measureTemperature(self.color, temp, self.objects, objects_measurement, USER_TEMP_OFFSET, RGB_SCALE)
-                
-                              
+                if (not self.INTERNET_AVAILABLE):
+                    for (objectID, obj) in list(self.objects.items()):
+                        obj.have_mask = self.landmarkDetect.faceMaskDetected(obj.face_rgb) 
             except Exception as identifier:
                 print(identifier)
-            time.sleep(TIME_MEASURE_TEMP)
+            finally:
+                time.sleep(TIME_MEASURE_TEMP)
 
 
     def sendRecordsInfo(self, DeletedObjects):
