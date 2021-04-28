@@ -225,11 +225,11 @@ class DeviceAppFunctions():
             elif (not self.INTERNET_AVAILABLE):
                 saveRecordsOfflineMode(self.recordFilename, obj)
                 
-    def sendOfflineRecords(self, listRecords):
+    def sendOfflineRecords(self, listRecordObjs):
         print('send offline')
-        for obj in listRecords:
-            print(obj['id'])
-            self.conn.sendRecord( DEVICE_LABEL, obj['id'], obj['record_temperature'], obj['pic_str'], obj['have_mask'], obj['record_time'], obj['internet_available'])
+        for listRecords in listRecordObjs:
+            for obj in listRecords:
+                self.conn.sendRecord( DEVICE_LABEL, obj['id'], obj['record_temperature'], obj['pic_str'], obj['have_mask'], obj['record_time'], obj['internet_available'])
 
     def drawInfoOnFrameAndCheckRecognize( self, rects):
         for (objectID, obj) in list(self.objects.items()):
@@ -395,15 +395,17 @@ def saveRecordsOfflineMode(fileName, record):
             f.close()
 
 def getAllOfflineRecords():
+    listOfRecordObjs = []
     try:
         for filename in glob.glob('device_app/data/offline_records/records_since_*.json'):
             with open(filename) as f:
                 my_list = [json.loads(line) for line in f]
                 os.remove(filename)
-                return my_list
+                listOfRecordObjs.append(my_list)
+        return listOfRecordObjs
     except Exception as e:
         print (e)
-        return list()
+        return []
 
 def getRecordOfflineFile():
     print('dead')

@@ -40,41 +40,69 @@ def sendingEventLoopThread(loop):
     loop.run_forever()
 
 class IotConn:
-    def __init__(self, internetStatus, mode, connStringDevice, connStringBlob, objects):
+    def __init__(self, internetSignal, mode, connStringDevice, connStringBlob, objects):
         # Create an IoT Hub client
         self.mode = mode
         self.activeDeviceStatus = None
-        self.connectionAvailable = internetStatus
-        try:
+        self.connectionAvailable = self.ConnectionStatus(internetSignal)   
 
-            self.client = IoTHubDeviceClient.create_from_connection_string(connStringDevice)
+        self.connStringDev = connStringDevice
+        self.connStringBlob = connStringBlob
+        self.currentObj = objects
+        if (not self.initConnection()):
+            Thread(target=self.retryConnection, daemon=True).start() 
+            
+        self.sending_event_loop = get_or_create_eventloop()
+
+        self.thread_sending = Thread(target=sendingEventLoopThread, args=(self.sending_event_loop, ), daemon=True)
+        self.thread_sending.start()
+
+    class ConnectionStatus:
+        def __init__(self, connectionSignal):
+            self.connectionSignal = connectionSignal
+            self.connectionAvailable = True
+
+        def emit(self, availableConn):
+            self.connectionAvailable = availableConn
+            self.connectionSignal.emit(availableConn)
+
+        def isConnAvailable(self):
+            return self.connectionAvailable
+
+    def initConnection(self):
+        try:
+            self.client = IoTHubDeviceClient.create_from_connection_string(self.connStringDev)
             loop = get_or_create_eventloop()
             loop.run_until_complete(self.client.connect())
             # loop.run_in_executor(self.messageListener(self.client, objects))
             
-            self.blob_service_client = BlobServiceClient.from_connection_string(connStringBlob)
+            self.blob_service_client = BlobServiceClient.from_connection_string(self.connStringBlob)
             
-            self.thread_listening = Thread(target=listeningEventLoopThread, args=(self.messageListener, self.client, objects,))
-            self.thread_listening.daemon = True
+            self.thread_listening = Thread(target=listeningEventLoopThread, args=(self.messageListener, self.client, self.currentObj,), daemon=True)
             self.thread_listening.start()
             
-            self.sending_event_loop = get_or_create_eventloop()
-            self.thread_sending = Thread(target=sendingEventLoopThread, args=(self.sending_event_loop, ))
-            self.thread_sending.daemon = True
-            self.thread_sending.start()
             self.connectionAvailable.emit(True)
-
-        except:
+            print('CONNECT DEVICE TO IOT-HUB SUCCESSFUL')
+            return True
+        except Exception as e:
+            print(e)
             self.connectionAvailable.emit(False)
+            return False
+
+    def retryConnection(self):
+        while (not self.initConnection()):
+            time.sleep(5)
 
     def restartListener(self, objects):
         if self.thread_listening.is_alive():
             print("Is Alive")
+        elif (not self.connectionAvailable.isConnAvailable()):
+            print("Can restart listener because the connection is not established") 
         else:
+            self.currentObj = objects
             self.thread_listening = Thread(target=listeningEventLoopThread, args=(self.messageListener, self.client, objects,))
             self.thread_listening.daemon = True
             self.thread_listening.start()
-
 
     async def messageListener(self, client, objects):
         print("Start listening to server")
@@ -106,13 +134,14 @@ class IotConn:
             self.connectionAvailable.emit(False)
 
     async def handleSendMessage(self, msg):
-        done, pending = await asyncio.wait({self.client.send_message(msg)},  timeout=7.0)
-        if len(pending) > 0:
-            self.connectionAvailable.emit(False)
-            for task in pending:
-                task.add_done_callback(self.handleSendingStatus)
-        else:
-            self.connectionAvailable.emit(True)
+        if (self.connectionAvailable.isConnAvailable()):
+            done, pending = await asyncio.wait({self.client.send_message(msg)},  timeout=7.0)
+            if len(pending) > 0:
+                self.connectionAvailable.emit(False)
+                for task in pending:
+                    task.add_done_callback(self.handleSendingStatus)
+            else:
+                self.connectionAvailable.emit(True)
 
 
     def activeDevice(self, deviceId, deviceLabel, pinCode):
