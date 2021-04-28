@@ -41,7 +41,7 @@ faceDetection:
     protoRfb320: "./device_app/submodules/face_detection/models/RFB-320.prototxt"
     onnxSlim320: "./device_app/submodules/face_detection/models/version-slim-320_simplified.onnx"
     landmarkDetectionModel: "./device_app/submodules/face_detection/models/landmarks.dat"
-    faceSize: 290
+    faceSize: 400
     threshold: 0.8
 
 transMatrix: [[0.719298243522644042968750000000000000000000000000000000000000,0.000000000000000000000000000000000000000000000000000000000000,108.140350341796875000000000000000000000000000000000000000000000],[-0.000000000000000052438578919762255086539637360942833765875548,0.736842095851898193359375000000000000000000000000000000000000,219.368423461914062500000000000000000000000000000000000000000000]]
@@ -65,3 +65,12 @@ personTracking:
     bufSizeTempPersonTracking: 6
     bufSizeNameAndIdPersonTracking: 3
     thresholdTempOfFever: 38
+
+developmentFlags:
+    printProcessTime: False
+    printReceiveData: False
+    printSendData: False
+    printRecord: True
+    printRecognize: True
+    printRegister: True
+    printIoTConn: True

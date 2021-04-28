@@ -14,6 +14,7 @@ from device_app_function import DeviceAppFunctions
 from guiModules.ui_components import *
 from guiModules.worker import *
 from datetime import datetime
+from submodules.common.log import Log
 
 bus = dbus.SessionBus()
 proxy = bus.get_object("org.onboard.Onboard", "/org/onboard/Onboard/Keyboard")
@@ -87,10 +88,13 @@ class MainWindow(QtWidgets.QMainWindow):
         self.notifications.verticalHeader().setDefaultSectionSize(30)
         self.notifications.verticalHeader().sectionResizeMode(QtWidgets.QHeaderView.Fixed)
 
-        self.timerWorking = QtCore.QTimer()
-        self.timerWorking.setTimerType(QtCore.Qt.PreciseTimer)
-        self.timerWorking.timeout.connect(self.working)
-        self.timerWorking.start(0)
+        # self.timerWorking = QtCore.QTimer()
+        # self.timerWorking.setTimerType(QtCore.Qt.PreciseTimer)
+        # self.timerWorking.timeout.connect(self.working)
+        # self.timerWorking.start(0)
+
+        worker = Worker(self.working)
+        self.threadpool.start(worker)
 
         self.timeHandleStatus = QtCore.QTimer()
         self.timeHandleStatus.setTimerType(QtCore.Qt.PreciseTimer)
@@ -131,19 +135,23 @@ class MainWindow(QtWidgets.QMainWindow):
     """
     #PROCESSING OF THE MAIN SYSTEM
     def working(self):
-        if (not self.suspend):
-            status = self.deviceFuntion.process()
-            if (status == "REGISTER_SUCCESS"):
-                self.finishedFaceRegistrationStyle(self.face_right)
-                self.createInputNameDialog()
-            elif (status == "REGISTER_DONE_LEFT"):
-                self.finishedFaceRegistrationStyle(self.face_left)
-            elif (status == "REGISTER_DONE_FRONT"):
-                self.finishedFaceRegistrationStyle(self.face_front)
-            elif (status == "CALIBRATE_TOO_MUCH_PEOPLE"):
-                print('one person please')
-            elif (status == "CALIBRATE_SUCCESS"):
-                self.createInputGroundTruthTemp()
+        while self.deviceFuntion.getMode() != "OFF":
+            try: 
+                if (not self.suspend):
+                    status = self.deviceFuntion.process()
+                    if (status == "REGISTER_SUCCESS"):
+                        self.finishedFaceRegistrationStyle(self.face_right)
+                        self.createInputNameDialog()
+                    elif (status == "REGISTER_DONE_LEFT"):
+                        self.finishedFaceRegistrationStyle(self.face_left)
+                    elif (status == "REGISTER_DONE_FRONT"):
+                        self.finishedFaceRegistrationStyle(self.face_front)
+                    elif (status == "CALIBRATE_TOO_MUCH_PEOPLE"):
+                        Log('PROCESS', 'calibrate_one person please')
+                    elif (status == "CALIBRATE_SUCCESS"):
+                        self.createInputGroundTruthTemp()
+            except Exception as e:
+                pass
 
     #Handle status of working process
     def handleRecordsAndNotis(self):
@@ -172,10 +180,6 @@ class MainWindow(QtWidgets.QMainWindow):
     def getInternetStatus(self, internetStatus):
         if (self.deviceFuntion.isInternetAvailable() != internetStatus):
             self.deviceFuntion.setInternetStatus(internetStatus)
-        # if(not internetStatus):
-        #     print('**** DO NOT HAVE INTERNET ****')
-        # else:
-        #     print('**** INTERNET ON ****')
 
     #Close the application
     def closeApp(self):
@@ -329,7 +333,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.history_record.setSpan(count, 1, 1, 2)
 
         try:
-            face = cv2.resize(face_rgb, (65,85))
+            face = cv2.resize(face_rgb, (70,85))
             height, width, _ = face.shape
             qimg = QtGui.QImage(face.data, width, height, 3*width, QtGui.QImage.Format_RGB888).rgbSwapped()
             qimg = QtGui.QPixmap(qimg)

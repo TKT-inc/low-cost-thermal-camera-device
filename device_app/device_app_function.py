@@ -20,6 +20,7 @@ from submodules.object_tracking.objecttracking import CentroidTracker
 from submodules.measure_temperature.measure_temperature import measureTemperature
 from submodules.iot_hub.iot_conn import IotConn
 from submodules.capture_register.capture_register import CaptureRegisterFace
+from submodules.common.log import Log
 from copy import deepcopy
 from datetime import datetime
 
@@ -139,6 +140,7 @@ class DeviceAppFunctions():
 
 
     def process(self):
+        Log('PROCESS', 'Start processing frame')
         start = time.time()
         self.frame, self.ori = self.rgb.getFrame()
         rects = self.faceDetect.detectFaces(self.frame)
@@ -148,7 +150,7 @@ class DeviceAppFunctions():
             
             if (deletedObject.records):
                 Thread(target=self.sendRecordsInfo, args=(deletedObject, ),daemon=True).start()
-                print("send records")
+                Log('PROCESS', 'Start send records')
                 
             self.drawInfoOnFrameAndCheckRecognize(rects)
             
@@ -158,7 +160,7 @@ class DeviceAppFunctions():
                 self.store_registered_imgs, status = self.register.update(self.frame,img_points, self.ori, rects, RGB_SCALE)
 
                 if status == "REGISTER_SUCCESS":
-                    print('Register Ok')
+                    Log('PROCESS', 'Register successful')
                     del self.register
                     self.MODE = 'WAITING'
 
@@ -172,17 +174,17 @@ class DeviceAppFunctions():
 
         if (self.MODE == 'CALIBRATE'):
             if (len(self.objects.items()) == 1):
+                if (DEV_PRINT_PROCESS):
+                    Log('PROCESS','Calibrate mode _ have one person')
                 if (self.calibrate_person_ID != list(self.objects.items())[0][0]):
                     self.calibrate_time = time.time()
                     self.calibrate_person_ID =  list(self.objects.items())[0][0]
-                    print ('reset' )
                 elif (time.time() - self.calibrate_time > CALIBRATE_TIME):
                     self.camera_input_calibrate_temp = list(self.objects.items())[0][1].record_temperature
                     return 'CALIBRATE_SUCCESS'
             return 'CALIBRATE_TOO_MUCH_PEOPLE'
+        Log('PROCESS', 'Time for one frame: {:.5f}'.format(time.time() - start))
 
-        # print('time frame: {:.5f}'.format(time.time() - start))
-        
         return "NORMAL"
 
     def measureTemperatureAllPeople(self):
@@ -220,13 +222,12 @@ class DeviceAppFunctions():
             pic_str = obj.convertBinaryImg()
 
             if ((ENABLE_ALL_SENDING or ENABLE_SENDING_TO_CLOUD_RECORD) and self.INTERNET_AVAILABLE):
-                print('____ start send records {:.5f}' .format(time.time()))
                 self.conn.sendRecord( DEVICE_LABEL, obj.id, obj.record_temperature, pic_str, obj.have_mask, obj.record_time, obj.internet_available)
             elif (not self.INTERNET_AVAILABLE):
                 saveRecordsOfflineMode(self.recordFilename, obj)
                 
     def sendOfflineRecords(self, listRecordObjs):
-        print('send offline')
+        Log('RECORD','Start Send saved Offline records')
         for listRecords in listRecordObjs:
             for obj in listRecords:
                 self.conn.sendRecord( DEVICE_LABEL, obj['id'], obj['record_temperature'], obj['pic_str'], obj['have_mask'], obj['record_time'], obj['internet_available'])
@@ -241,23 +242,23 @@ class DeviceAppFunctions():
             cv2.circle(self.frame, (center[0], center[1]), 4, (0, 255, 0), -1) 
             cv2.putText(self.frame, str(obj.temperature), (centroid[0], y), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
             if not obj.sending_recs_img:
-                # print('start sending msg')
                 Thread(target=self.sendImageForRec, args=(objectID,),daemon=True).start()
                 obj.sending_recs_img = True
     
-    def sendImageForRec(self, personID):
-        while personID in self.objects and (self.MODE == 'NORMAL' or self.MODE == 'CALIBRATE'):
+    def sendImageForRec(self, trackingID):
+        while trackingID in self.objects and (self.MODE == 'NORMAL' or self.MODE == 'CALIBRATE'):
             try:
                 _, buffer = cv2.imencode('.jpg', cv2.resize(self.objects[personID].face_rgb, (FACE_SIZE,FACE_SIZE)))
                 pic_str = base64.b64encode(buffer)
                 pic_str = pic_str.decode()
 
                 if ((ENABLE_ALL_SENDING or ENABLE_SENDING_TO_CLOUD_RECOGNITE) and self.INTERNET_AVAILABLE):
-                    print('____ start send recognite {:.5f}' .format(time.time()))
-                    self.conn.messageSending(BUILDING_ID ,DEVICE_ID, personID, pic_str)
+                    Log('RECOGNIZE','Start send recognite for ' + trackingID)
+                    self.conn.messageSending(BUILDING_ID ,DEVICE_ID, trackingID, pic_str)
                     
                 time.sleep(TIME_SEND_REC)
-            except Exception as identifier:
+            except Exception as e:
+                print(e)
                 pass
 
     def centroidDetect(self, x, y, w, h):
@@ -330,7 +331,7 @@ class DeviceAppFunctions():
         if (self.store_registered_imgs is not None and (ENABLE_ALL_SENDING or ENABLE_SENDING_TO_CLOUD_REGISTER) and self.INTERNET_AVAILABLE):
             Thread(target=self.conn.registerToAzure, args=(BUILDING_ID ,name_of_new_user, self.store_registered_imgs, FACE_SIZE, ), daemon=True).start()
         self.store_registered_imgs = None
-        print('Registered')
+        Log('REGISTER', 'Send register')
     
     def isDeviceActivated(self):
         if (ACTIVATE_DEVICE):
@@ -376,7 +377,7 @@ class DeviceAppFunctions():
             records = getAllOfflineRecords()
             Thread(target=self.sendOfflineRecords ,args=(records,), daemon=True).start()
         self.INTERNET_AVAILABLE = status
-        print('INTERNET ' + str(status))
+        Log('CONNECTION', 'INTERNET ' + str(status))
 
     def isInternetAvailable(self):
         return self.INTERNET_AVAILABLE
@@ -385,7 +386,6 @@ class DeviceAppFunctions():
 def saveRecordsOfflineMode(fileName, record):
     try:
         with open(fileName, 'a') as f:
-            print('have record File')
             json.dump(record, f, default=ComplexJsonHandler)
             f.write(os.linesep)
     except IOError:
@@ -408,7 +408,7 @@ def getAllOfflineRecords():
         return []
 
 def getRecordOfflineFile():
-    print('dead')
+    Log('PROCESS', 'Logout successful')
 
 def ComplexJsonHandler(Obj):
     if hasattr(Obj, 'jsonable'):

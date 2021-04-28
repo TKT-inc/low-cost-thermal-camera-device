@@ -6,6 +6,7 @@ import yaml
 import asyncio
 with open("configuration.yaml") as ymlfile:
     cfg = yaml.safe_load(ymlfile)
+from submodules.common.log import Log
 from threading import Thread
 import threading
 import time
@@ -25,7 +26,7 @@ def get_or_create_eventloop():
         return asyncio.get_event_loop()
     except RuntimeError as ex:
         if "There is no current event loop in thread" in str(ex):
-            print('new event loop')
+            Log('CONNECTION', 'Create new event loop')
             asyncio.set_event_loop(asyncio. SelectorEventLoop())
             return asyncio.get_event_loop()
 
@@ -82,7 +83,7 @@ class IotConn:
             self.thread_listening.start()
             
             self.connectionAvailable.emit(True)
-            print('CONNECT DEVICE TO IOT-HUB SUCCESSFUL')
+            Log('CONNECTION', 'CONNECT DEVICE TO IOT-HUB SUCCESSFUL')
             return True
         except Exception as e:
             print(e)
@@ -95,9 +96,9 @@ class IotConn:
 
     def restartListener(self, objects):
         if self.thread_listening.is_alive():
-            print("Is Alive")
+            Log('CONNECTION', 'Listening thread still alive')
         elif (not self.connectionAvailable.isConnAvailable()):
-            print("Can restart listener because the connection is not established") 
+            Log('CONNECTION', 'Can restart listener because the connection is not established')
         else:
             self.currentObj = objects
             self.thread_listening = Thread(target=listeningEventLoopThread, args=(self.messageListener, self.client, objects,))
@@ -105,13 +106,13 @@ class IotConn:
             self.thread_listening.start()
 
     async def messageListener(self, client, objects):
-        print("Start listening to server")
+        Log('CONNECTION', 'Start Listener')
         while (self.mode == 'NORMAL' or self.mode == 'OFF'): 
             try:
                 message = await client.receive_message()
                 message = message.data.decode('utf-8')
                 json_data = json.loads(message, strict = False)
-                # print(json_data)
+                Log('RECEIVE_DATA', json_data)
                 if 'trackingId' in json_data and int(json_data['trackingId']) in objects:
                     objects[int(json_data['trackingId'])].updateInfo(str(json_data['personName']), str(json_data['personId']), str(json_data['mask']))
                 elif 'authorizeStatus' in json_data:
@@ -130,11 +131,12 @@ class IotConn:
             result.result()
             self.connectionAvailable.emit(True)
         except Exception as e:
-            print(e)
+            Log('CONNECTION', e)
             self.connectionAvailable.emit(False)
 
     async def handleSendMessage(self, msg):
         if (self.connectionAvailable.isConnAvailable()):
+            Log('SEND_DATA', msg)
             done, pending = await asyncio.wait({self.client.send_message(msg)},  timeout=7.0)
             if len(pending) > 0:
                 self.connectionAvailable.emit(False)
@@ -162,7 +164,6 @@ class IotConn:
         message_object.custom_properties["level"] = "recognize"
         # Send the message.
         asyncio.run_coroutine_threadsafe(self.handleSendMessage(message_object),self.sending_event_loop)
-        # print( "Message sent" ) 
 
     def sendRecord(self, deviceLabel, personID, temperature, face, masked, recordTime, internetAvailable):
         message = MSG_RECORD.format(deviceLabel=deviceLabel, personID=personID, temperature=temperature, face=face, masked=masked, recordTime=recordTime, internetAvailable=internetAvailable)
@@ -196,7 +197,7 @@ class IotConn:
         message_object= Message(message)
         message_object.custom_properties["level"] = "register"
         asyncio.run_coroutine_threadsafe(self.handleSendMessage(message_object),self.sending_event_loop)
-        print("Resgister sent to the server")
+        Log('CONNECTION' , "Resgister sent to the server")
 
     def sendImageToBlob(self, images, containerName, size):
         # Create container
