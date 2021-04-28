@@ -127,7 +127,7 @@ class Lepton(object):
         raise IOError("can't send {0} spi messages ({1})".format(60, ret))
       messages -= count
 
-  def capture(self, data_buffer = None, log_time = False, debug_print = True, retry_reset = True):
+  def capture(self, data_buffer = None, log_time = False, debug_print = False, garbage_frame_print=True, retry_reset = True):
     """Capture a frame of data.
 
     Captures 80x60 uint16 array of non-normalized (raw 12-bit) data. Returns that frame and a frame_id (which
@@ -155,7 +155,7 @@ class Lepton(object):
       if retry_reset and (self.__capture_buf[20, 0] & 0xFF0F) != 0x1400 and garbage_frame_count <= 4: # make sure that this is a well-formed frame, should find line 20 here
         # Leave chip select deasserted for at least 185 ms to reset
         garbage_frame_count = garbage_frame_count + 1
-        if debug_print:
+        if garbage_frame_print or debug_print:
           print("Garbage frame number reset waiting...")
         time.sleep(0.185)
       elif garbage_frame_count > 4:
