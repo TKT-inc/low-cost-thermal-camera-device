@@ -13,7 +13,10 @@ iotHub:
         recordMsg: '{{"method":"storeRecord","data":{{"deviceLabel":"{deviceLabel}","personId": "{personID}", "temperature":"{temperature}", "face":"{face}", "masked":"{masked}", "recordTime":"{recordTime}" , "internetAvailable":"{internetAvailable}"}}}}'
         registerMsg: '{{"buildingId":"{buildingId}","personName": "{personName}","containerName":"{containerName}"}}'
         activeDeviceMsg: '{{"method":"loginDevice","data":{{"deviceId":"{deviceId}", "deviceLabel":"{deviceLabel}","pinCode": "{pinCode}"}}}}'
-    enableSending: True
+    enableAllSending: False     # (True) will overwrite all other sending flags 
+    enableSendingRecognite: True
+    enableSendingRecord: False
+    enableSendingRegister: False
 
 camera:
     rgb:

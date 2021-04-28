@@ -75,7 +75,10 @@ FRONT_RANGE = user_cfg['registration']['frontRange']
 FRAMES_BETWEEN_CAP = cfg['registration']['frameBetweenCapture']
 
 # Flags of mode
-ENABLE_SENDING_TO_CLOUD = cfg['iotHub']['enableSending']
+ENABLE_ALL_SENDING = cfg['iotHub']['enableAllSending']
+ENABLE_SENDING_TO_CLOUD_RECOGNITE = cfg['iotHub']['enableSendingRecognite']
+ENABLE_SENDING_TO_CLOUD_RECORD = cfg['iotHub']['enableSendingRecord']
+ENABLE_SENDING_TO_CLOUD_REGISTER = cfg['iotHub']['enableSendingRegister']
 
 #setup threshold of face mask detection
 FACEMASK_DETECTION_THRESHOLD = cfg['thresholdFaceMaskDetection']
@@ -216,7 +219,7 @@ class DeviceAppFunctions():
             self.deletedObjectRecord[objectID] = obj
             pic_str = obj.convertBinaryImg()
 
-            if (ENABLE_SENDING_TO_CLOUD and self.INTERNET_AVAILABLE):
+            if ((ENABLE_ALL_SENDING or ENABLE_SENDING_TO_CLOUD_RECORD) and self.INTERNET_AVAILABLE):
                 print('____ start send records {:.5f}' .format(time.time()))
                 self.conn.sendRecord( DEVICE_LABEL, obj.id, obj.record_temperature, pic_str, obj.have_mask, obj.record_time, obj.internet_available)
             elif (not self.INTERNET_AVAILABLE):
@@ -249,7 +252,7 @@ class DeviceAppFunctions():
                 pic_str = base64.b64encode(buffer)
                 pic_str = pic_str.decode()
 
-                if (ENABLE_SENDING_TO_CLOUD and self.INTERNET_AVAILABLE):
+                if ((ENABLE_ALL_SENDING or ENABLE_SENDING_TO_CLOUD_RECOGNITE) and self.INTERNET_AVAILABLE):
                     print('____ start send recognite {:.5f}' .format(time.time()))
                     self.conn.messageSending(BUILDING_ID ,DEVICE_ID, personID, pic_str)
                     
@@ -324,7 +327,7 @@ class DeviceAppFunctions():
             yaml.dump(user_cfg, f)
 
     def sendRegisteredInfoToServer(self, name_of_new_user):
-        if (self.store_registered_imgs is not None and ENABLE_SENDING_TO_CLOUD and self.INTERNET_AVAILABLE):
+        if (self.store_registered_imgs is not None and (ENABLE_ALL_SENDING or ENABLE_SENDING_TO_CLOUD_REGISTER) and self.INTERNET_AVAILABLE):
             Thread(target=self.conn.registerToAzure, args=(BUILDING_ID ,name_of_new_user, self.store_registered_imgs, FACE_SIZE, ), daemon=True).start()
         self.store_registered_imgs = None
         print('Registered')
