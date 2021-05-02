@@ -220,7 +220,7 @@ class LightFaceDetection:
         picked_box_probs[:, 3] *= height
         return picked_box_probs[:, :4].astype(np.int32), np.array(picked_labels), picked_box_probs[:, 4]
 
-    def detectFaces(self, frame, bright=60):
+    def detectFaces(self, frame, bright=60, newThreshold=None):
         rect = cv2.convertScaleAbs(frame, beta=bright)
         rect = cv2.resize(rect, (self.width, self.height))
         # rect = cv2.convertScaleAbs(rect, beta=bright)
@@ -231,7 +231,9 @@ class LightFaceDetection:
         scores = np.expand_dims(np.reshape(scores, (-1, 2)), axis=0)
         boxes = self.convert_locations_to_boxes(boxes, self.priors, self.center_variance, self.size_variance)
         boxes = self.center_form_to_corner_form(boxes)
-        boxes, labels, probs = self.predict(frame.shape[1], frame.shape[0], scores, boxes, self.threshold)
+        if (newThreshold is None):
+            newThreshold = self.threshold
+        boxes, labels, probs = self.predict(frame.shape[1], frame.shape[0], scores, boxes, newThreshold)
         self.rects = []
         for i in range(boxes.shape[0]):
             box = boxes[i, :]

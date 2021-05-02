@@ -135,6 +135,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.temp_slider.valueChanged.connect(self.tempSliderValueHandle)
         self.time_calib_slider.valueChanged.connect(self.timeSliderValueHandle)
         self.records_slider.valueChanged.connect(self.recordsSliderValueHandle)
+        self.bright_slider.valueChanged.connect(self.brightSliderValueHandle)
+        self.threshold_slider.valueChanged.connect(self.thresholdSliderValueHandle)
 
     def startLoginWindow(self):
 
@@ -273,11 +275,13 @@ class MainWindow(QtWidgets.QMainWindow):
     def selectSettingMode(self):
         if (self.deviceFuntion.getMode() != 'NORMAL'):
             self.deviceFuntion.selectNormalMode()
-        time_calib, temp = self.deviceFuntion.getSettingsParam()
+        time_calib, temp, bright, threshold = self.deviceFuntion.getSettingsParam()
         self.time_calib_slider.setValue(time_calib)
         self.temp_slider.setValue(temp*100)
         self.records_slider.setValue(LIMIT_RECORDS)
         self.notis_slider.setValue(LIMIT_NOTIFICATIONS)
+        self.bright_slider.setValue(bright)
+        self.threshold_slider.setValue(threshold*100)
         self.stackedWidget.setCurrentWidget(self.setting)
         self.resetStyleBtn("settings")
         self.settings.setStyleSheet(self.selectMenu(self.settings.styleSheet()))
@@ -299,7 +303,9 @@ class MainWindow(QtWidgets.QMainWindow):
             yaml.dump(user_cfg, f)
         time = self.time_calib_slider.value()
         temp = float(self.temp_slider.value()/100)
-        self.deviceFuntion.updateSettingParams(time_calib=time, temp_fever=temp)
+        bright = self.bright_slider.value()
+        threshold = float(self.threshold_slider.value()/100)
+        self.deviceFuntion.updateSettingParams(time_calib=time, temp_fever=temp, bright_incre=bright,threshold=threshold )
         self.selectNormalMode()
         
     # Add notification when someone got fever or does not wear mask
@@ -420,6 +426,18 @@ class MainWindow(QtWidgets.QMainWindow):
         time = self.time_calib_slider.value()
         time = str(time) + ' seconds'
         self.time_calib_label.setText(time)
+
+    #Handle Bright increment slider
+    def brightSliderValueHandle(self):
+        bright = self.bright_slider.value()
+        bright = str(bright) + ' percent'
+        self.bright_label.setText(bright)
+
+    #Handle Face detection threshold slider
+    def thresholdSliderValueHandle(self):
+        threshold = self.threshold_slider.value()
+        threshold = str(threshold) + ' percent'
+        self.threshold_label.setText(threshold)
 
     #Handle all button of the application
     def button(self):

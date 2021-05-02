@@ -70,10 +70,13 @@ NUM_FRONT_PICS = cfg['registration']['numFontPics']
 NUM_LEFT_PICS = cfg['registration']['numLeftPics']
 NUM_RIGHT_PICS = cfg['registration']['numRightPics']
 STACK_NUMBER = cfg['registration']['stackNumberPics']
-LEFT_THRESHOLD = user_cfg['registration']['leftThreshold']
-RIGHT_THRESHOLD = user_cfg['registration']['rightThreshold']
-FRONT_RANGE = user_cfg['registration']['frontRange']
+LEFT_THRESHOLD = cfg['registration']['leftThreshold']
+RIGHT_THRESHOLD = cfg['registration']['rightThreshold']
+FRONT_RANGE = cfg['registration']['frontRange']
 FRAMES_BETWEEN_CAP = cfg['registration']['frameBetweenCapture']
+
+# The directory of offline record file
+OFFLINE_RECORD_DIR = cfg['offlineRecordDirectory']
 
 # Flags of mode
 ENABLE_ALL_SENDING = cfg['iotHub']['enableAllSending']
@@ -87,8 +90,14 @@ FACEMASK_DETECTION_THRESHOLD = cfg['thresholdFaceMaskDetection']
 #setup calibration params
 CALIBRATE_TIME = user_cfg['calibrationTimeForUser']
 
-# user offset
+# user  temperatture offset
 USER_TEMP_OFFSET = user_cfg['offsetTemperature']
+
+# user increment of bright for face detection =
+USER_BRIGHT_INCREMENT = user_cfg['brightIncrementForFaceDetection']
+
+# user face detection threshold
+USER_FACE_DETECTION_THRESHOLD = user_cfg['faceDetectionThreshold']
 
 
 class DeviceAppFunctions():
@@ -150,7 +159,7 @@ class DeviceAppFunctions():
         Log('PROCESS', 'Start processing frame')
         start = time.time()
         self.frame, self.ori = self.rgb.getFrame()
-        rects = self.faceDetect.detectFaces(self.frame)
+        rects = self.faceDetect.detectFaces(self.frame, USER_BRIGHT_INCREMENT, USER_FACE_DETECTION_THRESHOLD)
 
         if (self.MODE == 'NORMAL' or self.MODE == 'CALIBRATE'):
             self.objects,deletedObject = self.ct.update(rects, self.ori, RGB_SCALE, THRESHOLD_TEMP_FEVER)
@@ -287,7 +296,7 @@ class DeviceAppFunctions():
         return self.deletedObjectRecord
 
     def getSettingsParam(self):
-        return CALIBRATE_TIME, THRESHOLD_TEMP_FEVER
+        return CALIBRATE_TIME, THRESHOLD_TEMP_FEVER, USER_BRIGHT_INCREMENT, USER_FACE_DETECTION_THRESHOLD
     
     def selectRegisterMode(self):
         self.store_registered_imgs = None
@@ -324,14 +333,19 @@ class DeviceAppFunctions():
         with open("user_settings.yaml", "w") as f:
             yaml.dump(user_cfg, f)
         
-    def updateSettingParams(self, time_calib=CALIBRATE_TIME, temp_fever=THRESHOLD_TEMP_FEVER):
-        global CALIBRATE_TIME, THRESHOLD_TEMP_FEVER, user_cfg
+    def updateSettingParams(self, time_calib=CALIBRATE_TIME, temp_fever=THRESHOLD_TEMP_FEVER, bright_incre=USER_BRIGHT_INCREMENT, threshold=USER_FACE_DETECTION_THRESHOLD):
+        global CALIBRATE_TIME, THRESHOLD_TEMP_FEVER, USER_BRIGHT_INCREMENT, USER_FACE_DETECTION_THRESHOLD, user_cfg
         THRESHOLD_TEMP_FEVER = temp_fever
         CALIBRATE_TIME = time_calib
+        USER_BRIGHT_INCREMENT = bright_incre
+        USER_FACE_DETECTION_THRESHOLD = threshold
         user_cfg['feverTemperature'] = float(THRESHOLD_TEMP_FEVER)
         user_cfg['calibrationTimeForUser'] = int(CALIBRATE_TIME)
+        user_cfg['brightIncrementForFaceDetection'] = int(USER_BRIGHT_INCREMENT)
+        user_cfg['faceDetectionThreshold'] = float(USER_FACE_DETECTION_THRESHOLD)
         with open("user_settings.yaml", "w") as f:
             yaml.dump(user_cfg, f)
+        self.reset()
 
     def sendRegisteredInfoToServer(self, name_of_new_user):
         if (self.store_registered_imgs is not None and (ENABLE_ALL_SENDING or ENABLE_SENDING_TO_CLOUD_REGISTER) and self.INTERNET_AVAILABLE):
@@ -380,7 +394,7 @@ class DeviceAppFunctions():
 
     def setInternetStatus(self, status):
         if (not status):
-            self.recordFilename = 'device_app/data/offline_records/records_since_' + str(datetime.utcnow()) +'.json'
+            self.recordFilename = OFFLINE_RECORD_DIR + 'records_since_' + str(datetime.utcnow()) +'.json'
         else:
             records = getAllOfflineRecords()
             Thread(target=self.sendOfflineRecords ,args=(records,), daemon=True).start()
@@ -390,6 +404,14 @@ class DeviceAppFunctions():
     def isInternetAvailable(self):
         return self.INTERNET_AVAILABLE
 
+    def reset(self):
+        self.initObjectTracking()
+        if (not self.measureTemp.is_alive()):
+            self.measureTemp = Thread(target=self.measureTemperatureAllPeople, daemon=True)
+            self.measureTemp.start()
+        self.MODE = 'NORMAL'
+        self.conn.restartListener(self.objects)
+        
 
 def saveRecordsOfflineMode(fileName, record):
     try:
@@ -405,7 +427,7 @@ def saveRecordsOfflineMode(fileName, record):
 def getAllOfflineRecords():
     listOfRecordObjs = []
     try:
-        for filename in glob.glob('device_app/data/offline_records/records_since_*.json'):
+        for filename in glob.glob(OFFLINE_RECORD_DIR + 'records_since_*.json'):
             with open(filename) as f:
                 my_list = [json.loads(line) for line in f]
                 os.remove(filename)

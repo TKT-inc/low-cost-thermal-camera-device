@@ -1,6 +1,8 @@
 deviceIdAzure: 'test-device'
 deviceLabel: 'TMC-2021-1-00000001'
 
+offlineRecordDirectory: 'device_app/data/offline_records/'
+
 periodTime:
     measureTemp: 0.8
     sendRecMess: 2.0
@@ -54,6 +56,10 @@ registration:
     numRightPics: 2
     stackNumberPics: 6
     frameBetweenCapture: 3
+    frontRange: 44
+    leftThreshold: -18
+    rightThreshold: 15
+
 
 measureTemperature:
     numberMaxThermalPoints: 16

@@ -1747,7 +1747,7 @@ QSlider::handle:horizontal:pressed {
          <property name="geometry">
           <rect>
            <x>80</x>
-           <y>400</y>
+           <y>380</y>
            <width>441</width>
            <height>51</height>
           </rect>
@@ -1760,7 +1760,7 @@ QSlider::handle:horizontal:pressed {
           </font>
          </property>
          <property name="text">
-          <string>Calibration Settings</string>
+          <string>Threshold Settings</string>
          </property>
          <property name="alignment">
           <set>Qt::AlignCenter</set>
@@ -1769,17 +1769,17 @@ QSlider::handle:horizontal:pressed {
         <widget class="QSlider" name="time_calib_slider">
          <property name="geometry">
           <rect>
-           <x>160</x>
-           <y>520</y>
+           <x>170</x>
+           <y>610</y>
            <width>401</width>
            <height>40</height>
           </rect>
          </property>
          <property name="minimum">
-          <number>2</number>
+          <number>5</number>
          </property>
          <property name="maximum">
-          <number>5</number>
+          <number>8</number>
          </property>
          <property name="pageStep">
           <number>1</number>
@@ -1800,8 +1800,8 @@ QSlider::handle:horizontal:pressed {
         <widget class="QLabel" name="time_calib_label">
          <property name="geometry">
           <rect>
-           <x>30</x>
-           <y>520</y>
+           <x>40</x>
+           <y>610</y>
            <width>121</width>
            <height>41</height>
           </rect>
@@ -1833,8 +1833,8 @@ font: 500 12pt &quot;Fira Code&quot;;</string>
         <widget class="QLabel" name="label_12">
          <property name="geometry">
           <rect>
-           <x>10</x>
-           <y>480</y>
+           <x>30</x>
+           <y>570</y>
            <width>571</width>
            <height>41</height>
           </rect>
@@ -1845,7 +1845,7 @@ font: 500 12pt &quot;Fira Code&quot;;</string>
           </font>
          </property>
          <property name="text">
-          <string>Setting time for measure calibration temperature (second):</string>
+          <string>Time for measuring calibration temperature (seconds):</string>
          </property>
         </widget>
         <widget class="QLabel" name="label_13">
@@ -1865,7 +1865,7 @@ font: 500 12pt &quot;Fira Code&quot;;</string>
           </font>
          </property>
          <property name="text">
-          <string>Operation settings </string>
+          <string>Display Settings </string>
          </property>
          <property name="alignment">
           <set>Qt::AlignCenter</set>
@@ -1875,7 +1875,7 @@ font: 500 12pt &quot;Fira Code&quot;;</string>
          <property name="geometry">
           <rect>
            <x>30</x>
-           <y>110</y>
+           <y>120</y>
            <width>121</width>
            <height>41</height>
           </rect>
@@ -1908,7 +1908,7 @@ font: 500 12pt &quot;Fira Code&quot;;</string>
          <property name="geometry">
           <rect>
            <x>30</x>
-           <y>70</y>
+           <y>80</y>
            <width>361</width>
            <height>41</height>
           </rect>
@@ -1926,7 +1926,7 @@ font: 500 12pt &quot;Fira Code&quot;;</string>
          <property name="geometry">
           <rect>
            <x>160</x>
-           <y>110</y>
+           <y>120</y>
            <width>401</width>
            <height>40</height>
           </rect>
@@ -1957,7 +1957,7 @@ font: 500 12pt &quot;Fira Code&quot;;</string>
          <property name="geometry">
           <rect>
            <x>160</x>
-           <y>200</y>
+           <y>230</y>
            <width>401</width>
            <height>40</height>
           </rect>
@@ -1988,7 +1988,7 @@ font: 500 12pt &quot;Fira Code&quot;;</string>
          <property name="geometry">
           <rect>
            <x>30</x>
-           <y>160</y>
+           <y>190</y>
            <width>361</width>
            <height>41</height>
           </rect>
@@ -2006,7 +2006,7 @@ font: 500 12pt &quot;Fira Code&quot;;</string>
          <property name="geometry">
           <rect>
            <x>30</x>
-           <y>200</y>
+           <y>230</y>
            <width>121</width>
            <height>41</height>
           </rect>
@@ -2038,8 +2038,8 @@ font: 500 12pt &quot;Fira Code&quot;;</string>
         <widget class="QLabel" name="temp_label">
          <property name="geometry">
           <rect>
-           <x>30</x>
-           <y>290</y>
+           <x>40</x>
+           <y>500</y>
            <width>121</width>
            <height>41</height>
           </rect>
@@ -2071,8 +2071,8 @@ font: 500 12pt &quot;Fira Code&quot;;</string>
         <widget class="QSlider" name="temp_slider">
          <property name="geometry">
           <rect>
-           <x>160</x>
-           <y>290</y>
+           <x>170</x>
+           <y>500</y>
            <width>401</width>
            <height>40</height>
           </rect>
@@ -2103,8 +2103,8 @@ font: 500 12pt &quot;Fira Code&quot;;</string>
          <property name="geometry">
           <rect>
            <x>30</x>
-           <y>250</y>
-           <width>361</width>
+           <y>460</y>
+           <width>381</width>
            <height>41</height>
           </rect>
          </property>
@@ -2114,7 +2114,7 @@ font: 500 12pt &quot;Fira Code&quot;;</string>
           </font>
          </property>
          <property name="text">
-          <string>Setting fever threshold (celcious): </string>
+          <string>Fever temperature threshold (celcious): </string>
          </property>
         </widget>
        </widget>
@@ -2140,9 +2140,9 @@ font: 500 12pt &quot;Fira Code&quot;;</string>
          <property name="geometry">
           <rect>
            <x>90</x>
-           <y>30</y>
+           <y>0</y>
            <width>441</width>
-           <height>51</height>
+           <height>111</height>
           </rect>
          </property>
          <property name="font">
@@ -2153,7 +2153,7 @@ font: 500 12pt &quot;Fira Code&quot;;</string>
           </font>
          </property>
          <property name="text">
-          <string>Register Settings</string>
+          <string>Advance Settings</string>
          </property>
          <property name="alignment">
           <set>Qt::AlignCenter</set>
@@ -2209,6 +2209,170 @@ QPushButton:pressed {
            <width>24</width>
            <height>24</height>
           </size>
+         </property>
+        </widget>
+        <widget class="QSlider" name="bright_slider">
+         <property name="geometry">
+          <rect>
+           <x>170</x>
+           <y>190</y>
+           <width>401</width>
+           <height>40</height>
+          </rect>
+         </property>
+         <property name="minimum">
+          <number>0</number>
+         </property>
+         <property name="maximum">
+          <number>80</number>
+         </property>
+         <property name="pageStep">
+          <number>1</number>
+         </property>
+         <property name="value">
+          <number>20</number>
+         </property>
+         <property name="tracking">
+          <bool>true</bool>
+         </property>
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="tickPosition">
+          <enum>QSlider::TicksAbove</enum>
+         </property>
+        </widget>
+        <widget class="QLabel" name="bright_label">
+         <property name="geometry">
+          <rect>
+           <x>40</x>
+           <y>190</y>
+           <width>121</width>
+           <height>41</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <family>Fira Code</family>
+           <pointsize>12</pointsize>
+           <weight>62</weight>
+           <italic>false</italic>
+           <bold>true</bold>
+          </font>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">border :3px solid #151040;
+border-top-left-radius :10px;
+border-top-right-radius : 10px; 
+border-bottom-left-radius : 10px; 
+border-bottom-right-radius : 10px;
+font: 500 12pt &quot;Fira Code&quot;;</string>
+         </property>
+         <property name="text">
+          <string>20 percent</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+        <widget class="QLabel" name="bright_label_content">
+         <property name="geometry">
+          <rect>
+           <x>40</x>
+           <y>150</y>
+           <width>551</width>
+           <height>31</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <pointsize>16</pointsize>
+          </font>
+         </property>
+         <property name="text">
+          <string>Bright increment for face detection (percent):</string>
+         </property>
+        </widget>
+        <widget class="QLabel" name="threshold_label">
+         <property name="geometry">
+          <rect>
+           <x>40</x>
+           <y>340</y>
+           <width>121</width>
+           <height>41</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <family>Fira Code</family>
+           <pointsize>12</pointsize>
+           <weight>62</weight>
+           <italic>false</italic>
+           <bold>true</bold>
+          </font>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">border :3px solid #151040;
+border-top-left-radius :10px;
+border-top-right-radius : 10px; 
+border-bottom-left-radius : 10px; 
+border-bottom-right-radius : 10px;
+font: 500 12pt &quot;Fira Code&quot;;</string>
+         </property>
+         <property name="text">
+          <string>60 percent</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+        <widget class="QSlider" name="threshold_slider">
+         <property name="geometry">
+          <rect>
+           <x>170</x>
+           <y>340</y>
+           <width>401</width>
+           <height>40</height>
+          </rect>
+         </property>
+         <property name="minimum">
+          <number>60</number>
+         </property>
+         <property name="maximum">
+          <number>90</number>
+         </property>
+         <property name="pageStep">
+          <number>1</number>
+         </property>
+         <property name="value">
+          <number>60</number>
+         </property>
+         <property name="tracking">
+          <bool>true</bool>
+         </property>
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="tickPosition">
+          <enum>QSlider::TicksAbove</enum>
+         </property>
+        </widget>
+        <widget class="QLabel" name="bright_label_content_2">
+         <property name="geometry">
+          <rect>
+           <x>40</x>
+           <y>300</y>
+           <width>551</width>
+           <height>31</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <pointsize>16</pointsize>
+          </font>
+         </property>
+         <property name="text">
+          <string>Threshold of face detection (percent):</string>
          </property>
         </widget>
        </widget>
