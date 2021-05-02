@@ -44,7 +44,7 @@ class Lepton(object):
   MODE = SPI_MODE_0
   BITS = 8
   SPEED = 16000000
-  SPIDEV_MESSAGE_LIMIT = 56
+  SPIDEV_MESSAGE_LIMIT = 24
 
   def __init__(self, spi_dev = "/dev/spidev0.0"):
     self.__spi_dev = spi_dev
@@ -156,8 +156,8 @@ class Lepton(object):
         # Leave chip select deasserted for at least 185 ms to reset
         garbage_frame_count = garbage_frame_count + 1
         if garbage_frame_print or debug_print:
-          print("Garbage frame number reset waiting...")
-        time.sleep(0.185)
+          print(f"Garbage frame number reset waiting... {garbage_frame_count}")
+        time.sleep(0.25)
       elif garbage_frame_count > 4:
         print('garbage frame of thermal camera more then 3')
         raise Exception("Got error while capturing thermal camera")
