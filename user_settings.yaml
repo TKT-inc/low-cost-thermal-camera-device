@@ -1,10 +1,10 @@
-activatedDevice: True
+activatedDevice: true
 buildingId: 1
 calibrationTimeForUser: 4
 feverTemperature: 41.0
 limitNotifications: 7
 limitRecords: 5
-offsetTemperature: -2.3189353350000275
+offsetTemperature: -2.473107418801611
 registration:
   frontRange: 44
   leftThreshold: -18

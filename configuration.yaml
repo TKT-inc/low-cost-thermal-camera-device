@@ -14,7 +14,7 @@ iotHub:
         registerMsg: '{{"buildingId":"{buildingId}","personName": "{personName}","containerName":"{containerName}"}}'
         activeDeviceMsg: '{{"method":"loginDevice","data":{{"deviceId":"{deviceId}", "deviceLabel":"{deviceLabel}","pinCode": "{pinCode}"}}}}'
     enableAllSending: False     # (True) will overwrite all other sending flags 
-    enableSendingRecognite: True
+    enableSendingRecognite: False
     enableSendingRecord: False
     enableSendingRegister: False
 
@@ -42,7 +42,7 @@ faceDetection:
     onnxSlim320: "./device_app/submodules/face_detection/models/version-slim-320_simplified.onnx"
     landmarkDetectionModel: "./device_app/submodules/face_detection/models/landmarks.dat"
     faceSize: 400
-    threshold: 0.8
+    threshold: 0.6
 
 transMatrix: [[0.719298243522644042968750000000000000000000000000000000000000,0.000000000000000000000000000000000000000000000000000000000000,108.140350341796875000000000000000000000000000000000000000000000],[-0.000000000000000052438578919762255086539637360942833765875548,0.736842095851898193359375000000000000000000000000000000000000,219.368423461914062500000000000000000000000000000000000000000000]]
 
@@ -57,20 +57,21 @@ registration:
 
 measureTemperature:
     numberMaxThermalPoints: 16
-    offsetDistCoeffecient: -0.0000212
-    offsetDistIntercept: 1.654018585
+    # offsetDistCoeffecient: -0.0000212
+    # offsetDistIntercept: 1.654018585
+    offsetDistCoeffecient: -0.347698157
+    offsetDistIntercept: 4.557706084
 
 personTracking:
     NoOfDisapearFrames: 30
     bufSizeTempPersonTracking: 6
     bufSizeNameAndIdPersonTracking: 3
-    thresholdTempOfFever: 38
 
 developmentFlags:
     printProcessTime: False
-    printReceiveData: False
+    printReceiveData: True
     printSendData: False
-    printRecord: True
-    printRecognize: True
+    printRecord: False
+    printRecognize: False
     printRegister: True
     printIoTConn: True

@@ -96,6 +96,8 @@ class DeviceAppFunctions():
     def __init__(self, internetSignal):
         self.color = np.zeros((480,640,3), np.uint8)
         self.rgb_temp = np.zeros((480,640,3), np.uint8)
+
+        # States: OFF, NORMAL, CALIBRATE, WAITING, REGISTER
         self.MODE = 'OFF'
         self.recordFilename = ''
 
@@ -112,6 +114,8 @@ class DeviceAppFunctions():
         self.measureTemp.start()
 
         self.process()
+
+        # self.csvAva = False
 
 
     def initCamera(self):
@@ -138,7 +142,10 @@ class DeviceAppFunctions():
     def initIoTConnection(self, internetStatus):
         self.conn = IotConn(internetStatus, self.MODE, CONNECTION_STRING_DEVICE, CONNECTION_STRING_BLOB , self.objects)
 
-
+    """
+    This is the main function
+    Return: status (NORMAL, REGISTER_SUCCESS, REGISTER_DONE_LEFT, REGISTER_DONE_FRONT, CALIBRATE_TOO_MUCH_PEOPLE, CALIBRATE_SUCCESS)
+    """
     def process(self):
         Log('PROCESS', 'Start processing frame')
         start = time.time()
@@ -174,8 +181,7 @@ class DeviceAppFunctions():
 
         if (self.MODE == 'CALIBRATE'):
             if (len(self.objects.items()) == 1):
-                if (DEV_PRINT_PROCESS):
-                    Log('PROCESS','Calibrate mode _ have one person')
+                Log('PROCESS','Calibrate mode _ have one person')
                 if (self.calibrate_person_ID != list(self.objects.items())[0][0]):
                     self.calibrate_time = time.time()
                     self.calibrate_person_ID =  list(self.objects.items())[0][0]
@@ -248,12 +254,12 @@ class DeviceAppFunctions():
     def sendImageForRec(self, trackingID):
         while trackingID in self.objects and (self.MODE == 'NORMAL' or self.MODE == 'CALIBRATE'):
             try:
-                _, buffer = cv2.imencode('.jpg', cv2.resize(self.objects[personID].face_rgb, (FACE_SIZE,FACE_SIZE)))
+                _, buffer = cv2.imencode('.jpg', cv2.resize(self.objects[trackingID].face_rgb, (FACE_SIZE,FACE_SIZE)))
                 pic_str = base64.b64encode(buffer)
                 pic_str = pic_str.decode()
 
                 if ((ENABLE_ALL_SENDING or ENABLE_SENDING_TO_CLOUD_RECOGNITE) and self.INTERNET_AVAILABLE):
-                    Log('RECOGNIZE','Start send recognite for ' + trackingID)
+                    Log('RECOGNIZE','Start send recognite for ' + str(trackingID))
                     self.conn.messageSending(BUILDING_ID ,DEVICE_ID, trackingID, pic_str)
                     
                 time.sleep(TIME_SEND_REC)
@@ -345,14 +351,16 @@ class DeviceAppFunctions():
         self.MODE = 'NORMAL'
         
     def activateDevice(self, pinCode):
-        global USER_TEMP_OFFSET, user_cfg
+        global USER_TEMP_OFFSET, BUILDING_ID, user_cfg
 
         if (self.INTERNET_AVAILABLE):
-            status = self.conn.activeDevice(DEVICE_ID, DEVICE_LABEL, pinCode)
-            if (status):
+            buildingIdOfDevice = self.conn.activeDevice(DEVICE_ID, DEVICE_LABEL, pinCode)
+            if (buildingIdOfDevice is not None and buildingIdOfDevice >= 0):
                 self.turnDeviceToActivated()
-                user_cfg['activatedDevice'] = status
-                ACTIVATE_DEVICE = status
+                user_cfg['activatedDevice'] = True
+                ACTIVATE_DEVICE = True
+                user_cfg['buildingId'] = buildingIdOfDevice
+                BUILDING_ID = buildingIdOfDevice
                 with open("user_settings.yaml", "w") as f:
                     yaml.dump(user_cfg, f)
                 return True

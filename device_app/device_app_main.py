@@ -54,6 +54,17 @@ class MainWindow(QtWidgets.QMainWindow):
         self.shortcut_quit = QtWidgets.QShortcut(QtGui.QKeySequence('Ctrl+Q'), self)
         self.shortcut_quit.activated.connect(self.closeApp)
 
+    #     self.shortcut_on_csv = QtWidgets.QShortcut(QtGui.QKeySequence('Ctrl+O'), self)
+    #     self.shortcut_off_csv = QtWidgets.QShortcut(QtGui.QKeySequence('Ctrl+C'), self)
+    #     self.shortcut_on_csv.activated.connect(self.activeCSV)
+    #     self.shortcut_off_csv.activated.connect(self.deactiveCSV)
+    
+    # def activeCSV(self):
+    #     self.deviceFuntion.csvAva = True
+    
+    # def deactiveCSV(self):
+    #     self.deviceFuntion.csvAva = False
+
     def checkActivatedStatusFromConfig(self):
         activateCode = self.deviceFuntion.isDeviceActivated()
         if not activateCode:
@@ -88,13 +99,13 @@ class MainWindow(QtWidgets.QMainWindow):
         self.notifications.verticalHeader().setDefaultSectionSize(30)
         self.notifications.verticalHeader().sectionResizeMode(QtWidgets.QHeaderView.Fixed)
 
-        # self.timerWorking = QtCore.QTimer()
-        # self.timerWorking.setTimerType(QtCore.Qt.PreciseTimer)
-        # self.timerWorking.timeout.connect(self.working)
-        # self.timerWorking.start(0)
+        self.timerWorking = QtCore.QTimer()
+        self.timerWorking.setTimerType(QtCore.Qt.PreciseTimer)
+        self.timerWorking.timeout.connect(self.working)
+        self.timerWorking.start(0)
 
-        worker = Worker(self.working)
-        self.threadpool.start(worker)
+        # worker = Worker(self.working)
+        # self.threadpool.start(worker)
 
         self.timeHandleStatus = QtCore.QTimer()
         self.timeHandleStatus.setTimerType(QtCore.Qt.PreciseTimer)
@@ -135,23 +146,24 @@ class MainWindow(QtWidgets.QMainWindow):
     """
     #PROCESSING OF THE MAIN SYSTEM
     def working(self):
-        while self.deviceFuntion.getMode() != "OFF":
-            try: 
-                if (not self.suspend):
-                    status = self.deviceFuntion.process()
-                    if (status == "REGISTER_SUCCESS"):
-                        self.finishedFaceRegistrationStyle(self.face_right)
-                        self.createInputNameDialog()
-                    elif (status == "REGISTER_DONE_LEFT"):
-                        self.finishedFaceRegistrationStyle(self.face_left)
-                    elif (status == "REGISTER_DONE_FRONT"):
-                        self.finishedFaceRegistrationStyle(self.face_front)
-                    elif (status == "CALIBRATE_TOO_MUCH_PEOPLE"):
-                        Log('PROCESS', 'calibrate_one person please')
-                    elif (status == "CALIBRATE_SUCCESS"):
-                        self.createInputGroundTruthTemp()
-            except Exception as e:
-                pass
+        # while self.deviceFuntion.getMode() != "OFF":
+        try: 
+            if (not self.suspend):
+                status = self.deviceFuntion.process()
+                if (status == "REGISTER_SUCCESS"):
+                    self.finishedFaceRegistrationStyle(self.face_right)
+                    self.createInputNameDialog()
+                elif (status == "REGISTER_DONE_LEFT"):
+                    self.finishedFaceRegistrationStyle(self.face_left)
+                elif (status == "REGISTER_DONE_FRONT"):
+                    self.finishedFaceRegistrationStyle(self.face_front)
+                elif (status == "CALIBRATE_TOO_MUCH_PEOPLE"):
+                    Log('PROCESS', 'calibrate_one person please')
+                elif (status == "CALIBRATE_SUCCESS"):
+                    self.createInputGroundTruthTemp()
+        except Exception as e:
+            print(e)
+            pass
 
     #Handle status of working process
     def handleRecordsAndNotis(self):
@@ -252,12 +264,11 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def selectCalibrateMode(self):
         self.main_display_monitor = self.calibrate_screen
-        self.deviceFuntion.selectCalibrateMode()
         self.stackedWidget.setCurrentWidget(self.calibrate)
         self.resetStyleBtn("btn_calib")
         self.btn_calib.setStyleSheet(self.selectMenu(self.btn_calib.styleSheet()))
         if (self.deviceFuntion.getMode() != 'CALIBRATE'):
-            self.deviceFuntion.selectRegisterMode() 
+            self.deviceFuntion.selectCalibrateMode() 
 
     def selectSettingMode(self):
         if (self.deviceFuntion.getMode() != 'NORMAL'):

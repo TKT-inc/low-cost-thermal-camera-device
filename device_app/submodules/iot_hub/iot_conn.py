@@ -44,7 +44,7 @@ class IotConn:
     def __init__(self, internetSignal, mode, connStringDevice, connStringBlob, objects):
         # Create an IoT Hub client
         self.mode = mode
-        self.activeDeviceStatus = None
+        self.buildingIdActiveDevice = None
         self.connectionAvailable = self.ConnectionStatus(internetSignal)   
 
         self.connStringDev = connStringDevice
@@ -111,15 +111,15 @@ class IotConn:
             try:
                 message = await client.receive_message()
                 message = message.data.decode('utf-8')
+                Log('RECEIVE_DATA', message)
                 json_data = json.loads(message, strict = False)
-                Log('RECEIVE_DATA', json_data)
                 if 'trackingId' in json_data and int(json_data['trackingId']) in objects:
                     objects[int(json_data['trackingId'])].updateInfo(str(json_data['personName']), str(json_data['personId']), str(json_data['mask']))
                 elif 'authorizeStatus' in json_data:
                     if json_data['authorizeStatus'] == 'SUCCESS':
-                        self.activeDeviceStatus = True
+                        self.buildingIdActiveDevice = json_data['buildingId']
                     else:
-                        self.activeDeviceStatus = False
+                        self.buildingIdActiveDevice = -1
 
                 self.connectionAvailable.emit(True)
             except Exception as identifier:
@@ -152,10 +152,10 @@ class IotConn:
         message_object.custom_properties["level"] = "common"
         asyncio.run_coroutine_threadsafe(self.handleSendMessage(message_object),self.sending_event_loop)
         startTime = time.time()
-        while (self.activeDeviceStatus is None) and (time.time() - startTime < 8):
+        while (self.buildingIdActiveDevice is None) and (time.time() - startTime < 8):
             time.sleep(0.2)
-        returnValue = (self.activeDeviceStatus is not None) and self.activeDeviceStatus
-        self.activeDeviceStatus = None
+        returnValue = self.buildingIdActiveDevice
+        self.buildingIdActiveDevice = None
         return returnValue
 
     def messageSending(self, buildingId, deviceId, trackingId, face_img):

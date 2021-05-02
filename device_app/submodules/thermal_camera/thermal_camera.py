@@ -30,7 +30,7 @@ class ThermalCam:
     def updateFrame(self):
         try:
             with Lepton(self.source) as l:
-                a,_ = l.capture(garbage_frame_print=False)
+                a,_ = l.capture(garbage_frame_print=True)
                 self.temp = np.float32(a)
                 cv2.normalize(a, a, 0, 65535, cv2.NORM_MINMAX)
                 np.right_shift(a, 8, a)
