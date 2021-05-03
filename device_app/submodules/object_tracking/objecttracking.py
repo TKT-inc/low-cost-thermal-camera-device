@@ -1,7 +1,10 @@
 # import the necessary packages
 from scipy.spatial import distance as dist
 from collections import OrderedDict
+from datetime import datetime
 import numpy as np
+import base64
+import cv2
 
 class ObjectInfo():
 	def __init__(self, coor, rgb, scale, max_rec_stack = 3, max_temp_stack=6, fever_temp=38):
@@ -10,7 +13,7 @@ class ObjectInfo():
 		self.id = "None"
 		self.temperature = "None"
 		self.record_temperature = 0
-		self.have_mask = False
+		self.have_mask = "N/A"
 		self.face_rgb = rgb[int(coor[1]*scale):int(coor[3]*scale), int(coor[0]*scale):int(coor[2]*scale)]
 		self.rec_stacks = []
 		self.max_rec_stack = max_rec_stack
@@ -19,8 +22,11 @@ class ObjectInfo():
 		self.fever_temp = fever_temp
 		self.sending_recs_img = False
 		self.temporary_dissapear = False
+		self.internet_available = False
 	
-	def updateNameAndId(self, name, id):
+	def updateInfo(self, name, id, have_mask):
+		self.internet_available = True
+		self.have_mask = have_mask == "True"
 		self.rec_stacks.append((name, id))
 		if (len(self.rec_stacks) == self.max_rec_stack + 1):
 			self.rec_stacks.pop(0)
@@ -42,10 +48,41 @@ class ObjectInfo():
 		if(self.record_temperature >= self.fever_temp):
 			return True
 		return False
-	
+
+
+class RecordsObject():
+	def __init__(self, face_size):
+		self.records = OrderedDict()
+		self.face_size = face_size
+
+	def addNewRecord(self, objectId, obj):
+		if (obj.record_temperature > 25 and obj.record_temperature < 42):
+			self.records[objectId] = self.Record(id = obj.id, name=obj.name, record_temperature = obj.record_temperature, got_fever = obj.gotFever(), face_rgb = obj.face_rgb, have_mask = obj.have_mask, face_size= self.face_size, internet_available=obj.internet_available)
+		
+	class Record():
+		def __init__(self, id, name, record_temperature, got_fever, face_rgb, have_mask, face_size, internet_available):
+			self.id = id
+			self.name= name
+			self.record_temperature = record_temperature
+			self.got_fever = got_fever
+			self.face_rgb = face_rgb
+			self.have_mask = have_mask
+			self.face_size = face_size
+			self.record_time = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3]
+			self.internet_available = internet_available
+		
+		def convertBinaryImg(self):
+			_, buffer = cv2.imencode('.jpg', cv2.resize(self.face_rgb,(self.face_size,self.face_size)))
+			pic_str = base64.b64encode(buffer)
+			pic_str = pic_str.decode()
+			return pic_str
+
+		def jsonable(self):
+			return dict(id=self.id, record_time=self.record_time, record_temperature=self.record_temperature, have_mask=self.have_mask , internet_available=self.internet_available, pic_str=self.convertBinaryImg())
+
 
 class CentroidTracker():
-	def __init__(self, maxDisappeared=25, max_rec_stack = 3, max_temp_stack=6, fever_temp=38):
+	def __init__(self, maxDisappeared=25, max_rec_stack = 3, max_temp_stack=6):
 		# initialize the next unique object ID along with two ordered
 		# dictionaries used to keep track of mapping a given object
 		# ID to its centroid and number of consecutive frames it has
@@ -61,17 +98,16 @@ class CentroidTracker():
 		self.counted = False
 		self.max_rec_stack = max_rec_stack
 		self.max_temp_stack = max_temp_stack
-		self.fever_temp = fever_temp
 
 	def getCentroid(self, coor):
 		cX = int((coor[0] + coor[2]) / 2.0)
 		cY = int((coor[1] + coor[3]) / 2.0)
 		return (cX, cY)
 
-	def register(self, coor, rgb, scale):
+	def register(self, coor, rgb, scale, fever_temp):
 		# when registering an object we use the next available object
 		# ID to store the centroid
-		obj = ObjectInfo(coor, rgb, scale, self.max_rec_stack, self.max_temp_stack, self.fever_temp)
+		obj = ObjectInfo(coor, rgb, scale, self.max_rec_stack, self.max_temp_stack, fever_temp)
 		self.objects[self.nextObjectID] = obj
 		self.disappeared[self.nextObjectID] = 0
 		self.nextObjectID += 1
@@ -82,24 +118,24 @@ class CentroidTracker():
 		del self.objects[objectID]
 		del self.disappeared[objectID]
 
-	def update(self, rects, rgb, scale):
+
+	def update(self, rects, rgb, scale, fever_temp=38):
 		# check to see if the list of input bounding box rectangles
 		# is empty
-		disappearedObjects = OrderedDict()
-		indexDisappeared = 0
+		disappearedObjects = RecordsObject(600)
 
 		if len(rects) == 0:
 			# loop over any existing tracked objects and mark them
 			# as disappeared
 			for objectID in list(self.disappeared.keys()):
 				self.disappeared[objectID] += 1
-				self.objects[objectID].temporary_dissapear = True
+				if self.disappeared[objectID] > 5:
+					self.objects[objectID].temporary_dissapear = True
 				# if we have reached a maximum number of consecutive
 				# frames where a given object has been marked as
 				# missing, deregister it
 				if self.disappeared[objectID] > self.maxDisappeared:
-					disappearedObjects[indexDisappeared] = self.objects[objectID]
-					indexDisappeared += 1
+					disappearedObjects.addNewRecord(objectID, self.objects[objectID])
 					self.deregister(objectID)
 
 			# return early as there are no centroids or tracking info
@@ -119,7 +155,7 @@ class CentroidTracker():
 		# centroids and register each of them
 		if len(self.objects) == 0:
 			for i in range(0, len(inputCentroids)):
-				self.register(rects[i], rgb, scale)
+				self.register(rects[i], rgb, scale, fever_temp)
 
 		# otherwise, are are currently tracking objects so we need to
 		# try to match the input centroids to existing object
@@ -200,14 +236,15 @@ class CentroidTracker():
 					# index and increment the disappeared counter
 					objectID = objectIDs[row]
 					self.disappeared[objectID] += 1
-					self.objects[objectID].temporary_dissapear = True
+
+					if self.disappeared[objectID] > 5:
+						self.objects[objectID].temporary_dissapear = True
 
 					# check to see if the number of consecutive
 					# frames the object has been marked "disappeared"
 					# for warrants deregistering the object
 					if self.disappeared[objectID] > self.maxDisappeared:
-						disappearedObjects[indexDisappeared] = self.objects[objectID]
-						indexDisappeared += 1
+						disappearedObjects.addNewRecord(objectID, self.objects[objectID])
 						self.deregister(objectID)
 
 			# otherwise, if the number of input centroids is greater
@@ -215,7 +252,7 @@ class CentroidTracker():
 			# register each new input centroid as a trackable object
 			else:
 				for col in unusedCols:
-					self.register(rects[col],rgb, scale)
+					self.register(rects[col],rgb, scale, fever_temp)
 
 		# return the set of trackable objects
 		return self.objects, disappearedObjects

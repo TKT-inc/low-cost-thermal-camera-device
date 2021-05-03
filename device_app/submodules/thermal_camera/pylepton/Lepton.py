@@ -44,7 +44,7 @@ class Lepton(object):
   MODE = SPI_MODE_0
   BITS = 8
   SPEED = 16000000
-  SPIDEV_MESSAGE_LIMIT = 56
+  SPIDEV_MESSAGE_LIMIT = 24
 
   def __init__(self, spi_dev = "/dev/spidev0.0"):
     self.__spi_dev = spi_dev
@@ -127,7 +127,7 @@ class Lepton(object):
         raise IOError("can't send {0} spi messages ({1})".format(60, ret))
       messages -= count
 
-  def capture(self, data_buffer = None, log_time = False, debug_print = False, retry_reset = True):
+  def capture(self, data_buffer = None, log_time = False, debug_print = False, garbage_frame_print=True, retry_reset = True):
     """Capture a frame of data.
 
     Captures 80x60 uint16 array of non-normalized (raw 12-bit) data. Returns that frame and a frame_id (which
@@ -149,13 +149,18 @@ class Lepton(object):
     elif data_buffer.ndim < 2 or data_buffer.shape[0] < Lepton.ROWS or data_buffer.shape[1] < Lepton.COLS or data_buffer.itemsize < 2:
       raise Exception("Provided input array not large enough")
 
+    garbage_frame_count = 0
     while True:
       Lepton.capture_segment(self.__handle, self.__xmit_buf, self.__msg_size, self.__capture_buf[0])
-      if retry_reset and (self.__capture_buf[20, 0] & 0xFF0F) != 0x1400: # make sure that this is a well-formed frame, should find line 20 here
+      if retry_reset and (self.__capture_buf[20, 0] & 0xFF0F) != 0x1400 and garbage_frame_count <= 4: # make sure that this is a well-formed frame, should find line 20 here
         # Leave chip select deasserted for at least 185 ms to reset
-        if debug_print:
-          print("Garbage frame number reset waiting...")
-        time.sleep(0.185)
+        garbage_frame_count = garbage_frame_count + 1
+        if garbage_frame_print or debug_print:
+          print(f"Garbage frame number reset waiting... {garbage_frame_count}")
+        time.sleep(0.25)
+      elif garbage_frame_count > 4:
+        print('garbage frame of thermal camera more then 3')
+        raise Exception("Got error while capturing thermal camera")
       else:
         break
 
@@ -166,11 +171,12 @@ class Lepton(object):
 
     if debug_print:
       print("---")
-      for i in range(Lepton.ROWS):
-        fid = self.__capture_buf[i, 0, 0]
-        crc = self.__capture_buf[i, 1, 0]
-        fnum = fid & 0xFFF
-        print("0x{0:04x} 0x{1:04x} : Row {2:2} : crc={1}".format(fid, crc, fnum))
+      # for i in range(Lepton.ROWS):
+      #   fid = self.__capture_buf[i, 0, 0]
+      #   crc = self.__capture_buf[i, 1, 0]
+      #   fnum = fid & 0xFFF
+        # print("0x{0:04x} 0x{1:04x} : Row {2:2} : crc={1}".format(fid, crc, fnum))
+      print('Thermal camera working smooth')
       print("---")
 
     if log_time:

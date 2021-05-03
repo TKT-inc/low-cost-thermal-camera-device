@@ -1,17 +1,24 @@
-deviceId: 'test-device'
+deviceIdAzure: 'test-device'
+deviceLabel: 'TMC-2021-1-00000001'
+
+offlineRecordDirectory: 'device_app/data/offline_records/'
 
 periodTime:
-    measureTemp: 0.6
-    sendRecMess: 1.5
+    measureTemp: 0.8
+    sendRecMess: 2.0
 
 iotHub:
     connectionStringDevice: "HostName=thesis-hub.azure-devices.net;DeviceId=test-device;SharedAccessKey=E/uKH6XK6G2NLCYWQxu26+mrNBKmecm0I4WU2A1FfrY="
-    connectionStringBlob: "DefaultEndpointsProtocol=https;AccountName=thesisbstorage;AccountKey=WdOJMq9wULxCEKKHHiI9lafWPjIpJpXuinasmDLO5F9zZObHDzrLxTszglLM0zCa+GILFbjZCTO0BjFEuUR/WQ==;EndpointSuffix=core.windows.net"
+    connectionStringBlob: "DefaultEndpointsProtocol=https;AccountName=tktrecordstorage;AccountKey=L5yEM18qRAUaAvYiFkwQC1T54rl+ceLvhu6EeDVXr1vOBfvMn6mzoAoagM/WBwUiQJy4gYxNM5aSiDQlzIxtsg==;EndpointSuffix=core.windows.net"
     msgFormat: 
         recMsg: '{{"buildingId":"{buildingId}","deviceId":"{deviceId}","trackingId": "{trackingId}","face": "{face}"}}'
-        recordMsg: '{{"buildingId":"{buildingId}","personId": "{personID}", "personName": "{personName}", "temperature":"{temperature}", "face":"{face}"}}'
+        recordMsg: '{{"method":"storeRecord","data":{{"deviceLabel":"{deviceLabel}","personId": "{personID}", "temperature":"{temperature}", "face":"{face}", "masked":"{masked}", "recordTime":"{recordTime}" , "internetAvailable":"{internetAvailable}"}}}}'
         registerMsg: '{{"buildingId":"{buildingId}","personName": "{personName}","containerName":"{containerName}"}}'
-    enableSending: False
+        activeDeviceMsg: '{{"method":"loginDevice","data":{{"deviceId":"{deviceId}", "deviceLabel":"{deviceLabel}","pinCode": "{pinCode}"}}}}'
+    enableAllSending: False     # (True) will overwrite all other sending flags 
+    enableSendingRecognite: False
+    enableSendingRecord: False
+    enableSendingRegister: False
 
 camera:
     rgb:
@@ -36,7 +43,8 @@ faceDetection:
     protoRfb320: "./device_app/submodules/face_detection/models/RFB-320.prototxt"
     onnxSlim320: "./device_app/submodules/face_detection/models/version-slim-320_simplified.onnx"
     landmarkDetectionModel: "./device_app/submodules/face_detection/models/landmarks.dat"
-    faceSize: 600
+    faceSize: 400
+    threshold: 0.6
 
 transMatrix: [[0.719298243522644042968750000000000000000000000000000000000000,0.000000000000000000000000000000000000000000000000000000000000,108.140350341796875000000000000000000000000000000000000000000000],[-0.000000000000000052438578919762255086539637360942833765875548,0.736842095851898193359375000000000000000000000000000000000000,219.368423461914062500000000000000000000000000000000000000000000]]
 
@@ -48,14 +56,28 @@ registration:
     numRightPics: 2
     stackNumberPics: 6
     frameBetweenCapture: 3
+    frontRange: 44
+    leftThreshold: -18
+    rightThreshold: 15
+
 
 measureTemperature:
     numberMaxThermalPoints: 16
-    offsetDistCoeffecient: -0.0000212
-    offsetDistIntercept: 1.654018585
+    # offsetDistCoeffecient: -0.0000212
+    # offsetDistIntercept: 1.654018585
+    offsetDistCoeffecient: -0.347698157
+    offsetDistIntercept: 4.557706084
 
 personTracking:
     NoOfDisapearFrames: 30
     bufSizeTempPersonTracking: 6
     bufSizeNameAndIdPersonTracking: 3
-    thresholdTempOfFever: 38
+
+developmentFlags:
+    printProcessTime: False
+    printReceiveData: True
+    printSendData: False
+    printRecord: False
+    printRecognize: False
+    printRegister: True
+    printIoTConn: True

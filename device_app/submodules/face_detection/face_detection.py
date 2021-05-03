@@ -11,8 +11,8 @@ from submodules.face_detection.vision.ssd.mb_tiny_fd import create_mb_tiny_fd, c
 from submodules.face_detection.vision.ssd.mb_tiny_RFB_fd import create_Mb_Tiny_RFB_fd, create_Mb_Tiny_RFB_fd_predictor
 from submodules.face_detection.vision.utils.misc import Timer
 
-CAFFEMODEL = "/models/res10_300x300_ssd_iter_140000.caffemodel"
-PROTOTEXTPATH = "/models/deploy.prototxt.txt"
+CAFFEMODEL = "./device_app/submodules/face_detection/models/res10_300x300_ssd_iter_140000.caffemodel"
+PROTOTEXTPATH = "./device_app/submodules/face_detection/models/deploy.prototxt.txt"
 LANDMARK_DETECTION_MODEL = "./device_app/submodules/face_detection/models/landmarks.dat"
 MOUTH_CASCADE_FILE = './device_app/submodules/face_detection/models/haarcascade_mouth.xml'
 
@@ -21,6 +21,7 @@ class LandmarkDetection:
         self.predictor = dlib.shape_predictor(model)
         self.facemask_saturation = facemask_saturation
         self.mouth_cascade = cv2.CascadeClassifier(mouth_cascade_file)
+        # self.nose_cascade = cv2.CascadeClassifier("./device_app/submodules/face_detection/models/haarcascade_nose.xml")
 
     def detectLandmarkForRegister(self, frame, rects):
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
@@ -41,7 +42,6 @@ class LandmarkDetection:
         return image_points
 
     def faceMaskDetected(self, face):
-        
         face = cv2.cvtColor(face, cv2.COLOR_BGR2GRAY)
         h, w = face.shape
         face = face[int(h*0.25):h, 0:w]
@@ -51,7 +51,8 @@ class LandmarkDetection:
 
         face = cv2.convertScaleAbs(face, alpha=alpha, beta=beta)
         mouth_rects = self.mouth_cascade.detectMultiScale(face, minNeighbors=5)
-        # cv2.imwrite('../test/' + str(len(mouth_rects)) + '.png', face)
+        # nose_rects = self.nose_cascade.detectMultiScale(face)
+        # cv2.imwrite('./test/' + str(len(mouth_rects)) + '_' + str(len(nose_rects)) + '.png', face)
 
         if (len(mouth_rects) == 0):
             return True
@@ -91,7 +92,7 @@ class FaceDetection:
         return self.rects
 
 class LightFaceDetection:
-    def __init__(self, proto, model, width = 320, height = 240):
+    def __init__(self, proto, model, threshold, width = 320, height = 240):
         self.rects = []
         #self.net = cv2.dnn.readNetFromONNX(onnx)
         self.net = cv2.dnn.readNetFromCaffe(proto, model)
@@ -102,7 +103,7 @@ class LightFaceDetection:
         self.image_std = 128.0
         self.center_variance = 0.1
         self.size_variance = 0.2
-        self.threshold = 0.65
+        self.threshold = threshold
         self.strides = [8.0, 16.0, 32.0, 64.0]
         self.min_boxes = [[10.0, 16.0, 24.0], [32.0, 48.0], [64.0, 96.0], [128.0, 192.0, 256.0]]
         self.priors = self.define_img_size((self.width, self.height))
@@ -219,9 +220,10 @@ class LightFaceDetection:
         picked_box_probs[:, 3] *= height
         return picked_box_probs[:, :4].astype(np.int32), np.array(picked_labels), picked_box_probs[:, 4]
 
-    def detectFaces(self, frame, bright=20):
-        rect = cv2.resize(frame, (self.width, self.height))
-        rect = cv2.convertScaleAbs(rect, beta=bright)
+    def detectFaces(self, frame, bright=60, newThreshold=None):
+        rect = cv2.convertScaleAbs(frame, beta=bright)
+        rect = cv2.resize(rect, (self.width, self.height))
+        # rect = cv2.convertScaleAbs(rect, beta=bright)
         rect = cv2.cvtColor(rect, cv2.COLOR_BGR2RGB)
         self.net.setInput(cv2.dnn.blobFromImage(rect, 1 / self.image_std, (self.width, self.height), 127))
         boxes, scores = self.net.forward(["boxes", "scores"])
@@ -229,7 +231,9 @@ class LightFaceDetection:
         scores = np.expand_dims(np.reshape(scores, (-1, 2)), axis=0)
         boxes = self.convert_locations_to_boxes(boxes, self.priors, self.center_variance, self.size_variance)
         boxes = self.center_form_to_corner_form(boxes)
-        boxes, labels, probs = self.predict(frame.shape[1], frame.shape[0], scores, boxes, self.threshold)
+        if (newThreshold is None):
+            newThreshold = self.threshold
+        boxes, labels, probs = self.predict(frame.shape[1], frame.shape[0], scores, boxes, newThreshold)
         self.rects = []
         for i in range(boxes.shape[0]):
             box = boxes[i, :]
@@ -262,8 +266,3 @@ class FaceDetectionLightRfb:
             cv2.rectangle(frame, (box[0], box[1]), (box[2], box[3]), (0, 255, 0), 4)
         return self.rects
         
-
-
-
-
-

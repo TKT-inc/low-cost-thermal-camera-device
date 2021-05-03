@@ -37,7 +37,7 @@ QToolTip {
   <widget class="QWidget" name="centralwidget">
    <property name="styleSheet">
     <string notr="true">background: transparent;
-color: rgb(210, 210, 210);</string>
+color:#000000;</string>
    </property>
    <widget class="QFrame" name="frame">
     <property name="geometry">
@@ -49,7 +49,7 @@ color: rgb(210, 210, 210);</string>
      </rect>
     </property>
     <property name="styleSheet">
-     <string notr="true">background-color: rgb(75, 79, 87);
+     <string notr="true">background-color: #999eca;
 
 </string>
     </property>
@@ -69,7 +69,7 @@ color: rgb(210, 210, 210);</string>
       </rect>
      </property>
      <property name="styleSheet">
-      <string notr="true">background-color: rgb(27, 29, 35);</string>
+      <string notr="true">background-color: #3E1257</string>
      </property>
      <property name="frameShape">
       <enum>QFrame::StyledPanel</enum>
@@ -90,7 +90,7 @@ color: rgb(210, 210, 210);</string>
        <string/>
       </property>
       <property name="pixmap">
-       <pixmap>images/logo.png</pixmap>
+       <pixmap>../images/logo.png</pixmap>
       </property>
       <property name="scaledContents">
        <bool>true</bool>
@@ -131,18 +131,18 @@ color: rgb(210, 210, 210);</string>
 	background-position: left center;
     background-repeat: no-repeat;
 	border: none;
-	border-left: 28px solid rgb(27, 29, 35);
-	background-color: rgb(27, 29, 35);
+	border-left: 28px solid #3E1257;
+	background-color: #3E1257;
 	text-align: left;
 	padding-left: 45px;
 }
 QPushButton:hover {
-	background-color: rgb(33, 37, 43);
-	border-left: 28px solid rgb(33, 37, 43);
+	background-color:#61668c;
+	border-left: 28px solid #61668c;
 }
 QPushButton:pressed {	
-	background-color: rgb(85, 170, 255);
-	border-left: 28px solid rgb(85, 170, 255);
+	background-color:#61668c;
+	border-left: 28px solid #61668c;
 }</string>
       </property>
       <property name="text">
@@ -184,18 +184,18 @@ QPushButton:pressed {
 	background-position: left center;
     background-repeat: no-repeat;
 	border: none;
-	border-left: 26px solid rgb(27, 29, 35);
-	background-color: rgb(27, 29, 35);
+    border-left: 28px solid #3E1257;
+	background-color: #3E1257;
 	text-align: left;
 	padding-left: 45px;
 }
 QPushButton:hover {
-	background-color: rgb(33, 37, 43);
-	border-left: 26px solid rgb(33, 37, 43);
+	background-color:#61668c;
+	border-left: 28px solid #61668c;
 }
 QPushButton:pressed {	
-	background-color: rgb(85, 170, 255);
-	border-left: 26px solid rgb(85, 170, 255);
+	background-color:#61668c;
+	border-left: 28px solid #61668c;
 }</string>
       </property>
       <property name="text">
@@ -237,18 +237,18 @@ QPushButton:pressed {
 	background-position: left center;
     background-repeat: no-repeat;
 	border: none;
-	border-left: 26px solid rgb(27, 29, 35);
-	background-color: rgb(27, 29, 35);
+	border-left: 28px solid #3E1257;
+	background-color: #3E1257;
 	text-align: left;
 	padding-left: 45px;
 }
 QPushButton:hover {
-	background-color: rgb(33, 37, 43);
-	border-left: 26px solid rgb(33, 37, 43);
+	background-color:#61668c;
+	border-left: 28px solid #61668c;
 }
 QPushButton:pressed {	
-	background-color: rgb(85, 170, 255);
-	border-left: 26px solid rgb(85, 170, 255);
+	background-color:#61668c;
+	border-left: 28px solid #61668c;
 }</string>
       </property>
       <property name="text">
@@ -290,18 +290,18 @@ QPushButton:pressed {
 	background-position: left center;
     background-repeat: no-repeat;
 	border: none;
-	border-left: 28px solid rgb(27, 29, 35);
-	background-color: rgb(27, 29, 35);
+	border-left: 28px solid #3E1257;
+	background-color: #3E1257;
 	text-align: left;
 	padding-left: 45px;
 }
 QPushButton:hover {
-	background-color: rgb(33, 37, 43);
-	border-left: 28px solid rgb(33, 37, 43);
+	background-color:#61668c;
+	border-left: 28px solid #61668c;
 }
 QPushButton:pressed {	
-	background-color: rgb(85, 170, 255);
-	border-left: 28px solid rgb(85, 170, 255);
+	background-color:#61668c;
+	border-left: 28px solid #61668c;
 }</string>
       </property>
       <property name="text">
@@ -343,18 +343,18 @@ QPushButton:pressed {
 	background-position: left center;
     background-repeat: no-repeat;
 	border: none;
-	border-left: 28px solid rgb(27, 29, 35);
-	background-color: rgb(27, 29, 35);
+	border-left: 28px solid #3E1257;
+	background-color: #3E1257;
 	text-align: left;
 	padding-left: 45px;
 }
 QPushButton:hover {
-	background-color: rgb(33, 37, 43);
-	border-left: 28px solid rgb(33, 37, 43);
+	background-color:#61668c;
+	border-left: 28px solid #61668c;
 }
 QPushButton:pressed {	
-	background-color: rgb(85, 170, 255);
-	border-left: 28px solid rgb(85, 170, 255);
+	background-color:#61668c;
+	border-left: 28px solid #61668c;
 }</string>
       </property>
       <property name="text">
@@ -396,18 +396,18 @@ QPushButton:pressed {
 	background-position: left center;
     background-repeat: no-repeat;
 	border: none;
-	border-left: 28px solid rgb(27, 29, 35);
-	background-color: rgb(27, 29, 35);
+	border-left: 28px solid #3E1257;
+	background-color: #3E1257;
 	text-align: left;
 	padding-left: 45px;
 }
 QPushButton:hover {
-	background-color: rgb(33, 37, 43);
-	border-left: 28px solid rgb(33, 37, 43);
+	background-color:#61668c;
+	border-left: 28px solid #61668c;
 }
 QPushButton:pressed {	
-	background-color: rgb(85, 170, 255);
-	border-left: 28px solid rgb(85, 170, 255);
+	background-color:#61668c;
+	border-left: 28px solid #61668c;
 }</string>
       </property>
       <property name="text">
@@ -609,8 +609,8 @@ QComboBox QAbstractItemView {
         <property name="geometry">
          <rect>
           <x>10</x>
-          <y>270</y>
-          <width>768</width>
+          <y>280</y>
+          <width>761</width>
           <height>432</height>
          </rect>
         </property>
@@ -628,10 +628,10 @@ background-color: rgb(150, 150, 150);</string>
        <widget class="QLabel" name="thremal_frame">
         <property name="geometry">
          <rect>
-          <x>800</x>
-          <y>20</y>
-          <width>400</width>
-          <height>300</height>
+          <x>790</x>
+          <y>10</y>
+          <width>411</width>
+          <height>291</height>
          </rect>
         </property>
         <property name="styleSheet">
@@ -645,7 +645,7 @@ background-color: rgb(150, 150, 150);</string>
        <widget class="QPushButton" name="register_button">
         <property name="geometry">
          <rect>
-          <x>30</x>
+          <x>20</x>
           <y>60</y>
           <width>151</width>
           <height>151</height>
@@ -667,17 +667,15 @@ background-color: rgb(150, 150, 150);</string>
         </property>
         <property name="styleSheet">
          <string notr="true">QPushButton {
-	border: 2px solid rgb(200, 200, 200);
 	border-radius: 20px;	
-	background-color: rgb(82, 89, 102);
+	background-color: #901785;
+	color: #293241;
 }
 QPushButton:hover {
-	background-color: rgb(77, 85, 90);
-	border: 2px solid rgb(61, 70, 86);
+	background-color:#531463;
 }
 QPushButton:pressed {	
-	background-color: rgb(35, 40, 49);
-	border: 2px solid rgb(43, 50, 61);
+	background-color: #531463;
 }</string>
         </property>
         <property name="text">
@@ -699,9 +697,9 @@ User</string>
         <property name="geometry">
          <rect>
           <x>240</x>
-          <y>20</y>
+          <y>10</y>
           <width>531</width>
-          <height>231</height>
+          <height>251</height>
          </rect>
         </property>
         <property name="sizePolicy">
@@ -716,63 +714,63 @@ User</string>
            <colorrole role="WindowText">
             <brush brushstyle="SolidPattern">
              <color alpha="255">
-              <red>210</red>
-              <green>210</green>
-              <blue>210</blue>
+              <red>255</red>
+              <green>255</green>
+              <blue>255</blue>
              </color>
             </brush>
            </colorrole>
            <colorrole role="Button">
             <brush brushstyle="SolidPattern">
              <color alpha="255">
-              <red>39</red>
-              <green>44</green>
-              <blue>54</blue>
+              <red>41</red>
+              <green>17</green>
+              <blue>76</blue>
              </color>
             </brush>
            </colorrole>
            <colorrole role="Text">
             <brush brushstyle="SolidPattern">
              <color alpha="255">
-              <red>210</red>
-              <green>210</green>
-              <blue>210</blue>
+              <red>255</red>
+              <green>255</green>
+              <blue>255</blue>
              </color>
             </brush>
            </colorrole>
            <colorrole role="ButtonText">
             <brush brushstyle="SolidPattern">
              <color alpha="255">
-              <red>210</red>
-              <green>210</green>
-              <blue>210</blue>
+              <red>255</red>
+              <green>255</green>
+              <blue>255</blue>
              </color>
             </brush>
            </colorrole>
            <colorrole role="Base">
             <brush brushstyle="SolidPattern">
              <color alpha="255">
-              <red>39</red>
-              <green>44</green>
-              <blue>54</blue>
+              <red>41</red>
+              <green>17</green>
+              <blue>76</blue>
              </color>
             </brush>
            </colorrole>
            <colorrole role="Window">
             <brush brushstyle="SolidPattern">
              <color alpha="255">
-              <red>39</red>
-              <green>44</green>
-              <blue>54</blue>
+              <red>41</red>
+              <green>17</green>
+              <blue>76</blue>
              </color>
             </brush>
            </colorrole>
            <!-- <colorrole role="PlaceholderText">
             <brush brushstyle="NoBrush">
              <color alpha="128">
-              <red>210</red>
-              <green>210</green>
-              <blue>210</blue>
+              <red>255</red>
+              <green>255</green>
+              <blue>255</blue>
              </color>
             </brush>
            </colorrole> -->
@@ -781,63 +779,63 @@ User</string>
            <colorrole role="WindowText">
             <brush brushstyle="SolidPattern">
              <color alpha="255">
-              <red>210</red>
-              <green>210</green>
-              <blue>210</blue>
+              <red>255</red>
+              <green>255</green>
+              <blue>255</blue>
              </color>
             </brush>
            </colorrole>
            <colorrole role="Button">
             <brush brushstyle="SolidPattern">
              <color alpha="255">
-              <red>39</red>
-              <green>44</green>
-              <blue>54</blue>
+              <red>41</red>
+              <green>17</green>
+              <blue>76</blue>
              </color>
             </brush>
            </colorrole>
            <colorrole role="Text">
             <brush brushstyle="SolidPattern">
              <color alpha="255">
-              <red>210</red>
-              <green>210</green>
-              <blue>210</blue>
+              <red>255</red>
+              <green>255</green>
+              <blue>255</blue>
              </color>
             </brush>
            </colorrole>
            <colorrole role="ButtonText">
             <brush brushstyle="SolidPattern">
              <color alpha="255">
-              <red>210</red>
-              <green>210</green>
-              <blue>210</blue>
+              <red>255</red>
+              <green>255</green>
+              <blue>255</blue>
              </color>
             </brush>
            </colorrole>
            <colorrole role="Base">
             <brush brushstyle="SolidPattern">
              <color alpha="255">
-              <red>39</red>
-              <green>44</green>
-              <blue>54</blue>
+              <red>41</red>
+              <green>17</green>
+              <blue>76</blue>
              </color>
             </brush>
            </colorrole>
            <colorrole role="Window">
             <brush brushstyle="SolidPattern">
              <color alpha="255">
-              <red>39</red>
-              <green>44</green>
-              <blue>54</blue>
+              <red>41</red>
+              <green>17</green>
+              <blue>76</blue>
              </color>
             </brush>
            </colorrole>
            <!-- <colorrole role="PlaceholderText">
             <brush brushstyle="NoBrush">
              <color alpha="128">
-              <red>210</red>
-              <green>210</green>
-              <blue>210</blue>
+              <red>255</red>
+              <green>255</green>
+              <blue>255</blue>
              </color>
             </brush>
            </colorrole> -->
@@ -846,63 +844,63 @@ User</string>
            <colorrole role="WindowText">
             <brush brushstyle="SolidPattern">
              <color alpha="255">
-              <red>210</red>
-              <green>210</green>
-              <blue>210</blue>
+              <red>255</red>
+              <green>255</green>
+              <blue>255</blue>
              </color>
             </brush>
            </colorrole>
            <colorrole role="Button">
             <brush brushstyle="SolidPattern">
              <color alpha="255">
-              <red>39</red>
-              <green>44</green>
-              <blue>54</blue>
+              <red>41</red>
+              <green>17</green>
+              <blue>76</blue>
              </color>
             </brush>
            </colorrole>
            <colorrole role="Text">
             <brush brushstyle="SolidPattern">
              <color alpha="255">
-              <red>210</red>
-              <green>210</green>
-              <blue>210</blue>
+              <red>255</red>
+              <green>255</green>
+              <blue>255</blue>
              </color>
             </brush>
            </colorrole>
            <colorrole role="ButtonText">
             <brush brushstyle="SolidPattern">
              <color alpha="255">
-              <red>210</red>
-              <green>210</green>
-              <blue>210</blue>
+              <red>255</red>
+              <green>255</green>
+              <blue>255</blue>
              </color>
             </brush>
            </colorrole>
            <colorrole role="Base">
             <brush brushstyle="SolidPattern">
              <color alpha="255">
-              <red>39</red>
-              <green>44</green>
-              <blue>54</blue>
+              <red>41</red>
+              <green>17</green>
+              <blue>76</blue>
              </color>
             </brush>
            </colorrole>
            <colorrole role="Window">
             <brush brushstyle="SolidPattern">
              <color alpha="255">
-              <red>39</red>
-              <green>44</green>
-              <blue>54</blue>
+              <red>41</red>
+              <green>17</green>
+              <blue>76</blue>
              </color>
             </brush>
            </colorrole>
            <!-- <colorrole role="PlaceholderText">
             <brush brushstyle="NoBrush">
              <color alpha="128">
-              <red>210</red>
-              <green>210</green>
-              <blue>210</blue>
+              <red>255</red>
+              <green>255</green>
+              <blue>255</blue>
              </color>
             </brush>
            </colorrole> -->
@@ -911,11 +909,11 @@ User</string>
         </property>
         <property name="styleSheet">
          <string notr="true">QTableWidget {	
-	background-color: rgb(39, 44, 54);
+	background-color: #29114C;
 	padding: 10px;
-	border-radius: 5px;
-	gridline-color: rgb(255,255,255);
-	border-bottom: 1px solid rgb(44, 49, 60);
+	border-radius: 12px;
+	gridline-color: rgb(255, 255, 255);
+	color: rgb(255, 255, 255);
 }
 QTableWidget::item{
 	border-color: rgb(44, 49, 60);
@@ -930,7 +928,7 @@ QScrollBar:horizontal {
     border: none;
     background: rgb(52, 59, 72);
     height: 14px;
-    margin: 0px 21px 0 21px;
+    margin: 0px 18px 0 21px;
 	border-radius: 0px;
 }
  QScrollBar:vertical {
@@ -981,7 +979,7 @@ QHeaderView::section:vertical
          <bool>false</bool>
         </property>
         <property name="selectionMode">
-         <enum>QAbstractItemView::SingleSelection</enum>
+         <enum>QAbstractItemView::NoSelection</enum>
         </property>
         <property name="selectionBehavior">
          <enum>QAbstractItemView::SelectRows</enum>
@@ -1052,7 +1050,7 @@ QHeaderView::section:vertical
         <property name="geometry">
          <rect>
           <x>860</x>
-          <y>340</y>
+          <y>320</y>
           <width>271</width>
           <height>31</height>
          </rect>
@@ -1075,7 +1073,7 @@ QHeaderView::section:vertical
         <property name="geometry">
          <rect>
           <x>200</x>
-          <y>40</y>
+          <y>50</y>
           <width>31</width>
           <height>171</height>
          </rect>
@@ -1104,10 +1102,10 @@ s</string>
        <widget class="QTableWidget" name="history_record">
         <property name="geometry">
          <rect>
-          <x>780</x>
-          <y>430</y>
-          <width>431</width>
-          <height>271</height>
+          <x>790</x>
+          <y>360</y>
+          <width>411</width>
+          <height>351</height>
          </rect>
         </property>
         <property name="sizePolicy">
@@ -1122,63 +1120,63 @@ s</string>
            <colorrole role="WindowText">
             <brush brushstyle="SolidPattern">
              <color alpha="255">
-              <red>210</red>
-              <green>210</green>
-              <blue>210</blue>
+              <red>255</red>
+              <green>255</green>
+              <blue>255</blue>
              </color>
             </brush>
            </colorrole>
            <colorrole role="Button">
             <brush brushstyle="SolidPattern">
              <color alpha="255">
-              <red>39</red>
-              <green>44</green>
-              <blue>54</blue>
+              <red>41</red>
+              <green>17</green>
+              <blue>76</blue>
              </color>
             </brush>
            </colorrole>
            <colorrole role="Text">
             <brush brushstyle="SolidPattern">
              <color alpha="255">
-              <red>210</red>
-              <green>210</green>
-              <blue>210</blue>
+              <red>255</red>
+              <green>255</green>
+              <blue>255</blue>
              </color>
             </brush>
            </colorrole>
            <colorrole role="ButtonText">
             <brush brushstyle="SolidPattern">
              <color alpha="255">
-              <red>210</red>
-              <green>210</green>
-              <blue>210</blue>
+              <red>255</red>
+              <green>255</green>
+              <blue>255</blue>
              </color>
             </brush>
            </colorrole>
            <colorrole role="Base">
             <brush brushstyle="SolidPattern">
              <color alpha="255">
-              <red>39</red>
-              <green>44</green>
-              <blue>54</blue>
+              <red>41</red>
+              <green>17</green>
+              <blue>76</blue>
              </color>
             </brush>
            </colorrole>
            <colorrole role="Window">
             <brush brushstyle="SolidPattern">
              <color alpha="255">
-              <red>39</red>
-              <green>44</green>
-              <blue>54</blue>
+              <red>41</red>
+              <green>17</green>
+              <blue>76</blue>
              </color>
             </brush>
            </colorrole>
            <!-- <colorrole role="PlaceholderText">
             <brush brushstyle="NoBrush">
              <color alpha="128">
-              <red>210</red>
-              <green>210</green>
-              <blue>210</blue>
+              <red>255</red>
+              <green>255</green>
+              <blue>255</blue>
              </color>
             </brush>
            </colorrole> -->
@@ -1187,63 +1185,63 @@ s</string>
            <colorrole role="WindowText">
             <brush brushstyle="SolidPattern">
              <color alpha="255">
-              <red>210</red>
-              <green>210</green>
-              <blue>210</blue>
+              <red>255</red>
+              <green>255</green>
+              <blue>255</blue>
              </color>
             </brush>
            </colorrole>
            <colorrole role="Button">
             <brush brushstyle="SolidPattern">
              <color alpha="255">
-              <red>39</red>
-              <green>44</green>
-              <blue>54</blue>
+              <red>41</red>
+              <green>17</green>
+              <blue>76</blue>
              </color>
             </brush>
            </colorrole>
            <colorrole role="Text">
             <brush brushstyle="SolidPattern">
              <color alpha="255">
-              <red>210</red>
-              <green>210</green>
-              <blue>210</blue>
+              <red>255</red>
+              <green>255</green>
+              <blue>255</blue>
              </color>
             </brush>
            </colorrole>
            <colorrole role="ButtonText">
             <brush brushstyle="SolidPattern">
              <color alpha="255">
-              <red>210</red>
-              <green>210</green>
-              <blue>210</blue>
+              <red>255</red>
+              <green>255</green>
+              <blue>255</blue>
              </color>
             </brush>
            </colorrole>
            <colorrole role="Base">
             <brush brushstyle="SolidPattern">
              <color alpha="255">
-              <red>39</red>
-              <green>44</green>
-              <blue>54</blue>
+              <red>41</red>
+              <green>17</green>
+              <blue>76</blue>
              </color>
             </brush>
            </colorrole>
            <colorrole role="Window">
             <brush brushstyle="SolidPattern">
              <color alpha="255">
-              <red>39</red>
-              <green>44</green>
-              <blue>54</blue>
+              <red>41</red>
+              <green>17</green>
+              <blue>76</blue>
              </color>
             </brush>
            </colorrole>
            <!-- <colorrole role="PlaceholderText">
             <brush brushstyle="NoBrush">
              <color alpha="128">
-              <red>210</red>
-              <green>210</green>
-              <blue>210</blue>
+              <red>255</red>
+              <green>255</green>
+              <blue>255</blue>
              </color>
             </brush>
            </colorrole> -->
@@ -1252,63 +1250,63 @@ s</string>
            <colorrole role="WindowText">
             <brush brushstyle="SolidPattern">
              <color alpha="255">
-              <red>210</red>
-              <green>210</green>
-              <blue>210</blue>
+              <red>255</red>
+              <green>255</green>
+              <blue>255</blue>
              </color>
             </brush>
            </colorrole>
            <colorrole role="Button">
             <brush brushstyle="SolidPattern">
              <color alpha="255">
-              <red>39</red>
-              <green>44</green>
-              <blue>54</blue>
+              <red>41</red>
+              <green>17</green>
+              <blue>76</blue>
              </color>
             </brush>
            </colorrole>
            <colorrole role="Text">
             <brush brushstyle="SolidPattern">
              <color alpha="255">
-              <red>210</red>
-              <green>210</green>
-              <blue>210</blue>
+              <red>255</red>
+              <green>255</green>
+              <blue>255</blue>
              </color>
             </brush>
            </colorrole>
            <colorrole role="ButtonText">
             <brush brushstyle="SolidPattern">
              <color alpha="255">
-              <red>210</red>
-              <green>210</green>
-              <blue>210</blue>
+              <red>255</red>
+              <green>255</green>
+              <blue>255</blue>
              </color>
             </brush>
            </colorrole>
            <colorrole role="Base">
             <brush brushstyle="SolidPattern">
              <color alpha="255">
-              <red>39</red>
-              <green>44</green>
-              <blue>54</blue>
+              <red>41</red>
+              <green>17</green>
+              <blue>76</blue>
              </color>
             </brush>
            </colorrole>
            <colorrole role="Window">
             <brush brushstyle="SolidPattern">
              <color alpha="255">
-              <red>39</red>
-              <green>44</green>
-              <blue>54</blue>
+              <red>41</red>
+              <green>17</green>
+              <blue>76</blue>
              </color>
             </brush>
            </colorrole>
            <!-- <colorrole role="PlaceholderText">
             <brush brushstyle="NoBrush">
              <color alpha="128">
-              <red>210</red>
-              <green>210</green>
-              <blue>210</blue>
+              <red>255</red>
+              <green>255</green>
+              <blue>255</blue>
              </color>
             </brush>
            </colorrole> -->
@@ -1317,14 +1315,14 @@ s</string>
         </property>
         <property name="styleSheet">
          <string notr="true">QTableWidget {	
-	background-color: rgb(39, 44, 54);
-	padding: 10px;
-	border-radius: 5px;
-	gridline-color: rgb(255, 255, 255);
-	border-bottom: 1px solid rgb(44, 49, 60);
+	background-color:#29114C;
+	padding: 5px;
+	border-radius: 12px;
+    gridline-color: rgb(255, 255, 255);
+    color: rgb(255, 255, 255);
 }
 QTableWidget::item{
-	border-color: rgb(255, 255, 255);
+	border: 1px solid  rgb(255, 255, 255);
 	gridline-color: rgb(255, 255, 255);
 }
 QTableWidget::item:selected{
@@ -1349,8 +1347,7 @@ QHeaderView::section{
 	max-width: 30px;
 	border: 1px solid rgb(44, 49, 60);
 	border-style: none;
-    border-bottom: 1px solid rgb(44, 49, 60);
-    border-right: 1px solid rgb(44, 49, 60);
+    border: 1px solid rgb(44, 49, 60);
 }
 QTableWidget::horizontalHeader {	
 	background-color: rgb(81, 255, 0);
@@ -1391,7 +1388,7 @@ QHeaderView::section:vertical
          <bool>false</bool>
         </property>
         <property name="selectionMode">
-         <enum>QAbstractItemView::SingleSelection</enum>
+         <enum>QAbstractItemView::NoSelection</enum>
         </property>
         <property name="selectionBehavior">
          <enum>QAbstractItemView::SelectRows</enum>
@@ -1475,90 +1472,6 @@ QHeaderView::section:vertical
          </property>
         </column>
        </widget>
-       <widget class="QLabel" name="temp">
-        <property name="geometry">
-         <rect>
-          <x>1100</x>
-          <y>390</y>
-          <width>81</width>
-          <height>31</height>
-         </rect>
-        </property>
-        <property name="font">
-         <font>
-          <pointsize>14</pointsize>
-          <weight>75</weight>
-          <bold>true</bold>
-         </font>
-        </property>
-        <property name="styleSheet">
-         <string notr="true">background-color: rgb(96, 173, 255);
-border: 2px solid rgb(200, 200, 200);
-border-radius: 10px;</string>
-        </property>
-        <property name="text">
-         <string>Temp</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignCenter</set>
-        </property>
-       </widget>
-       <widget class="QLabel" name="name">
-        <property name="geometry">
-         <rect>
-          <x>920</x>
-          <y>390</y>
-          <width>171</width>
-          <height>31</height>
-         </rect>
-        </property>
-        <property name="font">
-         <font>
-          <pointsize>14</pointsize>
-          <weight>75</weight>
-          <bold>true</bold>
-         </font>
-        </property>
-        <property name="styleSheet">
-         <string notr="true">background-color: rgb(96, 173, 255);
-border: 2px solid rgb(200, 200, 200);
-border-radius: 10px;</string>
-        </property>
-        <property name="text">
-         <string>Name</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignCenter</set>
-        </property>
-       </widget>
-       <widget class="QLabel" name="time">
-        <property name="geometry">
-         <rect>
-          <x>790</x>
-          <y>390</y>
-          <width>121</width>
-          <height>31</height>
-         </rect>
-        </property>
-        <property name="font">
-         <font>
-          <pointsize>14</pointsize>
-          <weight>75</weight>
-          <bold>true</bold>
-         </font>
-        </property>
-        <property name="styleSheet">
-         <string notr="true">background-color: rgb(96, 173, 255);
-border: 2px solid rgb(200, 200, 200);
-border-radius: 10px;</string>
-        </property>
-        <property name="text">
-         <string>Time</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignCenter</set>
-        </property>
-       </widget>
       </widget>
       <widget class="QWidget" name="new_user">
        <widget class="QLabel" name="register_screen">
@@ -1602,7 +1515,7 @@ border-radius: 20px;	</string>
          <string/>
         </property>
         <property name="pixmap">
-         <pixmap>images/face_left.png</pixmap>
+         <pixmap>../images/face_left.png</pixmap>
         </property>
         <property name="scaledContents">
          <bool>true</bool>
@@ -1626,7 +1539,7 @@ border-radius: 20px;	</string>
          <string/>
         </property>
         <property name="pixmap">
-         <pixmap>images/face_right.png</pixmap>
+         <pixmap>../images/face_right.png</pixmap>
         </property>
         <property name="scaledContents">
          <bool>true</bool>
@@ -1650,7 +1563,7 @@ border-radius: 20px;	</string>
          <string/>
         </property>
         <property name="pixmap">
-         <pixmap>images/face_front.png</pixmap>
+         <pixmap>../images/face_front.png</pixmap>
         </property>
         <property name="scaledContents">
          <bool>true</bool>
@@ -1668,7 +1581,7 @@ border-radius: 20px;	</string>
          </rect>
         </property>
         <property name="styleSheet">
-         <string notr="true">background-color: rgb(197, 255, 231);</string>
+         <string notr="true">background-color:#901785;</string>
         </property>
         <property name="text">
          <string>TextLabel</string>
@@ -1712,7 +1625,7 @@ border-radius: 20px;	</string>
          <string/>
         </property>
         <property name="pixmap">
-         <pixmap>images/logo.png</pixmap>
+         <pixmap>../images/logo.png</pixmap>
         </property>
        </widget>
        <widget class="QLabel" name="label_4">
@@ -1793,51 +1706,27 @@ border-radius: 20px;	</string>
        <property name="styleSheet">
         <string notr="true">QSlider::groove:horizontal {
     border-radius: 9px;
-    height: 18px;
-	margin: 0px;
-	background-color: rgb(52, 59, 72);
+    height: 15px;
+	margin: 15px;
+	background-color:#151040;
 }
 QSlider::groove:horizontal:hover {
-	background-color: rgb(55, 62, 76);
+	background-color:#151040;
 }
 QSlider::handle:horizontal {
-    background-color: rgb(85, 170, 255);
+    background-color: #7C1679;
     border: none;
-    height: 18px;
-    width: 18px;
-    margin: 0px;
+    width: 40px;
+    margin: -7px;
 	border-radius: 9px;
 }
 QSlider::handle:horizontal:hover {
-    background-color: rgb(105, 180, 255);
+    background-color: #A51890;
 }
 QSlider::handle:horizontal:pressed {
-    background-color: rgb(65, 130, 195);
+   background-color: #A51890;
 }
-
-QSlider::groove:vertical {
-    border-radius: 9px;
-    width: 18px;
-    margin: 0px;
-	background-color: rgb(52, 59, 72);
-}
-QSlider::groove:vertical:hover {
-	background-color: rgb(55, 62, 76);
-}
-QSlider::handle:vertical {
-    background-color: rgb(85, 170, 255);
-	border: none;
-    height: 18px;
-    width: 18px;
-    margin: 0px;
-	border-radius: 9px;
-}
-QSlider::handle:vertical:hover {
-    background-color: rgb(105, 180, 255);
-}
-QSlider::handle:vertical:pressed {
-    background-color: rgb(65, 130, 195);
-}</string>
+</string>
        </property>
        <widget class="QFrame" name="frame_2">
         <property name="geometry">
@@ -1858,7 +1747,7 @@ QSlider::handle:vertical:pressed {
          <property name="geometry">
           <rect>
            <x>80</x>
-           <y>30</y>
+           <y>380</y>
            <width>441</width>
            <height>51</height>
           </rect>
@@ -1871,17 +1760,155 @@ QSlider::handle:vertical:pressed {
           </font>
          </property>
          <property name="text">
-          <string>Calibration Settings</string>
+          <string>Threshold Settings</string>
          </property>
          <property name="alignment">
           <set>Qt::AlignCenter</set>
          </property>
         </widget>
-        <widget class="QLabel" name="label_8">
+        <widget class="QSlider" name="time_calib_slider">
          <property name="geometry">
           <rect>
-           <x>10</x>
-           <y>110</y>
+           <x>170</x>
+           <y>610</y>
+           <width>401</width>
+           <height>40</height>
+          </rect>
+         </property>
+         <property name="minimum">
+          <number>5</number>
+         </property>
+         <property name="maximum">
+          <number>8</number>
+         </property>
+         <property name="pageStep">
+          <number>1</number>
+         </property>
+         <property name="value">
+          <number>5</number>
+         </property>
+         <property name="tracking">
+          <bool>true</bool>
+         </property>
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="tickPosition">
+          <enum>QSlider::TicksAbove</enum>
+         </property>
+        </widget>
+        <widget class="QLabel" name="time_calib_label">
+         <property name="geometry">
+          <rect>
+           <x>40</x>
+           <y>610</y>
+           <width>121</width>
+           <height>41</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <family>Fira Code</family>
+           <pointsize>12</pointsize>
+           <weight>62</weight>
+           <italic>false</italic>
+           <bold>true</bold>
+          </font>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">border :3px solid #151040;
+border-top-left-radius :10px;
+border-top-right-radius : 10px; 
+border-bottom-left-radius : 10px; 
+border-bottom-right-radius : 10px;
+font: 500 12pt &quot;Fira Code&quot;;</string>
+         </property>
+         <property name="text">
+          <string>5 seconds</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+        <widget class="QLabel" name="label_12">
+         <property name="geometry">
+          <rect>
+           <x>30</x>
+           <y>570</y>
+           <width>571</width>
+           <height>41</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <pointsize>16</pointsize>
+          </font>
+         </property>
+         <property name="text">
+          <string>Time for measuring calibration temperature (seconds):</string>
+         </property>
+        </widget>
+        <widget class="QLabel" name="label_13">
+         <property name="geometry">
+          <rect>
+           <x>80</x>
+           <y>10</y>
+           <width>441</width>
+           <height>51</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <pointsize>28</pointsize>
+           <weight>75</weight>
+           <bold>true</bold>
+          </font>
+         </property>
+         <property name="text">
+          <string>Display Settings </string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+        <widget class="QLabel" name="notis_label">
+         <property name="geometry">
+          <rect>
+           <x>30</x>
+           <y>120</y>
+           <width>121</width>
+           <height>41</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <family>Fira Code</family>
+           <pointsize>12</pointsize>
+           <weight>62</weight>
+           <italic>false</italic>
+           <bold>true</bold>
+          </font>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">border :3px solid #151040;
+border-top-left-radius :10px;
+border-top-right-radius : 10px; 
+border-bottom-left-radius : 10px; 
+border-bottom-right-radius : 10px;
+font: 500 12pt &quot;Fira Code&quot;;</string>
+         </property>
+         <property name="text">
+          <string>10 notis</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+        <widget class="QLabel" name="label_14">
+         <property name="geometry">
+          <rect>
+           <x>30</x>
+           <y>80</y>
            <width>361</width>
            <height>41</height>
           </rect>
@@ -1892,16 +1919,162 @@ QSlider::handle:vertical:pressed {
           </font>
          </property>
          <property name="text">
-          <string>Setting fever threshold (celcious): </string>
+          <string>Limit of notifications:</string>
+         </property>
+        </widget>
+        <widget class="QSlider" name="notis_slider">
+         <property name="geometry">
+          <rect>
+           <x>160</x>
+           <y>120</y>
+           <width>401</width>
+           <height>40</height>
+          </rect>
+         </property>
+         <property name="minimum">
+          <number>7</number>
+         </property>
+         <property name="maximum">
+          <number>20</number>
+         </property>
+         <property name="pageStep">
+          <number>1</number>
+         </property>
+         <property name="value">
+          <number>10</number>
+         </property>
+         <property name="tracking">
+          <bool>true</bool>
+         </property>
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="tickPosition">
+          <enum>QSlider::TicksAbove</enum>
+         </property>
+        </widget>
+        <widget class="QSlider" name="records_slider">
+         <property name="geometry">
+          <rect>
+           <x>160</x>
+           <y>230</y>
+           <width>401</width>
+           <height>40</height>
+          </rect>
+         </property>
+         <property name="minimum">
+          <number>3</number>
+         </property>
+         <property name="maximum">
+          <number>20</number>
+         </property>
+         <property name="pageStep">
+          <number>1</number>
+         </property>
+         <property name="value">
+          <number>10</number>
+         </property>
+         <property name="tracking">
+          <bool>true</bool>
+         </property>
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="tickPosition">
+          <enum>QSlider::TicksAbove</enum>
+         </property>
+        </widget>
+        <widget class="QLabel" name="label_15">
+         <property name="geometry">
+          <rect>
+           <x>30</x>
+           <y>190</y>
+           <width>361</width>
+           <height>41</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <pointsize>16</pointsize>
+          </font>
+         </property>
+         <property name="text">
+          <string>Limit of records:</string>
+         </property>
+        </widget>
+        <widget class="QLabel" name="records_label">
+         <property name="geometry">
+          <rect>
+           <x>30</x>
+           <y>230</y>
+           <width>121</width>
+           <height>41</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <family>Fira Code</family>
+           <pointsize>12</pointsize>
+           <weight>62</weight>
+           <italic>false</italic>
+           <bold>true</bold>
+          </font>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">border :3px solid #151040;
+border-top-left-radius :10px;
+border-top-right-radius : 10px; 
+border-bottom-left-radius : 10px; 
+border-bottom-right-radius : 10px;
+font: 500 12pt &quot;Fira Code&quot;;</string>
+         </property>
+         <property name="text">
+          <string>10 records</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+        <widget class="QLabel" name="temp_label">
+         <property name="geometry">
+          <rect>
+           <x>40</x>
+           <y>500</y>
+           <width>121</width>
+           <height>41</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <family>Fira Code</family>
+           <pointsize>12</pointsize>
+           <weight>62</weight>
+           <italic>false</italic>
+           <bold>true</bold>
+          </font>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">border :3px solid #151040;
+border-top-left-radius :10px;
+border-top-right-radius : 10px; 
+border-bottom-left-radius : 10px; 
+border-bottom-right-radius : 10px;
+font: 500 12pt &quot;Fira Code&quot;;</string>
+         </property>
+         <property name="text">
+          <string>38 oC</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
          </property>
         </widget>
         <widget class="QSlider" name="temp_slider">
          <property name="geometry">
           <rect>
-           <x>150</x>
-           <y>170</y>
+           <x>170</x>
+           <y>500</y>
            <width>401</width>
-           <height>16</height>
+           <height>40</height>
           </rect>
          </property>
          <property name="minimum">
@@ -1914,7 +2087,7 @@ QSlider::handle:vertical:pressed {
           <number>1</number>
          </property>
          <property name="value">
-          <number>3900</number>
+          <number>3700</number>
          </property>
          <property name="tracking">
           <bool>true</bool>
@@ -1926,25 +2099,22 @@ QSlider::handle:vertical:pressed {
           <enum>QSlider::TicksAbove</enum>
          </property>
         </widget>
-        <widget class="QLabel" name="temp_label">
+        <widget class="QLabel" name="label_8">
          <property name="geometry">
           <rect>
            <x>30</x>
-           <y>160</y>
-           <width>81</width>
-           <height>31</height>
+           <y>460</y>
+           <width>381</width>
+           <height>41</height>
           </rect>
          </property>
          <property name="font">
           <font>
-           <pointsize>12</pointsize>
+           <pointsize>16</pointsize>
           </font>
          </property>
          <property name="text">
-          <string>TextLabel</string>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignCenter</set>
+          <string>Fever temperature threshold (celcious): </string>
          </property>
         </widget>
        </widget>
@@ -1958,7 +2128,7 @@ QSlider::handle:vertical:pressed {
          </rect>
         </property>
         <property name="styleSheet">
-         <string notr="true">background-color: rgb(95, 99, 107);</string>
+         <string notr="true">background-color: #dadceb;</string>
         </property>
         <property name="frameShape">
          <enum>QFrame::StyledPanel</enum>
@@ -1970,9 +2140,9 @@ QSlider::handle:vertical:pressed {
          <property name="geometry">
           <rect>
            <x>90</x>
-           <y>30</y>
+           <y>0</y>
            <width>441</width>
-           <height>51</height>
+           <height>111</height>
           </rect>
          </property>
          <property name="font">
@@ -1983,10 +2153,226 @@ QSlider::handle:vertical:pressed {
           </font>
          </property>
          <property name="text">
-          <string>Register Settings</string>
+          <string>Advance Settings</string>
          </property>
          <property name="alignment">
           <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+        <widget class="QPushButton" name="save">
+         <property name="geometry">
+          <rect>
+           <x>430</x>
+           <y>640</y>
+           <width>151</width>
+           <height>51</height>
+          </rect>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>150</width>
+           <height>30</height>
+          </size>
+         </property>
+         <property name="font">
+          <font>
+           <family>Segoe UI</family>
+           <pointsize>16</pointsize>
+           <weight>75</weight>
+           <bold>true</bold>
+          </font>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">QPushButton {
+	border: 2px solid rgb(200, 200, 200);
+	border-radius: 20px;	
+	background-color: rgb(82, 89, 102);
+}
+QPushButton:hover {
+	background-color: rgb(77, 85, 90);
+	border: 2px solid rgb(61, 70, 86);
+}
+QPushButton:pressed {	
+	background-color: rgb(35, 40, 49);
+	border: 2px solid rgb(43, 50, 61);
+}</string>
+         </property>
+         <property name="text">
+          <string>   Save</string>
+         </property>
+         <property name="icon">
+          <iconset>
+           <normaloff>icons/24x24/cil-save.png</normaloff>icons/24x24/cil-save.png</iconset>
+         </property>
+         <property name="iconSize">
+          <size>
+           <width>24</width>
+           <height>24</height>
+          </size>
+         </property>
+        </widget>
+        <widget class="QSlider" name="bright_slider">
+         <property name="geometry">
+          <rect>
+           <x>170</x>
+           <y>190</y>
+           <width>401</width>
+           <height>40</height>
+          </rect>
+         </property>
+         <property name="minimum">
+          <number>0</number>
+         </property>
+         <property name="maximum">
+          <number>80</number>
+         </property>
+         <property name="pageStep">
+          <number>1</number>
+         </property>
+         <property name="value">
+          <number>20</number>
+         </property>
+         <property name="tracking">
+          <bool>true</bool>
+         </property>
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="tickPosition">
+          <enum>QSlider::TicksAbove</enum>
+         </property>
+        </widget>
+        <widget class="QLabel" name="bright_label">
+         <property name="geometry">
+          <rect>
+           <x>40</x>
+           <y>190</y>
+           <width>121</width>
+           <height>41</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <family>Fira Code</family>
+           <pointsize>12</pointsize>
+           <weight>62</weight>
+           <italic>false</italic>
+           <bold>true</bold>
+          </font>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">border :3px solid #151040;
+border-top-left-radius :10px;
+border-top-right-radius : 10px; 
+border-bottom-left-radius : 10px; 
+border-bottom-right-radius : 10px;
+font: 500 12pt &quot;Fira Code&quot;;</string>
+         </property>
+         <property name="text">
+          <string>20 percent</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+        <widget class="QLabel" name="bright_label_content">
+         <property name="geometry">
+          <rect>
+           <x>40</x>
+           <y>150</y>
+           <width>551</width>
+           <height>31</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <pointsize>16</pointsize>
+          </font>
+         </property>
+         <property name="text">
+          <string>Bright increment for face detection (percent):</string>
+         </property>
+        </widget>
+        <widget class="QLabel" name="threshold_label">
+         <property name="geometry">
+          <rect>
+           <x>40</x>
+           <y>340</y>
+           <width>121</width>
+           <height>41</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <family>Fira Code</family>
+           <pointsize>12</pointsize>
+           <weight>62</weight>
+           <italic>false</italic>
+           <bold>true</bold>
+          </font>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">border :3px solid #151040;
+border-top-left-radius :10px;
+border-top-right-radius : 10px; 
+border-bottom-left-radius : 10px; 
+border-bottom-right-radius : 10px;
+font: 500 12pt &quot;Fira Code&quot;;</string>
+         </property>
+         <property name="text">
+          <string>60 percent</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+        <widget class="QSlider" name="threshold_slider">
+         <property name="geometry">
+          <rect>
+           <x>170</x>
+           <y>340</y>
+           <width>401</width>
+           <height>40</height>
+          </rect>
+         </property>
+         <property name="minimum">
+          <number>60</number>
+         </property>
+         <property name="maximum">
+          <number>90</number>
+         </property>
+         <property name="pageStep">
+          <number>1</number>
+         </property>
+         <property name="value">
+          <number>60</number>
+         </property>
+         <property name="tracking">
+          <bool>true</bool>
+         </property>
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="tickPosition">
+          <enum>QSlider::TicksAbove</enum>
+         </property>
+        </widget>
+        <widget class="QLabel" name="bright_label_content_2">
+         <property name="geometry">
+          <rect>
+           <x>40</x>
+           <y>300</y>
+           <width>551</width>
+           <height>31</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <pointsize>16</pointsize>
+          </font>
+         </property>
+         <property name="text">
+          <string>Threshold of face detection (percent):</string>
          </property>
         </widget>
        </widget>
@@ -1997,22 +2383,5 @@ QSlider::handle:vertical:pressed {
   </widget>
  </widget>
  <resources/>
- <connections>
- <connection>
-   <sender>temp_slider</sender>
-   <signal>valueChanged(int)</signal>
-   <receiver>temp_label</receiver>
-   <slot>setNum(int)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>419</x>
-     <y>175</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>132</x>
-     <y>164</y>
-    </hint>
-   </hints>
-  </connection>
- </connections>
+ <connections/>
 </ui>
