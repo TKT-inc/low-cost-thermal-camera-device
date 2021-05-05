@@ -5,7 +5,7 @@ offlineRecordDirectory: 'device_app/data/offline_records/'
 
 periodTime:
     measureTemp: 0.8
-    sendRecMess: 2.0
+    sendRecMess: 1.5
 
 iotHub:
     connectionStringDevice: "HostName=thesis-hub.azure-devices.net;DeviceId=test-device;SharedAccessKey=E/uKH6XK6G2NLCYWQxu26+mrNBKmecm0I4WU2A1FfrY="
@@ -13,9 +13,9 @@ iotHub:
     msgFormat: 
         recMsg: '{{"buildingId":"{buildingId}","deviceId":"{deviceId}","trackingId": "{trackingId}","face": "{face}"}}'
         recordMsg: '{{"method":"storeRecord","data":{{"deviceLabel":"{deviceLabel}","personId": "{personID}", "temperature":"{temperature}", "face":"{face}", "masked":"{masked}", "recordTime":"{recordTime}" , "internetAvailable":"{internetAvailable}"}}}}'
-        registerMsg: '{{"buildingId":"{buildingId}","personName": "{personName}","containerName":"{containerName}"}}'
+        registerMsg: '{{"deviceId":"{deviceId}","buildingId":"{buildingId}","registerCode": "{registerCode}","containerName":"{containerName}"}}'
         activeDeviceMsg: '{{"method":"loginDevice","data":{{"deviceId":"{deviceId}", "deviceLabel":"{deviceLabel}","pinCode": "{pinCode}"}}}}'
-    enableAllSending: False     # (True) will overwrite all other sending flags 
+    enableAllSending: True     # (True) will overwrite all other sending flags 
     enableSendingRecognite: False
     enableSendingRecord: False
     enableSendingRegister: False
@@ -51,9 +51,9 @@ transMatrix: [[0.719298243522644042968750000000000000000000000000000000000000,0.
 thresholdFaceMaskDetection: 75
 
 registration:
-    numFontPics: 2
-    numLeftPics: 2
-    numRightPics: 2
+    numFontPics: 5
+    numLeftPics: 5
+    numRightPics: 5
     stackNumberPics: 6
     frameBetweenCapture: 3
     frontRange: 44

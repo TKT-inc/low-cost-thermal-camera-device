@@ -84,6 +84,7 @@ class MainWindow(QtWidgets.QMainWindow):
     def startMainWindow(self):
         uic.loadUi("./device_app/guiModules/ui_files/mainWindow.ui", self)
         keyboard.Hide()
+        self.loading = LoadingDlg(self)
         self.main_display_monitor = self.rgb_frame   
 
         self.selectStandardMenu("btn_home")  
@@ -141,6 +142,7 @@ class MainWindow(QtWidgets.QMainWindow):
     def startLoginWindow(self):
 
         uic.loadUi("./device_app/guiModules/ui_files/loginWindow.ui", self)
+        self.loading = LoadingDlg(self)
         self.active_device_btn.clicked.connect(self.button)
 
     """
@@ -195,37 +197,53 @@ class MainWindow(QtWidgets.QMainWindow):
         if (self.deviceFuntion.isInternetAvailable() != internetStatus):
             self.deviceFuntion.setInternetStatus(internetStatus)
 
+    @QtCore.pyqtSlot(object)
+    def checkRegisterStatus(self, status):
+        if (status == 'UPDATE_SUCCESS'):
+            self.noti = NotificationDlg('Register data update successful!', self)
+        elif (status == 'ADD_SUCCESS'):
+            self.noti = NotificationDlg('Register data add successful!', self)
+        else:
+            self.noti = NotificationDlg('The register code is wrong or used. Please register again!', self)
+        self.selectNormalMode()
+
     #Close the application
     def closeApp(self):
         try:
             self.deviceFuntion.stop()
-        except:
-            pass
+        except Exception as e:
+            print(e)
         app.quit()
 
     #Display main frame into rgb frame in homepage and register page
     def displayMainFrame(self):
-        frame = self.deviceFuntion.getRgbFrame()
-        frame = cv2.resize(frame, (self.main_display_monitor.width(),self.main_display_monitor.height()))
-        height, width, _ = frame.shape
-        qimg = QtGui.QImage(frame.data, width, height, 3*width, QtGui.QImage.Format_RGB888).rgbSwapped()
-        self.main_display_monitor.setPixmap(QtGui.QPixmap(qimg))
+        try:
+            frame = self.deviceFuntion.getRgbFrame()
+            frame = cv2.resize(frame, (self.main_display_monitor.width(),self.main_display_monitor.height()))
+            height, width, _ = frame.shape
+            qimg = QtGui.QImage(frame.data, width, height, 3*width, QtGui.QImage.Format_RGB888).rgbSwapped()
+            self.main_display_monitor.setPixmap(QtGui.QPixmap(qimg))
+        except Exception as e:
+            pass
 
     #Display thermal frame in homepage
     def displayThermalFrame(self):
-        frame = self.deviceFuntion.getThermalFrame()
-        frame = cv2.resize(frame, (self.thremal_frame.width(),self.thremal_frame.height()))
-        height, width, _ = frame.shape
-        qimg = QtGui.QImage(frame.data, width, height, 3*width, QtGui.QImage.Format_RGB888).rgbSwapped()
-        self.thremal_frame.setPixmap(QtGui.QPixmap(qimg))
+        try:
+            frame = self.deviceFuntion.getThermalFrame()
+            frame = cv2.resize(frame, (self.thremal_frame.width(),self.thremal_frame.height()))
+            height, width, _ = frame.shape
+            qimg = QtGui.QImage(frame.data, width, height, 3*width, QtGui.QImage.Format_RGB888).rgbSwapped()
+            self.thremal_frame.setPixmap(QtGui.QPixmap(qimg))
+        except Exception as e:
+            pass
 
     
     #Create an input dialog to input person's info when finish face register
     def createInputNameDialog(self):
         keyboard.Show()
         self.dlg = InputNameDlg(self)
-        self.dlg.accepted.connect(self.acceptInputRegisterName)
-        self.dlg.rejected.connect(self.cancelInputRegisterName)
+        self.dlg.accepted.connect(self.acceptInputRegisterCode)
+        self.dlg.rejected.connect(self.cancelInputRegisterCode)
         self.suspend = True
         self.dlg.show()
 
@@ -243,7 +261,7 @@ class MainWindow(QtWidgets.QMainWindow):
         label_of_face.setStyleSheet(label_of_face.styleSheet() + ("background-color: rgb(147, 255, 165);"))
 
     #switch to normal mode (working mode)
-    def selectNormalMode(self):       
+    def selectNormalMode(self):
         self.main_display_monitor = self.rgb_frame
         self.stackedWidget.setCurrentWidget(self.home_page)
         self.resetStyleBtn("btn_home")
@@ -289,7 +307,7 @@ class MainWindow(QtWidgets.QMainWindow):
     def selectInfoPage(self):
         self.stackedWidget.setCurrentWidget(self.product_info)
         self.resetStyleBtn("btn_info")
-        btnWidget.setStyleSheet(self.selectMenu(btnWidget.styleSheet()))
+        self.product_info.setStyleSheet(self.selectMenu(self.product_info.styleSheet()))
         if (self.deviceFuntion.getMode() != 'NORMAL'):
             self.deviceFuntion.selectNormalMode()
 
@@ -380,28 +398,36 @@ class MainWindow(QtWidgets.QMainWindow):
     """
     
     #Ok button when input register name
-    def acceptInputRegisterName(self):
-        self.suspend = False
+    def acceptInputRegisterCode(self):
         keyboard.Hide()
-        self.selectNormalMode()
-        self.deviceFuntion.sendRegisteredInfoToServer(self.dlg.name_edit.text())
+        if self.dlg.isVisible():
+            self.dlg.setVisible(False)
+        self.loading.display()
+        worker = Worker(self.deviceFuntion.sendRegisteredInfoToServer, self.dlg.register_code_edit.text())
+        worker.signals.result.connect(self.checkRegisterStatus)
+        worker.signals.finished.connect(self.loading.close)
+
+        self.threadpool.start(worker)
+        self.suspend = False
+
+        # self.deviceFuntion.sendRegisteredInfoToServer(self.dlg.register_code_edit.text())
 
     #Cancel button when input register name
-    def cancelInputRegisterName(self):
+    def cancelInputRegisterCode(self):
         self.suspend = False
         keyboard.Hide()
         self.selectRegisterMode()
 
     def acceptInputTempCalibrate(self):
-        self.suspend = False
         keyboard.Hide()
         self.deviceFuntion.createUserTemperatureOffset(self.dlg.temperature_edit.text())
+        self.suspend = False
         self.selectNormalMode()
     
     def cancelInputTempCalibrate(self):
         self.suspend = False
         keyboard.Hide()
-        self.selectCalibrateMode()
+        self.selectNormalMode()
 
     #Handle limit of records slider
     def recordsSliderValueHandle(self):
@@ -484,12 +510,12 @@ class MainWindow(QtWidgets.QMainWindow):
 
     ## ==> SELECT
     def selectMenu(self, getStyle):
-        select = getStyle + ("QPushButton { background-color:#61668c; border-left: 28px solid #61668c; border-right: 11px solid rgb(44, 49, 60); }")
+        select = getStyle + ("QPushButton { background-color:#61668c; border-left: 28px solid #61668c; border-right: 11px solid #61668c; }")
         return select
 
     ## ==> DESELECT
     def deselectMenu(self, getStyle):
-        deselect = getStyle.replace("QPushButton { background-color:#61668c; border-left: 28px solid #61668c; border-right: 11px solid rgb(44, 49, 60); }", "")
+        deselect = getStyle.replace("QPushButton { background-color:#61668c; border-left: 28px solid #61668c; border-right: 11px solid #61668c; }", "")
         return deselect
 
     ## ==> START SELECTION

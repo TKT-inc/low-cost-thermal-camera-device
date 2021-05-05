@@ -8,7 +8,10 @@ class RgbCam:
         self.height = height
         self.capture = cv2.VideoCapture(src, cv2.CAP_GSTREAMER)
         _, self.ori = self.capture.read()
-        self.frame = cv2.resize(self.ori, (self.width, self.height))
+        try:
+            self.frame = cv2.resize(self.ori, (self.width, self.height))
+        except:
+            pass
         # self.capture.set(cv2.CAP_PROP_EXPOSURE, 40)
         self.working = True
         self.thread = Thread(target=self.update, daemon=True)

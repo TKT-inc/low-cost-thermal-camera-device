@@ -19,7 +19,7 @@ class NotificationDlg(QtWidgets.QDialog):
         uic.loadUi("./device_app/guiModules/ui_files/notificationDialog.ui", self)
         self.setWindowFlags(QtCore.Qt.FramelessWindowHint)
         self.notification.setText(noti)
-        self.exec()
+        self.show()
 
 class LoadingDlg(QtWidgets.QDialog):
     def __init__(self, parent=None, opacity='0.4'):
