@@ -45,6 +45,7 @@ class IotConn:
         # Create an IoT Hub client
         self.mode = mode
         self.buildingIdActiveDevice = None
+        self.registerStatus = None
         self.connectionAvailable = self.ConnectionStatus(internetSignal)   
 
         self.connStringDev = connStringDevice
@@ -79,7 +80,7 @@ class IotConn:
             
             self.blob_service_client = BlobServiceClient.from_connection_string(self.connStringBlob)
             
-            self.thread_listening = Thread(target=listeningEventLoopThread, args=(self.messageListener, self.client, self.currentObj,), daemon=True)
+            self.thread_listening = Thread(target=listeningEventLoopThread, args=(self.messageListener, self.client,), daemon=True)
             self.thread_listening.start()
             
             self.connectionAvailable.emit(True)
@@ -95,17 +96,17 @@ class IotConn:
             time.sleep(5)
 
     def restartListener(self, objects):
+        self.currentObj = objects
         if self.thread_listening.is_alive():
             Log('CONNECTION', 'Listening thread still alive')
         elif (not self.connectionAvailable.isConnAvailable()):
             Log('CONNECTION', 'Can restart listener because the connection is not established')
         else:
-            self.currentObj = objects
-            self.thread_listening = Thread(target=listeningEventLoopThread, args=(self.messageListener, self.client, objects,))
+            self.thread_listening = Thread(target=listeningEventLoopThread, args=(self.messageListener, self.client,))
             self.thread_listening.daemon = True
             self.thread_listening.start()
 
-    async def messageListener(self, client, objects):
+    async def messageListener(self, client):
         Log('CONNECTION', 'Start Listener')
         while (self.mode == 'NORMAL' or self.mode == 'OFF'): 
             try:
@@ -113,13 +114,15 @@ class IotConn:
                 message = message.data.decode('utf-8')
                 Log('RECEIVE_DATA', message)
                 json_data = json.loads(message, strict = False)
-                if 'trackingId' in json_data and int(json_data['trackingId']) in objects:
-                    objects[int(json_data['trackingId'])].updateInfo(str(json_data['personName']), str(json_data['personId']), str(json_data['mask']))
+                if 'trackingId' in json_data and int(json_data['trackingId']) in self.currentObj:
+                    self.currentObj[int(json_data['trackingId'])].updateInfo(str(json_data['personName']), str(json_data['personId']), str(json_data['mask']))
                 elif 'authorizeStatus' in json_data:
                     if json_data['authorizeStatus'] == 'SUCCESS':
                         self.buildingIdActiveDevice = json_data['buildingId']
                     else:
                         self.buildingIdActiveDevice = -1
+                elif json_data['method'] == 'userRegister' and self.registerStatus == 'WAITING':
+                    self.registerStatus = json_data['data']['status']
 
                 self.connectionAvailable.emit(True)
             except Exception as identifier:
@@ -172,10 +175,19 @@ class IotConn:
         # Send the message.
         asyncio.run_coroutine_threadsafe(self.handleSendMessage(message_object),self.sending_event_loop)       
 
-    def registerToAzure(self, buildingId, personName, imgs, size):
+    def registerToAzure(self, deviceId, buildingId, registerCode, imgs, size):
         containerName = str(uuid.uuid4())
         self.sendImageToBlob(imgs, containerName, size)
-        self.registerPersonToServer(buildingId ,containerName, personName)
+        self.registerPersonToServer(deviceId, buildingId ,containerName, registerCode)
+        self.registerStatus = 'WAITING'
+        startTime = time.time()
+        while (self.registerStatus == 'WAITING' and (time.time() - startTime < 10)):
+            time.sleep(0.2)
+        status = self.registerStatus
+        self.registerStatus = None
+        if (status == 'WAITING'):
+            return 'FAILED'
+        return status
 
     def createContainer(self, containerName):
         print (containerName)
@@ -187,11 +199,12 @@ class IotConn:
         _, encoded_img = cv2.imencode('.jpg',image)
         self.block_blob_client.upload_blob(encoded_img.tobytes())
 
-    def registerPersonToServer(self, buildingId, containerName, personName):
+    def registerPersonToServer(self, deviceId, buildingId, containerName, registerCode):
         message = MSG_REGISTER.format(
+            deviceId = deviceId,
             buildingId = buildingId,
             containerName = containerName,
-            personName = personName
+            registerCode = registerCode
         )
         # Set message property to level="register"
         message_object= Message(message)

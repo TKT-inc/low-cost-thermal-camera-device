@@ -146,6 +146,7 @@ class DeviceAppFunctions():
         self.ct = CentroidTracker(MAX_DISAPEARED_FRAMES, BUFFER_NAME_ID, BUFFER_TEMP)
         # self.trackableObjects = {}
         self.objects, _ = self.ct.update([],[],RGB_SCALE, THRESHOLD_TEMP_FEVER)
+        self.deletedObjectRecord = OrderedDict()
 
 
     def initIoTConnection(self, internetStatus):
@@ -163,7 +164,7 @@ class DeviceAppFunctions():
 
         if (self.MODE == 'NORMAL' or self.MODE == 'CALIBRATE'):
             self.objects,deletedObject = self.ct.update(rects, self.ori, RGB_SCALE, THRESHOLD_TEMP_FEVER)
-            
+
             if (deletedObject.records):
                 Thread(target=self.sendRecordsInfo, args=(deletedObject, ),daemon=True).start()
                 Log('PROCESS', 'Start send records')
@@ -306,7 +307,6 @@ class DeviceAppFunctions():
     def selectNormalMode(self):
         if (self.MODE == 'NORMAL'):
             return
-
         global USER_TEMP_OFFSET
         USER_TEMP_OFFSET = user_cfg['offsetTemperature']
         self.initObjectTracking()
@@ -329,7 +329,6 @@ class DeviceAppFunctions():
         global USER_TEMP_OFFSET, user_cfg
         USER_TEMP_OFFSET = float(ground_truth_temp) - self.camera_input_calibrate_temp
         user_cfg['offsetTemperature'] = float(USER_TEMP_OFFSET)
-        self.MODE = 'NORMAL'
         with open("user_settings.yaml", "w") as f:
             yaml.dump(user_cfg, f)
         
@@ -347,11 +346,12 @@ class DeviceAppFunctions():
             yaml.dump(user_cfg, f)
         self.reset()
 
-    def sendRegisteredInfoToServer(self, name_of_new_user):
+    def sendRegisteredInfoToServer(self, register_code):
         if (self.store_registered_imgs is not None and (ENABLE_ALL_SENDING or ENABLE_SENDING_TO_CLOUD_REGISTER) and self.INTERNET_AVAILABLE):
-            Thread(target=self.conn.registerToAzure, args=(BUILDING_ID ,name_of_new_user, self.store_registered_imgs, FACE_SIZE, ), daemon=True).start()
+            registerResult = self.conn.registerToAzure(DEVICE_ID, BUILDING_ID ,register_code, self.store_registered_imgs, FACE_SIZE)
         self.store_registered_imgs = None
         Log('REGISTER', 'Send register')
+        return registerResult
     
     def isDeviceActivated(self):
         if (ACTIVATE_DEVICE):

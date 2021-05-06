@@ -34,7 +34,7 @@
     <string>Name</string>
    </property>
   </widget>
-  <widget class="QLineEdit" name="name_edit">
+  <widget class="QLineEdit" name="register_code_edit">
    <property name="geometry">
     <rect>
      <x>150</x>

@@ -669,7 +669,7 @@ background-color: rgb(150, 150, 150);</string>
          <string notr="true">QPushButton {
 	border-radius: 20px;	
 	background-color: #901785;
-	color: #293241;
+	color: #FFFFFF;
 }
 QPushButton:hover {
 	background-color:#531463;
@@ -684,7 +684,7 @@ User</string>
         </property>
         <property name="icon">
          <iconset>
-          <normaloff>icons/24x24/cil-user-follow.png</normaloff>icons/24x24/cil-user-follow.png</iconset>
+          <normaloff>../icons/24x24/cil-user-follow.png</normaloff>./device_app/guiModules/icons/24x24/cil-user-follow.png</iconset>
         </property>
         <property name="iconSize">
          <size>
@@ -1473,6 +1473,24 @@ QHeaderView::section:vertical
         </column>
        </widget>
       </widget>
+      <widget class="QWidget" name="zoom">
+       <widget class="QLabel" name="zoom_monitor">
+        <property name="geometry">
+         <rect>
+          <x>0</x>
+          <y>0</y>
+          <width>1211</width>
+          <height>721</height>
+         </rect>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">background-color: rgb(193, 193, 193);</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </widget>
       <widget class="QWidget" name="new_user">
        <widget class="QLabel" name="register_screen">
         <property name="enabled">
@@ -2187,6 +2205,7 @@ font: 500 12pt &quot;Fira Code&quot;;</string>
 	border: 2px solid rgb(200, 200, 200);
 	border-radius: 20px;	
 	background-color: rgb(82, 89, 102);
+    color: #FFFFFF;
 }
 QPushButton:hover {
 	background-color: rgb(77, 85, 90);
@@ -2202,7 +2221,7 @@ QPushButton:pressed {
          </property>
          <property name="icon">
           <iconset>
-           <normaloff>icons/24x24/cil-save.png</normaloff>icons/24x24/cil-save.png</iconset>
+           <normaloff>../icons/24x24/cil-save.png</normaloff>./device_app/guiModules/icons/24x24/cil-save.png</iconset>
          </property>
          <property name="iconSize">
           <size>
