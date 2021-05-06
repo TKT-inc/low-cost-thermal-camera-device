@@ -87,6 +87,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.loading = LoadingDlg(self)
         self.main_display_monitor = self.rgb_frame   
 
+        clickableWidget(self.rgb_frame).connect(self.selectZoomMode)
+        clickableWidget(self.zoom_monitor).connect(self.selectNormalMode)
+
         self.selectStandardMenu("btn_home")  
         self.stackedWidget.setCurrentWidget(self.home_page)
 
@@ -268,6 +271,11 @@ class MainWindow(QtWidgets.QMainWindow):
         self.btn_home.setStyleSheet(self.selectMenu(self.btn_home.styleSheet()))
         if (self.deviceFuntion.getMode() != 'NORMAL'):
             self.deviceFuntion.selectNormalMode() 
+
+    #switch to zoom mode
+    def selectZoomMode(self):
+        self.main_display_monitor = self.zoom_monitor
+        self.stackedWidget.setCurrentWidget(self.zoom)
 
     # Switch to register mode
     def selectRegisterMode(self):
