@@ -60,9 +60,6 @@ TIME_MEASURE_TEMP = cfg['periodTime']['measureTemp']
 TIME_SEND_REC = cfg['periodTime']['sendRecMess']
 
 # Set up tracking params
-MAX_DISAPEARED_FRAMES = cfg['personTracking']['NoOfDisapearFrames']
-BUFFER_TEMP = cfg['personTracking']['bufSizeTempPersonTracking']
-BUFFER_NAME_ID = cfg['personTracking']['bufSizeNameAndIdPersonTracking']
 THRESHOLD_TEMP_FEVER = user_cfg['feverTemperature']
 
 # Set up registeration params
@@ -99,6 +96,8 @@ USER_BRIGHT_INCREMENT = user_cfg['brightIncrementForFaceDetection']
 # user face detection threshold
 USER_FACE_DETECTION_THRESHOLD = user_cfg['faceDetectionThreshold']
 
+# enable one person mode
+USER_ENABLE_ONE_PERSON_MODE = user_cfg['enableOnePersonMeasurement']
 
 class DeviceAppFunctions():
 
@@ -143,9 +142,9 @@ class DeviceAppFunctions():
 
 
     def initObjectTracking(self):
-        self.ct = CentroidTracker(MAX_DISAPEARED_FRAMES, BUFFER_NAME_ID, BUFFER_TEMP)
+        self.ct = CentroidTracker()
         # self.trackableObjects = {}
-        self.objects, _ = self.ct.update([],[],RGB_SCALE, THRESHOLD_TEMP_FEVER)
+        self.objects, _ = self.ct.update([],[],RGB_SCALE, THRESHOLD_TEMP_FEVER, USER_ENABLE_ONE_PERSON_MODE)
         self.deletedObjectRecord = OrderedDict()
 
 
@@ -163,7 +162,8 @@ class DeviceAppFunctions():
         rects = self.faceDetect.detectFaces(self.frame, USER_BRIGHT_INCREMENT, USER_FACE_DETECTION_THRESHOLD)
 
         if (self.MODE == 'NORMAL' or self.MODE == 'CALIBRATE'):
-            self.objects,deletedObject = self.ct.update(rects, self.ori, RGB_SCALE, THRESHOLD_TEMP_FEVER)
+            calibrateFlag = self.MODE == 'CALIBRATE'
+            self.objects,deletedObject = self.ct.update(rects, self.ori, RGB_SCALE, THRESHOLD_TEMP_FEVER, USER_ENABLE_ONE_PERSON_MODE, calibrateFlag)
 
             if (deletedObject.records):
                 Thread(target=self.sendRecordsInfo, args=(deletedObject, ),daemon=True).start()
@@ -195,6 +195,8 @@ class DeviceAppFunctions():
                 if (self.calibrate_person_ID != list(self.objects.items())[0][0]):
                     self.calibrate_time = time.time()
                     self.calibrate_person_ID =  list(self.objects.items())[0][0]
+                    list(self.objects.items())[0][1].resetTemperature()
+                    print('reset temp for new calibrate person')
                 elif (time.time() - self.calibrate_time > CALIBRATE_TIME):
                     self.camera_input_calibrate_temp = list(self.objects.items())[0][1].record_temperature
                     return 'CALIBRATE_SUCCESS'
@@ -209,17 +211,20 @@ class DeviceAppFunctions():
             try:
                 objects_measurement = deepcopy(self.objects)
                 ct_temp = deepcopy(self.ct)
-                
                 if (self.lep.checkWorkingStatus()):
                     self.rgb_temp, rgb_ori = self.rgb.getCurrentFrame()
                     thermal, temp = self.lep.getFrame()
                     raw = thermal
-
-                    thermal = cv2.resize(thermal,(THERMAL_WIDTH,THERMAL_HEIGHT))
-                    self.color = cv2.applyColorMap(thermal, cv2.COLORMAP_JET)
                     
-                    rects_measurement = self.faceDetectTemp.detectFaces(self.rgb_temp, 35)
-                    objects_measurement, _ = ct_temp.update(rects_measurement,rgb_ori,RGB_SCALE)
+                    try:
+                        thermal = cv2.resize(thermal,(THERMAL_WIDTH,THERMAL_HEIGHT))
+                        self.color = cv2.applyColorMap(thermal, cv2.COLORMAP_JET)
+                    except Exception as e:
+                        print('fail to resize')
+                        print(e)
+                    
+                    rects_measurement = self.faceDetectTemp.detectFaces(self.rgb_temp, USER_BRIGHT_INCREMENT, USER_FACE_DETECTION_THRESHOLD)
+                    objects_measurement, _ = ct_temp.update(rects_measurement,rgb_ori,RGB_SCALE, USER_ENABLE_ONE_PERSON_MODE)
                     
                     measureTemperature(self.color, temp, self.objects, objects_measurement, USER_TEMP_OFFSET, RGB_SCALE)
 
@@ -271,11 +276,13 @@ class DeviceAppFunctions():
                 if ((ENABLE_ALL_SENDING or ENABLE_SENDING_TO_CLOUD_RECOGNITE) and self.INTERNET_AVAILABLE):
                     Log('RECOGNIZE','Start send recognite for ' + str(trackingID))
                     self.conn.messageSending(BUILDING_ID ,DEVICE_ID, trackingID, pic_str)
-                    
-                time.sleep(TIME_SEND_REC)
+                
             except Exception as e:
+                print('dead: do not have this ID: ' + str(trackingID))
                 print(e)
                 pass
+            finally:
+                time.sleep(TIME_SEND_REC)
 
     def centroidDetect(self, x, y, w, h):
         x1 = int(w/2)
@@ -298,6 +305,17 @@ class DeviceAppFunctions():
 
     def getSettingsParam(self):
         return CALIBRATE_TIME, THRESHOLD_TEMP_FEVER, USER_BRIGHT_INCREMENT, USER_FACE_DETECTION_THRESHOLD
+
+    def getEnableOnePersonModeFlag(self):
+        return USER_ENABLE_ONE_PERSON_MODE
+    
+    def setEnableOnePersonModeFlag(self, value):
+        global USER_ENABLE_ONE_PERSON_MODE, user_cfg
+        USER_ENABLE_ONE_PERSON_MODE = value
+        user_cfg['enableOnePersonMeasurement'] = USER_ENABLE_ONE_PERSON_MODE
+        with open("user_settings.yaml", "w") as f:
+            yaml.dump(user_cfg, f)
+
     
     def selectRegisterMode(self):
         self.store_registered_imgs = None
@@ -320,7 +338,6 @@ class DeviceAppFunctions():
     def selectCalibrateMode(self):
         global USER_TEMP_OFFSET
         USER_TEMP_OFFSET = 0
-        self.initObjectTracking()
         self.calibrate_person_ID = None
         self.camera_input_calibrate_temp = None
         self.MODE = 'CALIBRATE'

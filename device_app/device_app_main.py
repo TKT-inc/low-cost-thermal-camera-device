@@ -4,6 +4,9 @@ import cv2
 import time
 import dbus
 import yaml
+import os
+
+path = os.path.dirname(os.path.abspath(__file__))
 
 with open("user_settings.yaml") as settings:
     user_cfg = yaml.safe_load(settings)
@@ -30,6 +33,9 @@ FONT_OF_TABLE_BIG.setBold(True)
 
 LIMIT_NOTIFICATIONS = user_cfg['limitNotifications']
 LIMIT_RECORDS = user_cfg['limitRecords']
+
+ON_SWITCH_ICON = os.path.join(path, 'guiModules/images/ON.png')
+OFF_SWITCH_ICON = os.path.join(path, 'guiModules/images/OFF.png')
 
 class MainWindow(QtWidgets.QMainWindow):
 
@@ -89,6 +95,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         clickableWidget(self.rgb_frame).connect(self.selectZoomMode)
         clickableWidget(self.zoom_monitor).connect(self.selectNormalMode)
+        clickableWidget(self.toggle_one_person).connect(self.toggleOnePersonMode)
 
         self.selectStandardMenu("btn_home")  
         self.stackedWidget.setCurrentWidget(self.home_page)
@@ -263,6 +270,15 @@ class MainWindow(QtWidgets.QMainWindow):
     def finishedFaceRegistrationStyle(self, label_of_face):
         label_of_face.setStyleSheet(label_of_face.styleSheet() + ("background-color: rgb(147, 255, 165);"))
 
+    # change one person mode
+    def toggleOnePersonMode(self):
+        if (self.deviceFuntion.getEnableOnePersonModeFlag()):
+            self.toggle_one_person.setPixmap(QtGui.QPixmap(OFF_SWITCH_ICON))
+            self.deviceFuntion.setEnableOnePersonModeFlag(False)
+        else:
+            self.toggle_one_person.setPixmap(QtGui.QPixmap(ON_SWITCH_ICON))
+            self.deviceFuntion.setEnableOnePersonModeFlag(True)
+
     #switch to normal mode (working mode)
     def selectNormalMode(self):
         self.main_display_monitor = self.rgb_frame
@@ -311,6 +327,10 @@ class MainWindow(QtWidgets.QMainWindow):
         self.stackedWidget.setCurrentWidget(self.setting)
         self.resetStyleBtn("settings")
         self.settings.setStyleSheet(self.selectMenu(self.settings.styleSheet()))
+        if (self.deviceFuntion.getEnableOnePersonModeFlag()):
+            self.toggle_one_person.setPixmap(QtGui.QPixmap(ON_SWITCH_ICON))
+        else:
+            self.toggle_one_person.setPixmap(QtGui.QPixmap(OFF_SWITCH_ICON))
 
     def selectInfoPage(self):
         self.stackedWidget.setCurrentWidget(self.product_info)
