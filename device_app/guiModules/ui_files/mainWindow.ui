@@ -2394,6 +2394,61 @@ font: 500 12pt &quot;Fira Code&quot;;</string>
           <string>Threshold of face detection (percent):</string>
          </property>
         </widget>
+        <widget class="QLabel" name="bright_label_content_3">
+         <property name="geometry">
+          <rect>
+           <x>40</x>
+           <y>440</y>
+           <width>541</width>
+           <height>31</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <pointsize>16</pointsize>
+          </font>
+         </property>
+         <property name="text">
+          <string>Enable one person measurement (In this mode, the</string>
+         </property>
+        </widget>
+        <widget class="QLabel" name="bright_label_content_4">
+         <property name="geometry">
+          <rect>
+           <x>40</x>
+           <y>490</y>
+           <width>351</width>
+           <height>31</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <pointsize>16</pointsize>
+          </font>
+         </property>
+         <property name="text">
+          <string>temperature will be more accurate):</string>
+         </property>
+        </widget>
+        <widget class="QLabel" name="toggle_one_person">
+         <property name="geometry">
+          <rect>
+           <x>440</x>
+           <y>480</y>
+           <width>81</width>
+           <height>41</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+         <property name="pixmap">
+          <pixmap>../images/OFF.png</pixmap>
+         </property>
+         <property name="scaledContents">
+          <bool>true</bool>
+         </property>
+        </widget>
        </widget>
       </widget>
      </widget>

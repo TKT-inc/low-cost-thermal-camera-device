@@ -5,9 +5,20 @@ from datetime import datetime
 import numpy as np
 import base64
 import cv2
+import yaml
+with open("configuration.yaml") as ymlfile:
+    cfg = yaml.safe_load(ymlfile)
+
+MAX_DISAPEARED_FRAMES = cfg['personTracking']['noOfDisapearFrames']
+MAX_DISAPEARED_FRAMES_FOR_CALIB = cfg['personTracking']['noOfDisapearFramesForCalib']
+BUFFER_TEMP = cfg['personTracking']['bufSizeTempPersonTracking']
+BUFFER_RECONITE = cfg['personTracking']['bufSizeNameAndIdPersonTracking']
+RECORD_FACE_SIZE = cfg['personTracking']['recordFaceSize']
+MIN_FACE_SIZE_ONE_PERSON_MODE = cfg['personTracking']['minFaceSizeOfOnePersonMode']
+MAX_FACE_SIZE_ONE_PERSON_MODE = cfg['personTracking']['maxFaceSizeOfOnePersonMode']
 
 class ObjectInfo():
-	def __init__(self, coor, rgb, scale, max_rec_stack = 3, max_temp_stack=6, fever_temp=38):
+	def __init__(self, coor, rgb, scale, fever_temp=38):
 		self.coor = coor
 		self.name = "None"
 		self.id = "None"
@@ -16,19 +27,20 @@ class ObjectInfo():
 		self.have_mask = "N/A"
 		self.face_rgb = rgb[int(coor[1]*scale):int(coor[3]*scale), int(coor[0]*scale):int(coor[2]*scale)]
 		self.rec_stacks = []
-		self.max_rec_stack = max_rec_stack
 		self.temp_stacks = []
-		self.max_temp_stack = max_temp_stack
 		self.fever_temp = fever_temp
 		self.sending_recs_img = False
 		self.temporary_dissapear = False
 		self.internet_available = False
 	
+	# def turnToOffline(self):
+	# 	self.internet_available = False
+
 	def updateInfo(self, name, id, have_mask):
 		self.internet_available = True
 		self.have_mask = have_mask == "True"
 		self.rec_stacks.append((name, id))
-		if (len(self.rec_stacks) == self.max_rec_stack + 1):
+		if (len(self.rec_stacks) > BUFFER_RECONITE):
 			self.rec_stacks.pop(0)
 			self.name, self.id = max(self.rec_stacks, key=self.rec_stacks.count)
 		else:
@@ -38,11 +50,14 @@ class ObjectInfo():
 	def updateTemperature(self, temp):
 		self.temp_stacks.append(temp)
 
-		if (len(self.temp_stacks) == self.max_temp_stack):
+		if (len(self.temp_stacks) > BUFFER_TEMP):
 			self.temp_stacks.pop(0)
 
 		self.record_temperature = np.average(self.temp_stacks) 
 		self.temperature = "{:.2f}".format(temp) + " oC"
+
+	def resetTemperature(self):
+		self.temp_stacks = []
 
 	def gotFever(self):
 		if(self.record_temperature >= self.fever_temp):
@@ -51,28 +66,26 @@ class ObjectInfo():
 
 
 class RecordsObject():
-	def __init__(self, face_size):
+	def __init__(self ):
 		self.records = OrderedDict()
-		self.face_size = face_size
 
 	def addNewRecord(self, objectId, obj):
 		if (obj.record_temperature > 25 and obj.record_temperature < 42):
-			self.records[objectId] = self.Record(id = obj.id, name=obj.name, record_temperature = obj.record_temperature, got_fever = obj.gotFever(), face_rgb = obj.face_rgb, have_mask = obj.have_mask, face_size= self.face_size, internet_available=obj.internet_available)
+			self.records[objectId] = self.Record(id = obj.id, name=obj.name, record_temperature = obj.record_temperature, got_fever = obj.gotFever(), face_rgb = obj.face_rgb, have_mask = obj.have_mask, internet_available=obj.internet_available)
 		
 	class Record():
-		def __init__(self, id, name, record_temperature, got_fever, face_rgb, have_mask, face_size, internet_available):
+		def __init__(self, id, name, record_temperature, got_fever, face_rgb, have_mask, internet_available):
 			self.id = id
 			self.name= name
 			self.record_temperature = record_temperature
 			self.got_fever = got_fever
 			self.face_rgb = face_rgb
 			self.have_mask = have_mask
-			self.face_size = face_size
 			self.record_time = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3]
 			self.internet_available = internet_available
 		
 		def convertBinaryImg(self):
-			_, buffer = cv2.imencode('.jpg', cv2.resize(self.face_rgb,(self.face_size,self.face_size)))
+			_, buffer = cv2.imencode('.jpg', cv2.resize(self.face_rgb,(RECORD_FACE_SIZE,RECORD_FACE_SIZE)))
 			pic_str = base64.b64encode(buffer)
 			pic_str = pic_str.decode()
 			return pic_str
@@ -82,7 +95,7 @@ class RecordsObject():
 
 
 class CentroidTracker():
-	def __init__(self, maxDisappeared=25, max_rec_stack = 3, max_temp_stack=6):
+	def __init__(self):
 		# initialize the next unique object ID along with two ordered
 		# dictionaries used to keep track of mapping a given object
 		# ID to its centroid and number of consecutive frames it has
@@ -94,10 +107,6 @@ class CentroidTracker():
 		# store the number of maximum consecutive frames a given
 		# object is allowed to be marked as "disappeared" until we
 		# need to deregister the object from tracking
-		self.maxDisappeared = maxDisappeared
-		self.counted = False
-		self.max_rec_stack = max_rec_stack
-		self.max_temp_stack = max_temp_stack
 
 	def getCentroid(self, coor):
 		cX = int((coor[0] + coor[2]) / 2.0)
@@ -107,7 +116,7 @@ class CentroidTracker():
 	def register(self, coor, rgb, scale, fever_temp):
 		# when registering an object we use the next available object
 		# ID to store the centroid
-		obj = ObjectInfo(coor, rgb, scale, self.max_rec_stack, self.max_temp_stack, fever_temp)
+		obj = ObjectInfo(coor, rgb, scale, fever_temp)
 		self.objects[self.nextObjectID] = obj
 		self.disappeared[self.nextObjectID] = 0
 		self.nextObjectID += 1
@@ -119,29 +128,41 @@ class CentroidTracker():
 		del self.disappeared[objectID]
 
 
-	def update(self, rects, rgb, scale, fever_temp=38):
+	def update(self, rects, rgb, scale, fever_temp=38, onePersonMeasurement=False, calibrateFlag=False):
 		# check to see if the list of input bounding box rectangles
 		# is empty
-		disappearedObjects = RecordsObject(600)
+		if (calibrateFlag):
+			maxDisapearedFrames = MAX_DISAPEARED_FRAMES_FOR_CALIB
+		else: 
+			maxDisapearedFrames = MAX_DISAPEARED_FRAMES
+		
+		disappearedObjects = RecordsObject()
 
+		if (onePersonMeasurement and len(rects) > 0):
+			maxAreaFace = max(rects, key=lambda x : (x[2]-x[0])*(x[3]-x[1]))
+			area = (maxAreaFace[2]-maxAreaFace[0])*(maxAreaFace[3]-maxAreaFace[1])*scale*scale
+			if area <= MAX_FACE_SIZE_ONE_PERSON_MODE and area >= MIN_FACE_SIZE_ONE_PERSON_MODE:
+				rects = [maxAreaFace]
+			else:
+				rects = []
+		
 		if len(rects) == 0:
 			# loop over any existing tracked objects and mark them
 			# as disappeared
 			for objectID in list(self.disappeared.keys()):
 				self.disappeared[objectID] += 1
-				if self.disappeared[objectID] > 5:
+				if self.disappeared[objectID] > 7:
 					self.objects[objectID].temporary_dissapear = True
 				# if we have reached a maximum number of consecutive
 				# frames where a given object has been marked as
 				# missing, deregister it
-				if self.disappeared[objectID] > self.maxDisappeared:
+				if self.disappeared[objectID] > maxDisapearedFrames:
 					disappearedObjects.addNewRecord(objectID, self.objects[objectID])
 					self.deregister(objectID)
 
 			# return early as there are no centroids or tracking info
 			# to update
 			return self.objects, disappearedObjects
-
 		# initialize an array of input centroids for the current frame
 		inputCentroids = np.zeros((len(rects), 2), dtype="int")
 
@@ -237,13 +258,13 @@ class CentroidTracker():
 					objectID = objectIDs[row]
 					self.disappeared[objectID] += 1
 
-					if self.disappeared[objectID] > 5:
+					if self.disappeared[objectID] > 7:
 						self.objects[objectID].temporary_dissapear = True
 
 					# check to see if the number of consecutive
 					# frames the object has been marked "disappeared"
 					# for warrants deregistering the object
-					if self.disappeared[objectID] > self.maxDisappeared:
+					if self.disappeared[objectID] > maxDisapearedFrames:
 						disappearedObjects.addNewRecord(objectID, self.objects[objectID])
 						self.deregister(objectID)
 

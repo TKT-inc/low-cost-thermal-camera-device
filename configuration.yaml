@@ -5,7 +5,7 @@ offlineRecordDirectory: 'device_app/data/offline_records/'
 
 periodTime:
     measureTemp: 0.8
-    sendRecMess: 1.5
+    sendRecMess: 2
 
 iotHub:
     connectionStringDevice: "HostName=thesis-hub.azure-devices.net;DeviceId=test-device;SharedAccessKey=E/uKH6XK6G2NLCYWQxu26+mrNBKmecm0I4WU2A1FfrY="
@@ -24,7 +24,7 @@ camera:
     rgb:
         source: 'nvarguscamerasrc exposuretimerange="10000000 10000000" ! video/x-raw(memory:NVMM), 
         width=(int)1920, height=(int)1080,format=(string)NV12, 
-        framerate=(fraction)29/1 ! nvvidconv flip-method=2 ! video/x-raw, 
+        framerate=(fraction)29/1 ! nvvidconv flip-method=6 ! video/x-raw, 
         format=(string)BGRx ! videoconvert ! video/x-raw, 
         format=(string)BGR ! appsink max-buffers=1 drop=True'
         scaleWidth: 768
@@ -69,7 +69,11 @@ measureTemperature:
     offsetDistIntercept: 4.557706084
 
 personTracking:
-    NoOfDisapearFrames: 30
+    maxFaceSizeOfOnePersonMode: 450000
+    minFaceSizeOfOnePersonMode: 350000
+    noOfDisapearFrames: 30
+    noOfDisapearFramesForCalib: 15
+    recordFaceSize: 500
     bufSizeTempPersonTracking: 6
     bufSizeNameAndIdPersonTracking: 3
 

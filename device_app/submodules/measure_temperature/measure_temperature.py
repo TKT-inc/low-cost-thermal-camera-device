@@ -43,6 +43,7 @@ def measureTemperature(color,temp, objects, object_measurement, user_offset, sca
             # print(f'Temp: {str((measured_temp/100.0) - 273.15)}')
             objects[objectID].updateTemperature(temperature)
         except Exception as identifier:
+            print('Cant measure the temperature')
             print(identifier)
 
 
