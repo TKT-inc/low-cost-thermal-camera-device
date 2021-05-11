@@ -372,14 +372,8 @@ class DeviceAppFunctions():
     
     def isDeviceActivated(self):
         if (ACTIVATE_DEVICE):
-            self.turnDeviceToActivated()
+            self.selectNormalMode()
         return ACTIVATE_DEVICE
-
-    def turnDeviceToActivated(self):
-        self.measureTemp.join()
-        self.measureTemp = Thread(target=self.measureTemperatureAllPeople, daemon=True)
-        self.measureTemp.start()
-        self.MODE = 'NORMAL'
         
     def activateDevice(self, pinCode):
         global USER_TEMP_OFFSET, BUILDING_ID, user_cfg
@@ -387,7 +381,7 @@ class DeviceAppFunctions():
         if (self.INTERNET_AVAILABLE):
             buildingIdOfDevice = self.conn.activeDevice(DEVICE_ID, DEVICE_LABEL, pinCode)
             if (buildingIdOfDevice is not None and buildingIdOfDevice >= 0):
-                self.turnDeviceToActivated()
+                self.selectNormalMode()
                 user_cfg['activatedDevice'] = True
                 ACTIVATE_DEVICE = True
                 user_cfg['buildingId'] = buildingIdOfDevice
@@ -396,14 +390,6 @@ class DeviceAppFunctions():
                     yaml.dump(user_cfg, f)
                 return True
         return False
-
-    def deactivateDevice(self):
-        global USER_TEMP_OFFSET, user_cfg
-        self.MODE = 'OFF'
-        user_cfg['activatedDevice'] = False
-        ACTIVATE_DEVICE = False
-        with open("user_settings.yaml", "w") as f:
-            yaml.dump(user_cfg, f)
 
     def stop(self):
         self.MODE = "OFF"
@@ -428,6 +414,14 @@ class DeviceAppFunctions():
             self.measureTemp.start()
         self.MODE = 'NORMAL'
         self.conn.restartListener(self.objects)
+
+    def deactivateDevice(self):
+        global ACTIVATE_DEVICE, user_cfg
+        self.MODE = 'OFF'
+        user_cfg['activatedDevice'] = False
+        ACTIVATE_DEVICE = False
+        with open("user_settings.yaml", "w") as f:
+            yaml.dump(user_cfg, f)
         
 
 def saveRecordsOfflineMode(fileName, record):

@@ -2,7 +2,7 @@ activatedDevice: true
 brightIncrementForFaceDetection: 33
 buildingId: 1
 calibrationTimeForUser: 5
-enableOnePersonMeasurement: true
+enableOnePersonMeasurement: false
 faceDetectionThreshold: 0.9
 feverTemperature: 37.99
 limitNotifications: 7

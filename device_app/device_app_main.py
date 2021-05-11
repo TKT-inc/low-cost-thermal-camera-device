@@ -155,6 +155,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.btn_calib.clicked.connect(self.button)
         self.settings.clicked.connect(self.button)
         self.save.clicked.connect(self.button)
+        self.btn_exit.clicked.connect(self.button)
 
 
         self.notis_slider.valueChanged.connect(self.notisSliderValueHandle)
@@ -396,7 +397,11 @@ class MainWindow(QtWidgets.QMainWindow):
         threshold = float(self.threshold_slider.value()/100)
         self.deviceFuntion.updateSettingParams(time_calib=time, temp_fever=temp, bright_incre=bright,threshold=threshold )
         self.selectNormalMode()
-        
+
+    def logoutSystem(self):
+        self.deviceFuntion.deactivateDevice()
+        self.checkWifiStatus()
+
     # Add notification when someone got fever or does not wear mask
     def addNoti(self, current_time, name, temp=None):
         vbar = self.notifications.verticalScrollBar()
@@ -587,6 +592,9 @@ class MainWindow(QtWidgets.QMainWindow):
             worker.signals.result.connect(self.activeDevice)
             worker.signals.finished.connect(self.loading.close)
             self.threadpool.start(worker)
+        
+        if btnWidget.objectName() == "btn_exit":
+            self.logoutSystem()
 
 
     # @QtCore.pyqtSlot("QWidget*", "QWidget*")
