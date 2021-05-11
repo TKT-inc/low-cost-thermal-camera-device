@@ -80,7 +80,7 @@ class WifiManager:
         self.ssids.sort(key=lambda x: x["strength"], reverse=True)
         return self.ssids
 
-    def connectNewWifi(self, ssid, password, username="" , conn_name=""):
+    def connectNewWifi(self, ssid, password, newSsid=False, username="" , conn_name=""):
         wifiInfo = None
         for wifi in self.ssids:
             # orubt
@@ -155,13 +155,17 @@ class WifiManager:
             if conn_dict is None:
                 # print(f'connect_to_AP() Error: Invalid conn_type="{conn_type}"')
                 return 'FAILED: Invalid connection type'
-
-            for connection in NetworkManager.Settings.ListConnections():
-                settings = connection.GetSettings()['connection']
-                if settings['id'] == ssid:
-                    break;
-            else:
+            
+            if (newSsid):
                 NetworkManager.Settings.AddConnection(conn_dict)
+            else:
+                for connection in NetworkManager.Settings.ListConnections():
+                    settings = connection.GetSettings()['connection']
+                    if settings['id'] == ssid:
+                        break;
+                else:
+                    return 'FAILED: This connection is a new connection'
+                
 
             # Now find this connection and its device
             connections = NetworkManager.Settings.ListConnections()

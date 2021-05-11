@@ -27,30 +27,27 @@
   </property>
   <property name="styleSheet">
    <string notr="true">QMainWindow {background: transparent; }
-QToolTip {
-	color: #ffffff;
-	background-color: rgba(27, 29, 35, 160);
-	border: 1px solid rgb(40, 40, 40);
-	border-radius: 2px;
-}</string>
+</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <property name="styleSheet">
-    <string notr="true">background: transparent;
-color: rgb(210, 210, 210);</string>
+    <string notr="true">QWidget#centralwidget {
+background: transparent;
+}</string>
    </property>
    <widget class="QFrame" name="frame">
     <property name="geometry">
      <rect>
-      <x>0</x>
-      <y>0</y>
+      <x>10</x>
+      <y>10</y>
       <width>1281</width>
       <height>721</height>
      </rect>
     </property>
     <property name="styleSheet">
-     <string notr="true">background-color: #98C1D9;
-
+     <string notr="true">QFrame#frame {
+	background-color: #98C1D9;
+}
 </string>
     </property>
     <property name="frameShape">
@@ -68,10 +65,19 @@ color: rgb(210, 210, 210);</string>
        <height>321</height>
       </rect>
      </property>
+     <property name="font">
+      <font>
+       <weight>75</weight>
+       <bold>true</bold>
+      </font>
+     </property>
      <property name="styleSheet">
-      <string notr="true">background-color: #293241;
+      <string notr="true">QFrame#frame_2, QFrame#frame_2 QLabel  {
+background-color: #293241;
 border-radius: 20px;
-color: #E0FBFC;</string>
+color: #E0FBFC;
+}
+</string>
      </property>
      <property name="frameShape">
       <enum>QFrame::StyledPanel</enum>
@@ -106,6 +112,9 @@ color: #E0FBFC;</string>
       </property>
      </widget>
      <widget class="QLineEdit" name="password_wifi">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
       <property name="geometry">
        <rect>
         <x>80</x>
@@ -120,8 +129,15 @@ color: #E0FBFC;</string>
        </font>
       </property>
       <property name="styleSheet">
-       <string notr="true">background-color: rgb(177, 177, 177);
-color: rgb(0, 0, 0);</string>
+       <string notr="true">QLineEdit::disabled{
+	background-color: rgb(107, 107, 107);
+}
+
+QLineEdit{
+	background-color: rgb(177, 177, 177);
+	color: rgb(0, 0, 0);
+	border-radius: 20px;
+}</string>
       </property>
       <property name="alignment">
        <set>Qt::AlignCenter</set>
@@ -178,6 +194,9 @@ QPushButton:pressed {
       </property>
      </widget>
      <widget class="QComboBox" name="ssids_selection">
+      <property name="enabled">
+       <bool>true</bool>
+      </property>
       <property name="geometry">
        <rect>
         <x>50</x>
@@ -186,12 +205,45 @@ QPushButton:pressed {
         <height>41</height>
        </rect>
       </property>
+      <property name="font">
+       <font>
+        <pointsize>12</pointsize>
+        <weight>75</weight>
+        <bold>true</bold>
+       </font>
+      </property>
       <property name="styleSheet">
        <string notr="true">QComboBox::drop-down {border-width: 0px;} QComboBox::down-arrow {image: url(noimg); border-width: 0px;}
 QComboBox {
 	background-color: rgb(177, 177, 177);
 	color: rgb(0, 0, 0);
+	border-radius: 10px;
+}/*
+QComboBox::indicator{
+    background-color:transparent;
+    selection-background-color:transparent;
+    color:transparent;
+    selection-color:transparent;
+}*/
+QListView{
+    border:                 none;
+    color:                      rgb(0, 0, 0);
+    background-color:   rgb(255, 255, 255);
+    font-weight:            bold;
+    selection-background-color: rgb(218, 153, 255);
+    show-decoration-selected: 1;
+    margin-left:                -10px;
+    padding-left    :           15px;
+}
+
+QListView::item:hover{
+
+    background-color:   rgb(218, 153, 255);
+    border:                 none;
 }</string>
+      </property>
+      <property name="maxVisibleItems">
+       <number>5</number>
       </property>
      </widget>
      <widget class="QLabel" name="label_2">
@@ -199,7 +251,7 @@ QComboBox {
        <rect>
         <x>30</x>
         <y>140</y>
-        <width>371</width>
+        <width>141</width>
         <height>41</height>
        </rect>
       </property>
@@ -250,7 +302,47 @@ QPushButton:pressed {
 }</string>
       </property>
       <property name="text">
-       <string>Refressh</string>
+       <string>Refresh</string>
+      </property>
+     </widget>
+     <widget class="QCheckBox" name="check_new_wifi">
+      <property name="geometry">
+       <rect>
+        <x>200</x>
+        <y>140</y>
+        <width>201</width>
+        <height>41</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <pointsize>12</pointsize>
+       </font>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">QCheckBox::indicator {
+    width: 20px;
+    height: 20px;
+	background-color: #FFFFFF;
+}
+QCheckBox { 
+background-color: transparent;
+color: #E0FBFC;
+}
+
+QCheckBox::indicator::checked {
+    width: 17px;
+    height: 17px;
+    background-color: #db4959;
+	border: 3px solod #FFFFFF;
+	
+}</string>
+      </property>
+      <property name="text">
+       <string>New Wifi connection</string>
+      </property>
+      <property name="checked">
+       <bool>false</bool>
       </property>
      </widget>
     </widget>

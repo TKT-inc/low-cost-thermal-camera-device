@@ -28,12 +28,6 @@ bus = dbus.SessionBus()
 proxy = bus.get_object("org.onboard.Onboard", "/org/onboard/Onboard/Keyboard")
 keyboard = dbus.Interface(proxy, "org.onboard.Onboard.Keyboard")
 
-for dev in NetworkManager.NetworkManager.GetDevices():
-    if dev.DeviceType != NetworkManager.NM_DEVICE_TYPE_WIFI:
-        continue
-    for ap in dev.SpecificDevice().GetAccessPoints():
-        print(ap.Ssid)
-
 FONT_OF_TABLE = QtGui.QFont()
 FONT_OF_TABLE.setPointSize(16)
 FONT_OF_TABLE.setBold(True)
@@ -185,6 +179,7 @@ class MainWindow(QtWidgets.QMainWindow):
         worker.signals.result.connect(self.addSsidsIntoSelectionBox)
         self.threadpool.start(worker)
 
+        self.check_new_wifi.stateChanged.connect(lambda state: [self.password_wifi.setText(""),self.password_wifi.setEnabled(state!=QtCore.Qt.Unchecked)])
         self.connect_wifi.clicked.connect(self.connectWifi)
         self.refresh_wifi.clicked.connect(self.refreshWifiList)
 
@@ -485,7 +480,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.loading.display()
         ssid = str(self.ssids_selection.currentText())
         password = str(self.password_wifi.text())
-        worker = Worker(self.wifi.connectNewWifi, ssid, password)
+        worker = Worker(self.wifi.connectNewWifi, ssid, password, self.check_new_wifi.isChecked())
         worker.signals.result.connect(self.handleConnectionStatus)
         worker.signals.finished.connect(self.loading.close)
         self.threadpool.start(worker)
