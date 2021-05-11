@@ -111,6 +111,7 @@ class IotConn:
         while (self.mode == 'NORMAL' or self.mode == 'OFF'): 
             try:
                 message = await client.receive_message()
+                self.connectionAvailable.emit(True)
                 message = message.data.decode('utf-8')
                 Log('RECEIVE_DATA', message)
                 json_data = json.loads(message, strict = False)
@@ -124,7 +125,6 @@ class IotConn:
                 elif json_data['method'] == 'userRegister' and self.registerStatus == 'WAITING':
                     self.registerStatus = json_data['data']['status']
 
-                self.connectionAvailable.emit(True)
             except Exception as identifier:
                 print(identifier)
                 pass

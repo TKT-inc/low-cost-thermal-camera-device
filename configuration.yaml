@@ -79,7 +79,7 @@ personTracking:
 
 developmentFlags:
     printProcessTime: False
-    printReceiveData: True
+    printReceiveData: False
     printSendData: False
     printRecord: False
     printRecognize: False

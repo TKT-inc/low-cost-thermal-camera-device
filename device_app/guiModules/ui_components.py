@@ -14,12 +14,38 @@ class InputTempDlg(QtWidgets.QDialog):
         self.setWindowFlags(QtCore.Qt.FramelessWindowHint)
 
 class NotificationDlg(QtWidgets.QDialog):
-    def __init__(self, noti="GOT ERROR DURING OPERATING" ,parent=None):
+    def __init__(self, noti="GOT ERROR DURING OPERATING" ,parent=None, timeout=None):
         super().__init__(parent)
         uic.loadUi("./device_app/guiModules/ui_files/notificationDialog.ui", self)
         self.setWindowFlags(QtCore.Qt.FramelessWindowHint)
         self.notification.setText(noti)
         self.show()
+        if (timeout is not None):
+            self.time_to_wait = timeout
+            self.timeout_noti.setText("Closing automatically in {0} secondes.".format(self.time_to_wait))
+            self.timer = QtCore.QTimer(self)
+            self.timer.setInterval(1000)
+            self.timer.timeout.connect(self.changeContent)
+            self.timer.start()
+
+    def changeContent(self):
+        self.time_to_wait -= 1
+        self.timeout_noti.setText("Closing automatically in {0} secondes.".format(self.time_to_wait))
+        if self.time_to_wait <= 0:
+            self.close()
+
+    def closeEvent(self, event):
+        print('close Dlg Noti')
+        self.timer.stop()
+        event.accept()
+    
+    def accept(self):
+        print('OK Dlg Noti')
+        try:
+            self.timer.stop()
+        except:
+            pass
+        super().accept()
 
 class LoadingDlg(QtWidgets.QDialog):
     def __init__(self, parent=None, opacity='0.4'):

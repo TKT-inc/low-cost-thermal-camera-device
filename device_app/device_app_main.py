@@ -5,6 +5,8 @@ import time
 import dbus
 import yaml
 import os
+from dbus.mainloop.glib import DBusGMainLoop
+import NetworkManager
 
 path = os.path.dirname(os.path.abspath(__file__))
 
@@ -16,12 +18,21 @@ from PyQt5 import uic
 from device_app_function import DeviceAppFunctions
 from guiModules.ui_components import *
 from guiModules.worker import *
+from submodules.wifi_connection.wifiManager import WifiManager
 from datetime import datetime
 from submodules.common.log import Log
+
+DBusGMainLoop(set_as_default=True)
 
 bus = dbus.SessionBus()
 proxy = bus.get_object("org.onboard.Onboard", "/org/onboard/Onboard/Keyboard")
 keyboard = dbus.Interface(proxy, "org.onboard.Onboard.Keyboard")
+
+for dev in NetworkManager.NetworkManager.GetDevices():
+    if dev.DeviceType != NetworkManager.NM_DEVICE_TYPE_WIFI:
+        continue
+    for ap in dev.SpecificDevice().GetAccessPoints():
+        print(ap.Ssid)
 
 FONT_OF_TABLE = QtGui.QFont()
 FONT_OF_TABLE.setPointSize(16)
@@ -52,7 +63,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.loading.display('1')
         worker = Worker(self.initSystem)
         worker.signals.finished.connect(self.loading.close)
-        worker.signals.finished.connect(self.checkActivatedStatusFromConfig)
+        worker.signals.finished.connect(self.checkWifiStatus)
         self.threadpool.start(worker)
 
         # QtWidgets.QApplication.instance().focusChanged.connect(self.handle_focuschanged)
@@ -71,9 +82,18 @@ class MainWindow(QtWidgets.QMainWindow):
     # def deactiveCSV(self):
     #     self.deviceFuntion.csvAva = False
 
+    def checkWifiStatus(self):
+        wifiConnected = self.wifi.wifiConnected()
+        print(wifiConnected)
+        if (not wifiConnected):
+            self.startConnectWifiWindow()
+        else:
+            self.checkActivatedStatusFromConfig()
+
     def checkActivatedStatusFromConfig(self):
         activateCode = self.deviceFuntion.isDeviceActivated()
         if not activateCode:
+            self.startLoginWindow()
             keyboard.Show()
         else:
             self.startMainWindow()
@@ -83,6 +103,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.OfflineMode = False
         self.deviceFuntion =  DeviceAppFunctions(self.internetAvailable)
         self.internetAvailable.connect(self.getInternetStatus)
+        self.wifi = WifiManager()
         return
     """
     Control windows
@@ -155,6 +176,19 @@ class MainWindow(QtWidgets.QMainWindow):
         self.loading = LoadingDlg(self)
         self.active_device_btn.clicked.connect(self.button)
 
+    def startConnectWifiWindow(self):
+        uic.loadUi("./device_app/guiModules/ui_files/connectWifi.ui", self)
+        self.loading = LoadingDlg(self)
+        self.loading.display()
+        worker = Worker(self.wifi.getAvailableWifis)
+        worker.signals.finished.connect(self.loading.close)
+        worker.signals.result.connect(self.addSsidsIntoSelectionBox)
+        self.threadpool.start(worker)
+
+        self.connect_wifi.clicked.connect(self.connectWifi)
+        self.refresh_wifi.clicked.connect(self.refreshWifiList)
+
+
     """
     Main processing of the application
     """
@@ -200,7 +234,7 @@ class MainWindow(QtWidgets.QMainWindow):
         if (activatedStatus):
             self.startMainWindow()
         else:
-            self.noti = NotificationDlg('The PIN is not match. Please input again', self)
+            self.noti = NotificationDlg('The PIN is not match. Please input again', self, 5)
 
     @QtCore.pyqtSlot(bool)
     def getInternetStatus(self, internetStatus):
@@ -210,12 +244,26 @@ class MainWindow(QtWidgets.QMainWindow):
     @QtCore.pyqtSlot(object)
     def checkRegisterStatus(self, status):
         if (status == 'UPDATE_SUCCESS'):
-            self.noti = NotificationDlg('Register data update successful!', self)
+            self.noti = NotificationDlg('Register data update successful!', self, 7)
         elif (status == 'ADD_SUCCESS'):
-            self.noti = NotificationDlg('Register data add successful!', self)
+            self.noti = NotificationDlg('Register data add successful!', self, 7)
         else:
-            self.noti = NotificationDlg('The register code is wrong or used. Please register again!', self)
+            self.noti = NotificationDlg('The register code is wrong or used. Please register again!', self, 7)
         self.selectNormalMode()
+
+    @QtCore.pyqtSlot(object)
+    def addSsidsIntoSelectionBox(self, ssids):
+        self.ssids_selection.clear()
+        for id in ssids:
+            self.ssids_selection.addItem(id['ssid'])
+
+    @QtCore.pyqtSlot(object)
+    def handleConnectionStatus(self, status):
+        if (status == 'SUCCESS'):
+            self.checkActivatedStatusFromConfig()
+        else:
+            self.noti = NotificationDlg(status, self)
+
 
     #Close the application
     def closeApp(self):
@@ -424,6 +472,24 @@ class MainWindow(QtWidgets.QMainWindow):
     """
     Handle inputs and signals of the application
     """
+    #Refresh the available wifis
+    def refreshWifiList(self):
+        self.loading.display()
+        worker = Worker(self.wifi.getAvailableWifis)
+        worker.signals.finished.connect(self.loading.close)
+        worker.signals.result.connect(self.addSsidsIntoSelectionBox)
+        self.threadpool.start(worker)
+
+    #Connect to wifi by ssid
+    def connectWifi(self):
+        self.loading.display()
+        ssid = str(self.ssids_selection.currentText())
+        password = str(self.password_wifi.text())
+        worker = Worker(self.wifi.connectNewWifi, ssid, password)
+        worker.signals.result.connect(self.handleConnectionStatus)
+        worker.signals.finished.connect(self.loading.close)
+        self.threadpool.start(worker)
+        # self.wifi.connectNewWifi(ssid,password)
     
     #Ok button when input register name
     def acceptInputRegisterCode(self):

@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>531</width>
-    <height>293</height>
+    <height>325</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -44,7 +44,7 @@ color: rgb(255, 255, 255);</string>
    <property name="geometry">
     <rect>
      <x>190</x>
-     <y>230</y>
+     <y>260</y>
      <width>150</width>
      <height>41</height>
     </rect>
@@ -87,9 +87,30 @@ QPushButton:pressed {
    <property name="geometry">
     <rect>
      <x>80</x>
-     <y>70</y>
+     <y>60</y>
      <width>381</width>
      <height>131</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>14</pointsize>
+    </font>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignCenter</set>
+   </property>
+  </widget>
+  <widget class="QLabel" name="timeout_noti">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>210</y>
+     <width>491</width>
+     <height>31</height>
     </rect>
    </property>
    <property name="font">
