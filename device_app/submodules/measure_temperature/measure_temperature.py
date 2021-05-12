@@ -8,13 +8,33 @@ import csv
 with open("configuration.yaml") as ymlfile:
     cfg = yaml.safe_load(ymlfile)
 
+"""
+Prams for transform from RGB coors into Thermal coors
+"""
+# Homography
 TRANSFORM_MATRIX = cfg['transMatrix']
 
-#setup offset temperature
+# PnP
+PNP_ROTATION_VEC = cfg['transMatrixPnP']['rotationVector']
+PNP_TRANSLATION_VEC = cfg['transMatrixPnP']['translationVector']
+PNP_THERMAL_CAM_MATRIX = cfg['transMatrixPnP']['thermalCameraMatrix']
+PNP_DIST_COEFF = cfg['transMatrixPnP']['distortionCoefficients']
+
+"""
+setup offset temperature
+"""
 NUMBER_MAX_THERMAL_POINTS = cfg['measureTemperature']['numberMaxThermalPoints']
 OFFSET_TEMPERATURE_DIST_COEF = cfg['measureTemperature']['offsetDistCoeffecient']
 OFFSET_TEMPERATURE_DIST_INT = cfg['measureTemperature']['offsetDistIntercept']
-# ROTATION_VECTOR = 
+
+"""
+get thermal camera size
+"""
+THERMAL_CAM_SCALED_WIDTH = cfg['camera']['thermal']['scaleWidth']
+THERMAL_CAM_SCALED_HEIGHT = cfg['camera']['thermal']['scaleHeight']
+THERMAL_CAM_WIDTH = cfg['camera']['thermal']['originalWidth']
+THERMAL_CAM_HEIGHT = cfg['camera']['thermal']['originalHeight']
+
 
 def measureTemperature(color,temp, objects, object_measurement, user_offset, scale, csvActivate=False):
     # with open('./device_app/submodules/measure_temperature/temp.csv', 'a') as f_object:
@@ -49,8 +69,6 @@ def measureTemperature(color,temp, objects, object_measurement, user_offset, sca
 
 def convertRGBToThermalCoor(x, y):
     start = time.time()
-    MAX_WIDTH = 640
-    MAX_HEIGHT = 480
 #     # Homography 
 #     # H = np.linalg.inv(H_raw)
 #     # convert_x = int((H[0][0] * x + H[0][1] * y + H[0][2]) / (H[2][0] * x + H[2][1] * y + H[2][2]))
@@ -60,25 +78,26 @@ def convertRGBToThermalCoor(x, y):
 #     convert_x = int(H[0][0] * x + H[0][1] * y + H[0][2])
 #     convert_y = int(H[1][0] * x + H[1][1] * y + H[1][2])
 #     # 3D convert
-    rvecs = np.asmatrix(np.asarray([[-0.192852688069800326520208955116686411201953887939453125000000],[0.004212742218180124363635652429138644947670400142669677734375],[0.013928152677063381989497337087868800153955817222595214843750]]), dtype=np.float32)
-    tvecs = np.asmatrix(np.asarray([[-357.180362938120026683463947847485542297363281250000000000000000],[-174.984175415651151297424803487956523895263671875000000000000000],[982.023202369916702991758938878774642944335937500000000000000000]]
-
-), dtype=np.float32)
-    mtx = np.asmatrix(np.asarray([[640.000000000000000000000000000000000000000000000000000000000000,0.000000000000000000000000000000000000000000000000000000000000,320.000000000000000000000000000000000000000000000000000000000000],[0.000000000000000000000000000000000000000000000000000000000000,640.000000000000000000000000000000000000000000000000000000000000,240.000000000000000000000000000000000000000000000000000000000000],[0.000000000000000000000000000000000000000000000000000000000000,0.000000000000000000000000000000000000000000000000000000000000,1.000000000000000000000000000000000000000000000000000000000000]]
-), dtype=np.float32)
-    dist = np.asmatrix(np.asarray([[0.000000000000000000000000000000000000000000000000000000000000],[0.000000000000000000000000000000000000000000000000000000000000],[0.000000000000000000000000000000000000000000000000000000000000],[0.000000000000000000000000000000000000000000000000000000000000]]
-), dtype=np.float32)
-    test= []
-    test.append([[x, y, 1]])
-    threed_point = np.asarray(test, dtype=np.float32)
+    rvecs = np.asmatrix(np.asarray(PNP_ROTATION_VEC), dtype=np.float32)
+    tvecs = np.asmatrix(np.asarray(PNP_TRANSLATION_VEC), dtype=np.float32)
+    mtx = np.asmatrix(np.asarray(PNP_THERMAL_CAM_MATRIX), dtype=np.float32)
+    dist = np.asmatrix(np.asarray(PNP_DIST_COEFF), dtype=np.float32)
+    coors= [[[x, y, 1]]]
+    threed_point = np.asarray(coors, dtype=np.float32)
     imgpoints2, _ = cv2.projectPoints(threed_point, rvecs, tvecs, mtx, dist)
     convert_x = imgpoints2[0][0][0]
     convert_y = imgpoints2[0][0][1]
-    if(convert_x > MAX_WIDTH):
-        convert_x = MAX_WIDTH - 1
-    if(convert_y > MAX_HEIGHT):
-        convert_y = MAX_HEIGHT - 1
-    # print( "{:.5f}" .format(time.time() - start))
+
+    def handleMaxMinSize(value, MAX, MIN = 0):
+        if (value >= MAX):
+            return MAX - 1
+        elif (value < MIN):
+            return MIN
+        return value
+    
+    convert_x = handleMaxMinSize(convert_x, THERMAL_CAM_SCALED_WIDTH)
+    convert_y = handleMaxMinSize(convert_y, THERMAL_CAM_SCALED_HEIGHT)
+
     return convert_x, convert_y  
 
 def measureOffsetTempOfDistance(face_area):
@@ -90,10 +109,16 @@ def measureTemperatureFromCoor(temp_img, coor_start, coor_end):
     y_start = int(coor_start[1]/8)
     y_end = int(coor_end[1]/8)
 
-    if (x_start == x_end):
-        x_end += 1
-    if (y_start == y_end):
-        y_end += 1
+    def translateCoorToThermal(start, end, MAX):
+        if (start == end):
+            if (end + 1 < MAX):
+                return start, (end + 1)
+            else: 
+                return (start - 1), end
+        return start, end
+
+    x_start, x_end = translateCoorToThermal(x_start, x_end, THERMAL_CAM_WIDTH)
+    y_start, y_end = translateCoorToThermal(y_start, y_end, THERMAL_CAM_HEIGHT)
 
     thermal_matrix = temp_img[y_start:y_end, x_start:x_end]
 
