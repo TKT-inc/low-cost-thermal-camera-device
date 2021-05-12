@@ -113,9 +113,13 @@ class DeviceAppFunctions():
         self.INTERNET_AVAILABLE = True
 
         #init the system
+        print("Init Cameras")
         self.initCamera()
+        print("Init Face Detection model")
         self.initModel()
+        print("Init People tracking")
         self.initObjectTracking()
+        print("Init IoT connections")
         self.initIoTConnection(internetSignal)
 
         self.measureTemp = Thread(target=self.measureTemperatureAllPeople,daemon=True)

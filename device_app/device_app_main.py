@@ -57,7 +57,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.loading.display('1')
         worker = Worker(self.initSystem)
         worker.signals.finished.connect(self.loading.close)
-        worker.signals.finished.connect(self.checkWifiStatus)
+        worker.signals.finished.connect(self.chooseInitScreen)
         self.threadpool.start(worker)
 
         # QtWidgets.QApplication.instance().focusChanged.connect(self.handle_focuschanged)
@@ -76,7 +76,7 @@ class MainWindow(QtWidgets.QMainWindow):
     # def deactiveCSV(self):
     #     self.deviceFuntion.csvAva = False
 
-    def checkWifiStatus(self):
+    def chooseInitScreen(self):
         wifiConnected = self.wifi.wifiConnected()
         print(wifiConnected)
         if (not wifiConnected):
@@ -166,7 +166,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.threshold_slider.valueChanged.connect(self.thresholdSliderValueHandle)
 
     def startLoginWindow(self):
-
         uic.loadUi("./device_app/guiModules/ui_files/loginWindow.ui", self)
         self.loading = LoadingDlg(self)
         self.active_device_btn.clicked.connect(self.button)
@@ -177,6 +176,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.loading.display()
         worker = Worker(self.wifi.getAvailableWifis)
         worker.signals.finished.connect(self.loading.close)
+        worker.signals.finished.connect(keyboard.Show())
         worker.signals.result.connect(self.addSsidsIntoSelectionBox)
         self.threadpool.start(worker)
 
@@ -399,8 +399,12 @@ class MainWindow(QtWidgets.QMainWindow):
         self.selectNormalMode()
 
     def logoutSystem(self):
+        self.timerWorking.stop()
+        self.timeHandleStatus.stop()
+        self.timerRGB.stop()
+        self.timerThermal.stop()
         self.deviceFuntion.deactivateDevice()
-        self.checkWifiStatus()
+        self.chooseInitScreen()
 
     # Add notification when someone got fever or does not wear mask
     def addNoti(self, current_time, name, temp=None):
