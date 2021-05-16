@@ -176,7 +176,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.loading.display()
         worker = Worker(self.wifi.getAvailableWifis)
         worker.signals.finished.connect(self.loading.close)
-        worker.signals.finished.connect(keyboard.Show())
+        worker.signals.finished.connect(keyboard.Show)
         worker.signals.result.connect(self.addSsidsIntoSelectionBox)
         self.threadpool.start(worker)
 
