@@ -8,7 +8,7 @@ periodTime:
     sendRecMess: 2
 
 iotHub:
-    connectionStringDevice: "HostName=thesis-hub.azure-devices.net;DeviceId=test-device;SharedAccessKey=E/uKH6XK6G2NLCYWQxu26+mrNBKmecm0I4WU2A1FfrY="
+    connectionStringDevice: "HostName=tkt-hub.azure-devices.net;DeviceId=test-device;SharedAccessKey=FOqwhgsa2JtBmW7Pr521Sh3ICstAFZgjWUCL7eoaCkU="
     connectionStringBlob: "DefaultEndpointsProtocol=https;AccountName=tktrecordstorage;AccountKey=L5yEM18qRAUaAvYiFkwQC1T54rl+ceLvhu6EeDVXr1vOBfvMn6mzoAoagM/WBwUiQJy4gYxNM5aSiDQlzIxtsg==;EndpointSuffix=core.windows.net"
     msgFormat: 
         recMsg: '{{"buildingId":"{buildingId}","deviceId":"{deviceId}","trackingId": "{trackingId}","face": "{face}"}}'
@@ -96,3 +96,4 @@ developmentFlags:
     printRecognize: False
     printRegister: True
     printIoTConn: True
+    printGarbageFrams: False

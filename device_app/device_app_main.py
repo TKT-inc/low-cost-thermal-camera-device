@@ -39,8 +39,13 @@ FONT_OF_TABLE_BIG.setBold(True)
 LIMIT_NOTIFICATIONS = user_cfg['limitNotifications']
 LIMIT_RECORDS = user_cfg['limitRecords']
 
+#Icons for status
 ON_SWITCH_ICON = os.path.join(path, 'guiModules/images/ON.png')
 OFF_SWITCH_ICON = os.path.join(path, 'guiModules/images/OFF.png')
+
+#Icons for wifi status
+WIFI_ON = os.path.join(path, 'guiModules/icons/24x24/cil-wifi-signal-1.png')
+WIFI_OFF = os.path.join(path, 'guiModules/icons/24x24/cil-wifi-signal-off.png')
 
 class MainWindow(QtWidgets.QMainWindow):
 
@@ -78,7 +83,6 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def chooseInitScreen(self):
         wifiConnected = self.wifi.wifiConnected()
-        print(wifiConnected)
         if (not wifiConnected):
             self.startConnectWifiWindow()
         else:
@@ -111,6 +115,10 @@ class MainWindow(QtWidgets.QMainWindow):
         clickableWidget(self.rgb_frame).connect(self.selectZoomMode)
         clickableWidget(self.zoom_monitor).connect(self.selectNormalMode)
         clickableWidget(self.toggle_one_person).connect(self.toggleOnePersonMode)
+        if (self.deviceFuntion.isInternetAvailable()):
+            self.wifi_status.setPixmap(QtGui.QPixmap(WIFI_ON))
+        else:
+            self.wifi_status.setPixmap(QtGui.QPixmap(WIFI_OFF))
 
         self.selectStandardMenu("btn_home")  
         self.stackedWidget.setCurrentWidget(self.home_page)
@@ -236,6 +244,10 @@ class MainWindow(QtWidgets.QMainWindow):
     def getInternetStatus(self, internetStatus):
         if (self.deviceFuntion.isInternetAvailable() != internetStatus):
             self.deviceFuntion.setInternetStatus(internetStatus)
+        if (internetStatus):
+            self.wifi_status.setPixmap(QtGui.QPixmap(WIFI_ON))
+        else:
+            self.wifi_status.setPixmap(QtGui.QPixmap(WIFI_OFF))
 
     @QtCore.pyqtSlot(object)
     def checkRegisterStatus(self, status):
