@@ -340,6 +340,7 @@ class DeviceAppFunctions():
         self.conn.restartListener(self.objects)
     
     def selectCalibrateMode(self):
+        self.selectNormalMode()
         global USER_TEMP_OFFSET
         USER_TEMP_OFFSET = 0
         self.calibrate_person_ID = None
