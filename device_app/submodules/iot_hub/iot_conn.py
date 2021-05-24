@@ -96,15 +96,18 @@ class IotConn:
             time.sleep(5)
 
     def restartListener(self, objects):
-        self.currentObj = objects
-        if self.thread_listening.is_alive():
-            Log('CONNECTION', 'Listening thread still alive')
-        elif (not self.connectionAvailable.isConnAvailable()):
-            Log('CONNECTION', 'Can restart listener because the connection is not established')
-        else:
-            self.thread_listening = Thread(target=listeningEventLoopThread, args=(self.messageListener, self.client,))
-            self.thread_listening.daemon = True
-            self.thread_listening.start()
+        try:
+            self.currentObj = objects
+            if self.thread_listening.is_alive():
+                Log('CONNECTION', 'Listening thread still alive')
+            elif (not self.connectionAvailable.isConnAvailable()):
+                Log('CONNECTION', 'Can restart listener because the connection is not established')
+            else:
+                self.thread_listening = Thread(target=listeningEventLoopThread, args=(self.messageListener, self.client,))
+                self.thread_listening.daemon = True
+                self.thread_listening.start()
+        except Exception as e:
+            print(e)
 
     async def messageListener(self, client):
         Log('CONNECTION', 'Start Listener')
