@@ -8,6 +8,9 @@ import csv
 with open("configuration.yaml") as ymlfile:
     cfg = yaml.safe_load(ymlfile)
 
+# with open("../../../configuration.yaml") as ymlfile:
+#     cfg = yaml.safe_load(ymlfile)
+
 """
 Prams for transform from RGB coors into Thermal coors
 """
@@ -103,6 +106,8 @@ def convertRGBToThermalCoor(x, y):
 def measureOffsetTempOfDistance(face_area):
     return (math.log(face_area)*OFFSET_TEMPERATURE_DIST_COEF + OFFSET_TEMPERATURE_DIST_INT)
 
+# test = np.array([[[1, 2, 3, 4], [5, 6, 7, 8], [9, 10, 11, 12]]])
+
 def measureTemperatureFromCoor(temp_img, coor_start, coor_end):
     x_start = int(coor_start[0]/8)
     x_end = int(coor_end[0]/8)
@@ -122,14 +127,19 @@ def measureTemperatureFromCoor(temp_img, coor_start, coor_end):
 
     thermal_matrix = temp_img[y_start:y_end, x_start:x_end]
 
-    # if ((x_end - x_start)*(y_end - y_start) > NUMBER_MAX_THERMAL_POINTS):
-    #     top_max_indices = (-np.array(thermal_matrix)).argpartition(NUMBER_MAX_THERMAL_POINTS, axis=None)[:NUMBER_MAX_THERMAL_POINTS]
-    #     # measured_temp = np.max(thermal_matrix)
-    #     measured_temp = np.average(thermal_matrix[np.unravel_index(top_max_indices, thermal_matrix.shape)])
-    # else:
-    measured_temp = np.amax(thermal_matrix)
+    def calculateAverageTemp(y, x):
+        selected_range = thermal_matrix[max(y - 1, y_start) : min(y + 2, y_end + 1), max(x - 1, x_start) : min(x + 2, x_end + 1)]
+        return np.average(selected_range)
 
-    return measured_temp
+    if ((x_end - x_start)*(y_end - y_start) > NUMBER_MAX_THERMAL_POINTS):
+        average_temp_arr = []
+        top_max_indices = (-np.array(thermal_matrix)).argpartition(NUMBER_MAX_THERMAL_POINTS, axis=None)[:NUMBER_MAX_THERMAL_POINTS]
+        for i in range(NUMBER_MAX_THERMAL_POINTS):
+            idx = np.unravel_index(top_max_indices[i], thermal_matrix.shape)
+            average_temp = calculateAverageTemp(idx[0], idx[1])
+            average_temp_arr.push(average_temp)
+        return max(average_temp_arr)
+    return np.max(thermal_matrix)
 
 
 
