@@ -427,6 +427,9 @@ class DeviceAppFunctions():
         ACTIVATE_DEVICE = False
         with open("user_settings.yaml", "w") as f:
             yaml.dump(user_cfg, f)
+    
+    def suspendDevice(self):
+        self.MODE = 'OFF'
         
 
 def saveRecordsOfflineMode(fileName, record):

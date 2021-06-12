@@ -1,4 +1,5 @@
 # This Python file uses the following encoding: utf-8
+from device_app.guiModules.ui_components import LoadingDlg, clickableWidget
 import sys
 import cv2
 import time
@@ -83,7 +84,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def chooseInitScreen(self):
         wifiConnected = self.wifi.wifiConnected()
-        if (not wifiConnected):
+        if (wifiConnected is not None):
             self.startConnectWifiWindow()
         else:
             self.checkActivatedStatusFromConfig()
@@ -115,6 +116,8 @@ class MainWindow(QtWidgets.QMainWindow):
         clickableWidget(self.rgb_frame).connect(self.selectZoomMode)
         clickableWidget(self.zoom_monitor).connect(self.selectNormalMode)
         clickableWidget(self.toggle_one_person).connect(self.toggleOnePersonMode)
+        clickableWidget(self.wifi_status).connect(self.configWifi)
+
         if (self.deviceFuntion.isInternetAvailable()):
             self.wifi_status.setPixmap(QtGui.QPixmap(WIFI_ON))
         else:
@@ -192,6 +195,26 @@ class MainWindow(QtWidgets.QMainWindow):
         self.connect_wifi.clicked.connect(self.connectWifi)
         self.refresh_wifi.clicked.connect(self.refreshWifiList)
 
+    def startConfigWifiWindow(self):
+        uic.loadUi("./device_app/guiModules/ui_files/editWifiConnection.ui", self)
+        self.loading = LoadingDlg(self)
+        curWifi = self.wifi.wifiConnected()
+        if (curWifi is not None):
+            self.current_wifi.setText("The device is using: " + curWifi)
+        else:
+            self.current_wifi.setText("The device is not using Internet")
+        worker = Worker(self.wifi.getAvailableWifis)
+        worker.signals.finished.connect(self.loading.close)
+        worker.signals.finished.connect(keyboard.Show)
+        worker.signals.result.connect(self.addSsidsIntoSelectionBox)
+        self.threadpool.start(worker)
+
+        self.check_new_wifi.stateChanged.connect(lambda state: [self.password_wifi.setText(""),self.password_wifi.setEnabled(state!=QtCore.Qt.Unchecked)])
+        self.connect_wifi.clicked.connect(self.connectWifi)
+        self.refresh_wifi.clicked.connect(self.refreshWifiList)
+        self.back.clicked.connect(self.checkActivatedStatusFromConfig)
+
+
 
     """
     Main processing of the application
@@ -263,7 +286,7 @@ class MainWindow(QtWidgets.QMainWindow):
     def addSsidsIntoSelectionBox(self, ssids):
         self.ssids_selection.clear()
         for id in ssids:
-            self.ssids_selection.addItem(id['ssid'])
+            self.ssids_selection.addItem(id['ssid'] + " - " + id['strength'])
 
     @QtCore.pyqtSlot(object)
     def handleConnectionStatus(self, status):
@@ -302,7 +325,6 @@ class MainWindow(QtWidgets.QMainWindow):
             self.thremal_frame.setPixmap(QtGui.QPixmap(qimg))
         except Exception as e:
             pass
-
     
     #Create an input dialog to input person's info when finish face register
     def createInputNameDialog(self):
@@ -417,6 +439,14 @@ class MainWindow(QtWidgets.QMainWindow):
         self.timerThermal.stop()
         self.deviceFuntion.deactivateDevice()
         self.chooseInitScreen()
+    
+    def configWifi(self):
+        self.timerWorking.stop()
+        self.timeHandleStatus.stop()
+        self.timerRGB.stop()
+        self.timerThermal.stop()
+        self.deviceFuntion.suspendDevice()
+        self.startConfigWifiWindow()
 
     # Add notification when someone got fever or does not wear mask
     def addNoti(self, current_time, name, temp=None):
