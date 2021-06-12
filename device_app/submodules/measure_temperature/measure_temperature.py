@@ -47,10 +47,11 @@ def measureTemperature(color,temp, objects, object_measurement, user_offset, sca
             thermal_end_x, thermal_end_y = convertRGBToThermalCoor(coordinates[2], coordinates[3])
             
             cv2.rectangle(color, (thermal_start_x, thermal_start_y), (thermal_end_x, thermal_end_y), (0, 0, 0), 4)
-            
+            face_area = (coordinates[2]-coordinates[0])*(coordinates[3]-coordinates[1])*(scale*2)
+            # print(f'Area: {str(face_area)}')
             measured_temp = measureTemperatureFromCoor(temp, (thermal_start_x, thermal_start_y), (thermal_end_x, thermal_end_y) )
             
-            face_area = (coordinates[2]-coordinates[0])*(coordinates[3]-coordinates[1])*(scale*2)
+            
             offset_temp = user_offset +  measureOffsetTempOfDistance(face_area)
             temperature = (measured_temp/100.0) - 273.15 + offset_temp
             # raw = measured_temp/100.0 - 273.15
@@ -59,7 +60,7 @@ def measureTemperature(color,temp, objects, object_measurement, user_offset, sca
             #     writer_object.writerow([face_area, raw])
             # f_object.close()
             # print(f'Log: {measureOffsetTempOfDistance(face_area)}')
-            # print(f'Area: {str(face_area)}')
+            
             # print(f'Temp: {str((measured_temp/100.0) - 273.15)}')
             objects[objectID].updateTemperature(temperature)
         except Exception as identifier:

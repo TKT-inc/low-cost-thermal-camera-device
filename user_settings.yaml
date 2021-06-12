@@ -1,10 +1,10 @@
 activatedDevice: true
-brightIncrementForFaceDetection: 33
-buildingId: 1
+brightIncrementForFaceDetection: 0
+buildingId: 116
 calibrationTimeForUser: 5
 enableOnePersonMeasurement: false
-faceDetectionThreshold: 0.9
+faceDetectionThreshold: 0.8
 feverTemperature: 37.99
 limitNotifications: 7
 limitRecords: 5
-offsetTemperature: -2.242613055342396
+offsetTemperature: -3.099283307219359

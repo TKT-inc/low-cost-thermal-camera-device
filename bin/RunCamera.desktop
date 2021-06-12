@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Icon=/home/khoa/Desktop/Thesis/thesis-device-app/device_app/guiModules/images/tkt.png
+Name=TKT Device
+GenericName=TKT_Camera
+Exec=lxterminal --working-directory=/home/khoa/Desktop/Thesis/thesis-device-app/bin -e ./CameraDevice.sh
+StartupNotify=false
+Terminal=false

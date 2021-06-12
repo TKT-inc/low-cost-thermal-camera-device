@@ -208,6 +208,6 @@ class WifiManager:
     def wifiConnected(self):
         devices = NetworkManager.NetworkManager.GetDevices()
         for dev in devices:
-            if dev.DeviceType == NetworkManager.NM_DEVICE_TYPE_WIFI and dev.State == NetworkManager.NM_DEVICE_STATE_ACTIVATED:
+            if (dev.DeviceType == NetworkManager.NM_DEVICE_TYPE_WIFI or dev.DeviceType == NetworkManager.NM_DEVICE_TYPE_ETHERNET) and dev.State == NetworkManager.NM_DEVICE_STATE_ACTIVATED:
                 return True
         return False
