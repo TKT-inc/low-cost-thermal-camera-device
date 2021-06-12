@@ -73,7 +73,7 @@ registration:
 
 
 measureTemperature:
-    numberMaxThermalPoints: 16
+    numberMaxThermalPoints: 2
     # offsetDistCoeffecient: -0.0000212
     # offsetDistIntercept: 1.654018585
     offsetDistCoeffecient: -0.347698157
