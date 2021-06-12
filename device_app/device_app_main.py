@@ -6,6 +6,7 @@ import time
 import dbus
 import yaml
 import os
+import re
 from dbus.mainloop.glib import DBusGMainLoop
 import NetworkManager
 
@@ -84,7 +85,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def chooseInitScreen(self):
         wifiConnected = self.wifi.wifiConnected()
-        if (wifiConnected is not None):
+        if (wifiConnected is None):
             self.startConnectWifiWindow()
         else:
             self.checkActivatedStatusFromConfig()
@@ -286,7 +287,7 @@ class MainWindow(QtWidgets.QMainWindow):
     def addSsidsIntoSelectionBox(self, ssids):
         self.ssids_selection.clear()
         for id in ssids:
-            self.ssids_selection.addItem(id['ssid'] + " - " + id['strength'])
+            self.ssids_selection.addItem(id['ssid'] + " - " + str(id['strength']))
 
     @QtCore.pyqtSlot(object)
     def handleConnectionStatus(self, status):
@@ -465,7 +466,7 @@ class MainWindow(QtWidgets.QMainWindow):
         if (temp is not None):
             noti = name + " got sick with " + "{:.2f}".format(temp) + " oC"
         else:
-            noti = name + " plase wear MASK!"
+            noti = name + " please wear MASK!"
 
         self.notifications.setItem(self.notifications.rowCount()-1, 1, QtWidgets.QTableWidgetItem(noti))
         self.notifications.item(self.notifications.rowCount()-1, 1).setFont(FONT_OF_TABLE)
@@ -530,6 +531,7 @@ class MainWindow(QtWidgets.QMainWindow):
     def connectWifi(self):
         self.loading.display()
         ssid = str(self.ssids_selection.currentText())
+        ssid = re.sub(" - [0-9]+$", "", ssid)
         password = str(self.password_wifi.text())
         worker = Worker(self.wifi.connectNewWifi, ssid, password, self.check_new_wifi.isChecked())
         worker.signals.result.connect(self.handleConnectionStatus)
