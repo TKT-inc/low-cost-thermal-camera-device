@@ -38,7 +38,7 @@ CONNECTION_STRING_BLOB = cfg['iotHub']['connectionStringBlob']
 RGB_SOURCE = cfg['camera']['rgb']['source']
 RGB_WIDTH = cfg['camera']['rgb']['scaleWidth']
 RGB_HEIGHT = cfg['camera']['rgb']['scaleHeight']
-RGB_SCALE = 1920 / RGB_WIDTH
+RGB_SCALE = cfg['camera']['rgb']['originalWidth'] / RGB_WIDTH
 THERMAL_SOURCE = cfg['camera']['thermal']['source']
 THERMAL_WIDTH = cfg['camera']['thermal']['scaleWidth']
 THERMAL_HEIGHT = cfg['camera']['thermal']['scaleHeight']
@@ -113,9 +113,13 @@ class DeviceAppFunctions():
         self.INTERNET_AVAILABLE = True
 
         #init the system
+        print("Init Cameras")
         self.initCamera()
+        print("Init Face Detection model")
         self.initModel()
+        print("Init People tracking")
         self.initObjectTracking()
+        print("Init IoT connections")
         self.initIoTConnection(internetSignal)
 
         self.measureTemp = Thread(target=self.measureTemperatureAllPeople,daemon=True)
@@ -372,14 +376,8 @@ class DeviceAppFunctions():
     
     def isDeviceActivated(self):
         if (ACTIVATE_DEVICE):
-            self.turnDeviceToActivated()
+            self.selectNormalMode()
         return ACTIVATE_DEVICE
-
-    def turnDeviceToActivated(self):
-        self.measureTemp.join()
-        self.measureTemp = Thread(target=self.measureTemperatureAllPeople, daemon=True)
-        self.measureTemp.start()
-        self.MODE = 'NORMAL'
         
     def activateDevice(self, pinCode):
         global USER_TEMP_OFFSET, BUILDING_ID, user_cfg
@@ -387,7 +385,7 @@ class DeviceAppFunctions():
         if (self.INTERNET_AVAILABLE):
             buildingIdOfDevice = self.conn.activeDevice(DEVICE_ID, DEVICE_LABEL, pinCode)
             if (buildingIdOfDevice is not None and buildingIdOfDevice >= 0):
-                self.turnDeviceToActivated()
+                self.selectNormalMode()
                 user_cfg['activatedDevice'] = True
                 ACTIVATE_DEVICE = True
                 user_cfg['buildingId'] = buildingIdOfDevice
@@ -396,14 +394,6 @@ class DeviceAppFunctions():
                     yaml.dump(user_cfg, f)
                 return True
         return False
-
-    def deactivateDevice(self):
-        global USER_TEMP_OFFSET, user_cfg
-        self.MODE = 'OFF'
-        user_cfg['activatedDevice'] = False
-        ACTIVATE_DEVICE = False
-        with open("user_settings.yaml", "w") as f:
-            yaml.dump(user_cfg, f)
 
     def stop(self):
         self.MODE = "OFF"
@@ -428,6 +418,14 @@ class DeviceAppFunctions():
             self.measureTemp.start()
         self.MODE = 'NORMAL'
         self.conn.restartListener(self.objects)
+
+    def deactivateDevice(self):
+        global ACTIVATE_DEVICE, user_cfg
+        self.MODE = 'OFF'
+        user_cfg['activatedDevice'] = False
+        ACTIVATE_DEVICE = False
+        with open("user_settings.yaml", "w") as f:
+            yaml.dump(user_cfg, f)
         
 
 def saveRecordsOfflineMode(fileName, record):

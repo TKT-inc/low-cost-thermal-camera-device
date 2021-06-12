@@ -5,6 +5,9 @@ from submodules.thermal_camera.pylepton.Lepton import Lepton
 import cv2
 import ctypes
 import pathlib
+import yaml
+with open("configuration.yaml") as ymlfile:
+    cfg = yaml.safe_load(ymlfile)
 
 libname = pathlib.Path().absolute() / "device_app/submodules/thermal_camera/LeptonSDKWrapper/LeptonWrapper.so"
 LeptonWrapper = ctypes.CDLL(libname)
@@ -14,6 +17,8 @@ void lepton_reboot();
 void lepton_perform_ffc(); 
 void lepton_manualFFC();
 """
+
+PRINT_GARBAGE_FRAME = cfg['developmentFlags']['printGarbageFrams']
 
 class ThermalCam:
     def __init__(self, source):
@@ -30,20 +35,19 @@ class ThermalCam:
     def updateFrame(self):
         try:
             with Lepton(self.source) as l:
-                a,_ = l.capture(garbage_frame_print=True)
+                a,_ = l.capture(garbage_frame_print=PRINT_GARBAGE_FRAME)
                 self.temp = np.fliplr(np.float32(a))
                 cv2.normalize(a, a, 0, 65535, cv2.NORM_MINMAX)
                 np.right_shift(a, 8, a)
                 self.frame = np.fliplr(np.uint8(a))
         except Exception as e:
-            print('wrong resize')
             print(e)
             self.isWorking = False
             self.reset()
             raise
 
     def reset(self):
-        print('reset thermal camera') 
+        print('ERROR: Reset thermal camera') 
         LeptonWrapper.lepton_reboot()
         self.isWorking = True
         return

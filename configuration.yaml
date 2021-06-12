@@ -8,7 +8,7 @@ periodTime:
     sendRecMess: 2
 
 iotHub:
-    connectionStringDevice: "HostName=thesis-hub.azure-devices.net;DeviceId=test-device;SharedAccessKey=E/uKH6XK6G2NLCYWQxu26+mrNBKmecm0I4WU2A1FfrY="
+    connectionStringDevice: "HostName=tkt-hub.azure-devices.net;DeviceId=test-device;SharedAccessKey=FOqwhgsa2JtBmW7Pr521Sh3ICstAFZgjWUCL7eoaCkU="
     connectionStringBlob: "DefaultEndpointsProtocol=https;AccountName=tktrecordstorage;AccountKey=L5yEM18qRAUaAvYiFkwQC1T54rl+ceLvhu6EeDVXr1vOBfvMn6mzoAoagM/WBwUiQJy4gYxNM5aSiDQlzIxtsg==;EndpointSuffix=core.windows.net"
     msgFormat: 
         recMsg: '{{"buildingId":"{buildingId}","deviceId":"{deviceId}","trackingId": "{trackingId}","face": "{face}"}}'
@@ -22,15 +22,20 @@ iotHub:
 
 camera:
     rgb:
-        source: 'nvarguscamerasrc exposuretimerange="10000000 10000000" ! video/x-raw(memory:NVMM), 
+        source: 'nvarguscamerasrc ! video/x-raw(memory:NVMM), 
         width=(int)1920, height=(int)1080,format=(string)NV12, 
         framerate=(fraction)29/1 ! nvvidconv flip-method=6 ! video/x-raw, 
         format=(string)BGRx ! videoconvert ! video/x-raw, 
         format=(string)BGR ! appsink max-buffers=1 drop=True'
+        originalWidth: 1920
+        originalHeight: 1080
+        # scaleWidh and scaleHeight must follow the ratio 16/9, change this scale values to change the perfomance of face detection
         scaleWidth: 768
         scaleHeight: 432
     thermal: 
         source: "/dev/spidev0.0"
+        originalWidth: 80
+        originalHeight: 60
         scaleWidth: 640
         scaleHeight: 480
     
@@ -47,6 +52,12 @@ faceDetection:
     threshold: 0.6
 
 transMatrix: [[0.719298243522644042968750000000000000000000000000000000000000,0.000000000000000000000000000000000000000000000000000000000000,108.140350341796875000000000000000000000000000000000000000000000],[-0.000000000000000052438578919762255086539637360942833765875548,0.736842095851898193359375000000000000000000000000000000000000,219.368423461914062500000000000000000000000000000000000000000000]]
+
+transMatrixPnP:
+    rotationVector: [[-0.192852688069800326520208955116686411201953887939453125000000],[0.004212742218180124363635652429138644947670400142669677734375],[0.013928152677063381989497337087868800153955817222595214843750]]
+    translationVector: [[-357.180362938120026683463947847485542297363281250000000000000000],[-174.984175415651151297424803487956523895263671875000000000000000],[982.023202369916702991758938878774642944335937500000000000000000]]
+    thermalCameraMatrix: [[640,0,320],[0,640,240],[0,0,1]]
+    distortionCoefficients: [[0],[0],[0],[0]]
 
 thresholdFaceMaskDetection: 75
 
@@ -79,9 +90,10 @@ personTracking:
 
 developmentFlags:
     printProcessTime: False
-    printReceiveData: True
+    printReceiveData: False
     printSendData: False
     printRecord: False
     printRecognize: False
     printRegister: True
     printIoTConn: True
+    printGarbageFrams: False

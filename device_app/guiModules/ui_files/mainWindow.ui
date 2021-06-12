@@ -153,7 +153,7 @@ QPushButton:pressed {
       <property name="geometry">
        <rect>
         <x>0</x>
-        <y>660</y>
+        <y>600</y>
         <width>70</width>
         <height>60</height>
        </rect>
@@ -206,7 +206,7 @@ QPushButton:pressed {
       <property name="geometry">
        <rect>
         <x>0</x>
-        <y>600</y>
+        <y>540</y>
         <width>70</width>
         <height>60</height>
        </rect>
@@ -412,6 +412,22 @@ QPushButton:pressed {
       </property>
       <property name="text">
        <string>New</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="wifi_status">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>660</y>
+        <width>51</width>
+        <height>51</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+      <property name="scaledContents">
+       <bool>true</bool>
       </property>
      </widget>
     </widget>
