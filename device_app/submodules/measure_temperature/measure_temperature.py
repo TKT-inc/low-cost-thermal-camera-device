@@ -126,9 +126,13 @@ def measureTemperatureFromCoor(temp_img, coor_start, coor_end):
     y_start, y_end = translateCoorToThermal(y_start, y_end, THERMAL_CAM_HEIGHT)
 
     thermal_matrix = temp_img[y_start:y_end, x_start:x_end]
-
+    # print(f'shape: {thermal_matrix.shape}')
     def calculateAverageTemp(y, x):
-        selected_range = thermal_matrix[max(y - 1, y_start) : min(y + 2, y_end + 1), max(x - 1, x_start) : min(x + 2, x_end + 1)]
+        selected_range = thermal_matrix[max(y - 1, 0) : min(y + 2, y_end-y_start + 1), max(x - 1, 0) : min(x + 2, x_end - x_start + 1)]
+        # thermal_reshape = thermal_matrix.reshape((thermal_matrix.shape[0], thermal_matrix.shape[1]))
+        # np.savetxt('thermal_matrix.csv', thermal_reshape, delimiter=',')
+        # print(f'Mat: {selected_range}')
+        # print()
         return np.average(selected_range)
 
     if ((x_end - x_start)*(y_end - y_start) > NUMBER_MAX_THERMAL_POINTS):
@@ -136,8 +140,9 @@ def measureTemperatureFromCoor(temp_img, coor_start, coor_end):
         top_max_indices = (-np.array(thermal_matrix)).argpartition(NUMBER_MAX_THERMAL_POINTS, axis=None)[:NUMBER_MAX_THERMAL_POINTS]
         for i in range(NUMBER_MAX_THERMAL_POINTS):
             idx = np.unravel_index(top_max_indices[i], thermal_matrix.shape)
+            # print(f'index: {idx}')
             average_temp = calculateAverageTemp(idx[0], idx[1])
-            average_temp_arr.push(average_temp)
+            average_temp_arr.append(average_temp)
         return max(average_temp_arr)
     return np.max(thermal_matrix)
 
