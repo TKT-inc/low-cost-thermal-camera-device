@@ -78,6 +78,7 @@ measureTemperature:
     # offsetDistIntercept: 1.654018585
     offsetDistCoeffecient: -0.347698157
     offsetDistIntercept: 4.557706084
+    percentageThermalPoints: 0.17
 
 personTracking:
     maxFaceSizeOfOnePersonMode: 450000
