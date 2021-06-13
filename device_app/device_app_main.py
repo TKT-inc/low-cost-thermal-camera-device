@@ -305,6 +305,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.deviceFuntion.stop()
         except Exception as e:
             print(e)
+        keyboard.Hide()
         app.quit()
 
     #Display main frame into rgb frame in homepage and register page
