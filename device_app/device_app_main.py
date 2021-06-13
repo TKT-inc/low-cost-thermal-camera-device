@@ -181,6 +181,7 @@ class MainWindow(QtWidgets.QMainWindow):
         uic.loadUi("./device_app/guiModules/ui_files/loginWindow.ui", self)
         self.loading = LoadingDlg(self)
         self.active_device_btn.clicked.connect(self.button)
+        self.exit.clicked.connect(self.closeApp)
 
     def startConnectWifiWindow(self):
         uic.loadUi("./device_app/guiModules/ui_files/connectWifi.ui", self)

@@ -63,9 +63,9 @@ color: rgb(210, 210, 210);</string>
      <property name="geometry">
       <rect>
        <x>430</x>
-       <y>80</y>
+       <y>30</y>
        <width>431</width>
-       <height>291</height>
+       <height>401</height>
       </rect>
      </property>
      <property name="styleSheet">
@@ -193,6 +193,57 @@ QPushButton:pressed {
       <property name="icon">
        <iconset>
         <normaloff>../icons/24x24/cil-check.png</normaloff>../icons/24x24/cil-check.png</iconset>
+      </property>
+      <property name="iconSize">
+       <size>
+        <width>24</width>
+        <height>24</height>
+       </size>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="active_device_btn_2">
+      <property name="geometry">
+       <rect>
+        <x>140</x>
+        <y>290</y>
+        <width>151</width>
+        <height>91</height>
+       </rect>
+      </property>
+      <property name="minimumSize">
+       <size>
+        <width>150</width>
+        <height>30</height>
+       </size>
+      </property>
+      <property name="font">
+       <font>
+        <family>Segoe UI</family>
+        <pointsize>16</pointsize>
+        <weight>75</weight>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">QPushButton {
+	border-radius: 20px;	
+	background-color: #db4959;
+	color: #293241;
+}
+QPushButton:hover {
+	background-color:#EE6C4D;
+}
+QPushButton:pressed {	
+	background-color: #EE6C4D;
+}</string>
+      </property>
+      <property name="text">
+       <string>Exit
+App</string>
+      </property>
+      <property name="icon">
+       <iconset>
+        <normaloff>../icons/24x24/cil-x.png</normaloff>../icons/24x24/cil-x.png</iconset>
       </property>
       <property name="iconSize">
        <size>
