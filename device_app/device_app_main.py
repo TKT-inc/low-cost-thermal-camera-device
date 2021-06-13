@@ -199,6 +199,7 @@ class MainWindow(QtWidgets.QMainWindow):
     def startConfigWifiWindow(self):
         uic.loadUi("./device_app/guiModules/ui_files/editWifiConnection.ui", self)
         self.loading = LoadingDlg(self)
+        self.loading.display()
         curWifi = self.wifi.wifiConnected()
         if (curWifi is not None):
             self.current_wifi.setText("The device is using: " + curWifi)

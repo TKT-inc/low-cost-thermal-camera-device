@@ -162,7 +162,7 @@ class WifiManager:
                 for connection in NetworkManager.Settings.ListConnections():
                     settings = connection.GetSettings()['connection']
                     if settings['id'] == ssid:
-                        break;
+                        break
                 else:
                     return 'FAILED: This connection is a new connection'
                 
@@ -209,5 +209,5 @@ class WifiManager:
         devices = NetworkManager.NetworkManager.GetDevices()
         for dev in devices:
             if (dev.DeviceType == NetworkManager.NM_DEVICE_TYPE_WIFI or dev.DeviceType == NetworkManager.NM_DEVICE_TYPE_ETHERNET) and dev.State == NetworkManager.NM_DEVICE_STATE_ACTIVATED:
-                return dev.Interface
+                return dev.GetAppliedConnection(0)[0]['connection']['id']
         return None
