@@ -184,8 +184,8 @@ class WifiManager:
                 return 'FAILED: No suitable and available {ctype} device found.'
 
             # And connect
-            if (self.wifiConnected()):
-                return 'SUCCESS'
+            # if (self.wifiConnected()):
+            #     return 'SUCCESS'
             NetworkManager.NetworkManager.ActivateConnection(conn, dev, "/")
             # print(f"Activated connection={conn_name}.")
 
@@ -209,5 +209,5 @@ class WifiManager:
         devices = NetworkManager.NetworkManager.GetDevices()
         for dev in devices:
             if (dev.DeviceType == NetworkManager.NM_DEVICE_TYPE_WIFI or dev.DeviceType == NetworkManager.NM_DEVICE_TYPE_ETHERNET) and dev.State == NetworkManager.NM_DEVICE_STATE_ACTIVATED:
-                return dev.Udi
+                return dev.Interface
         return None
