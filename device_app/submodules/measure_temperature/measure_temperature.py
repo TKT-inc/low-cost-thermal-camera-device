@@ -56,7 +56,7 @@ def measureTemperature(color,temp, objects, object_measurement, user_offset, sca
             
             face_area = (coordinates[2]-coordinates[0])*(coordinates[3]-coordinates[1])*(scale*2)
             offset_temp = user_offset +  measureOffsetTempOfDistance(face_area)
-            temperature = (measured_temp/100.0) - 273.15 + offset_temp
+            temperature = measured_temp - 273.15 + offset_temp
             # raw = measured_temp/100.0 - 273.15
             # if (csvActivate):
             #     writer_object = csv.writer(f_object)
@@ -129,6 +129,7 @@ def measureTemperatureFromCoor(temp_img, coor_start, coor_end):
     def calculateLocalPixels():
         def calculateAverageTemp(y, x):
             selected_range = thermal_matrix[max(y - 1, 0) : min(y + 2, y_end-y_start + 1), max(x - 1, 0) : min(x + 2, x_end - x_start + 1)]
+            selected_range = selected_range / 100.0
             # thermal_reshape = thermal_matrix.reshape((thermal_matrix.shape[0], thermal_matrix.shape[1]))
             # np.savetxt('thermal_matrix.csv', thermal_reshape, delimiter=',')
             # print(f'Mat: {selected_range}')
@@ -143,17 +144,17 @@ def measureTemperatureFromCoor(temp_img, coor_start, coor_end):
                 idx = np.unravel_index(top_max_indices[i], thermal_matrix.shape)
                 # print(f'index: {idx}')
                 average_temp, standard_dev = calculateAverageTemp(idx[0], idx[1])
-                print(f'kth-largest: {idx} STD: {standard_dev}')
+                # print(f'kth-largest: {i} STD: {standard_dev}')
                 average_temp_arr.append(average_temp)
             return max(average_temp_arr)
         return np.amax(thermal_matrix)
 
     def calculatePercentagePoints():
         num_of_points = math.ceil(PERCENTAGE_THERMAL_POINTS * (x_end - x_start) * (y_end - y_start))
-        print(f'Point: {num_of_points}')
+        # print(f'Point: {num_of_points}')
         if (num_of_points > 1):
             top_max_indices = (-np.array(thermal_matrix)).argpartition(num_of_points, axis=None)[:num_of_points]
-            return np.average(thermal_matrix[np.unravel_index(top_max_indices, thermal_matrix.shape)])
+            return np.average(thermal_matrix[np.unravel_index(top_max_indices, thermal_matrix.shape)]) / 100.0
         return np.amax(thermal_matrix)
 
     if TEMPERATURE_MEASURE_METHOD == 1 :

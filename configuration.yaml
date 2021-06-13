@@ -79,7 +79,7 @@ measureTemperature:
     offsetDistCoeffecient: -0.347698157
     offsetDistIntercept: 4.557706084
     percentageThermalPoints: 0.17
-    temperatureMeasureMethod: 1
+    temperatureMeasureMethod: 2
     # Method 1: apply in one-person mode -> Get N highest-temp pixels -> find 8 neighbor pixels and calculate the average temp, standard deviation 
     # Method 2: apply in multi-person mode -> Choose percentage of captured pixels that has the highest temp and find the average temp of them
     temperatureStandardDeviationThreshold: 0.5
