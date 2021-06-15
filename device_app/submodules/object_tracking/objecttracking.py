@@ -147,7 +147,7 @@ class CentroidTracker():
 			else:
 				rects = []
 		else:
-			rects = list(filter(lamda x: (x[2]-x[0])*(x[3]-x[1]) >= MIN_FACE_SIZE_NORMAL_MODE, rects))
+			rects = list(filter(lambda x: (x[2]-x[0])*(x[3]-x[1]) >= MIN_FACE_SIZE_NORMAL_MODE, rects))
 
 		if len(rects) == 0:
 			# loop over any existing tracked objects and mark them
