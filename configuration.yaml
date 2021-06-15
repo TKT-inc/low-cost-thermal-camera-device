@@ -85,6 +85,7 @@ measureTemperature:
     temperatureStandardDeviationThreshold: 0.5
 
 personTracking:
+    minFaceSizeOfNormalMode: 100000
     maxFaceSizeOfOnePersonMode: 450000
     minFaceSizeOfOnePersonMode: 350000
     noOfDisapearFrames: 30

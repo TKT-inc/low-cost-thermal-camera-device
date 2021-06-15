@@ -16,6 +16,7 @@ BUFFER_RECONITE = cfg['personTracking']['bufSizeNameAndIdPersonTracking']
 RECORD_FACE_SIZE = cfg['personTracking']['recordFaceSize']
 MIN_FACE_SIZE_ONE_PERSON_MODE = cfg['personTracking']['minFaceSizeOfOnePersonMode']
 MAX_FACE_SIZE_ONE_PERSON_MODE = cfg['personTracking']['maxFaceSizeOfOnePersonMode']
+MIN_FACE_SIZE_NORMAL_MODE = cfg['personTracking']['minFaceSizeOfNormalMode']
 
 class ObjectInfo():
 	def __init__(self, coor, rgb, scale, fever_temp=38):
@@ -145,7 +146,9 @@ class CentroidTracker():
 				rects = [maxAreaFace]
 			else:
 				rects = []
-		
+		else:
+			rects = list(filter(lamda x: (x[2]-x[0])*(x[3]-x[1]) >= MIN_FACE_SIZE_NORMAL_MODE, rects))
+
 		if len(rects) == 0:
 			# loop over any existing tracked objects and mark them
 			# as disappeared
