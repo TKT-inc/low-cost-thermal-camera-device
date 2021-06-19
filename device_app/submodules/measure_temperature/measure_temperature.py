@@ -8,6 +8,7 @@ import csv
 with open("configuration.yaml") as ymlfile:
     cfg = yaml.safe_load(ymlfile)
 
+
 """
 Prams for transform from RGB coors into Thermal coors
 """
@@ -26,6 +27,9 @@ setup offset temperature
 NUMBER_MAX_THERMAL_POINTS = cfg['measureTemperature']['numberMaxThermalPoints']
 OFFSET_TEMPERATURE_DIST_COEF = cfg['measureTemperature']['offsetDistCoeffecient']
 OFFSET_TEMPERATURE_DIST_INT = cfg['measureTemperature']['offsetDistIntercept']
+PERCENTAGE_THERMAL_POINTS = cfg['measureTemperature']['percentageThermalPoints']
+TEMPERATURE_MEASURE_METHOD = cfg['measureTemperature']['temperatureMeasureMethod']
+TEMPERATURE_STANDARD_DEVIATION_THRESHOLD = cfg['measureTemperature']['temperatureStandardDeviationThreshold']
 
 """
 get thermal camera size
@@ -47,19 +51,20 @@ def measureTemperature(color,temp, objects, object_measurement, user_offset, sca
             thermal_end_x, thermal_end_y = convertRGBToThermalCoor(coordinates[2], coordinates[3])
             
             cv2.rectangle(color, (thermal_start_x, thermal_start_y), (thermal_end_x, thermal_end_y), (0, 0, 0), 4)
-            
+            face_area = (coordinates[2]-coordinates[0])*(coordinates[3]-coordinates[1])*(scale*2)
+            # print(f'Area: {str(face_area)}')
             measured_temp = measureTemperatureFromCoor(temp, (thermal_start_x, thermal_start_y), (thermal_end_x, thermal_end_y) )
             
-            face_area = (coordinates[2]-coordinates[0])*(coordinates[3]-coordinates[1])*(scale*2)
+            
             offset_temp = user_offset +  measureOffsetTempOfDistance(face_area)
-            temperature = (measured_temp/100.0) - 273.15 + offset_temp
+            temperature = measured_temp - 273.15 + offset_temp
             # raw = measured_temp/100.0 - 273.15
             # if (csvActivate):
             #     writer_object = csv.writer(f_object)
             #     writer_object.writerow([face_area, raw])
             # f_object.close()
             # print(f'Log: {measureOffsetTempOfDistance(face_area)}')
-            # print(f'Area: {str(face_area)}')
+            
             # print(f'Temp: {str((measured_temp/100.0) - 273.15)}')
             objects[objectID].updateTemperature(temperature)
         except Exception as identifier:
@@ -122,14 +127,38 @@ def measureTemperatureFromCoor(temp_img, coor_start, coor_end):
 
     thermal_matrix = temp_img[y_start:y_end, x_start:x_end]
 
-    # if ((x_end - x_start)*(y_end - y_start) > NUMBER_MAX_THERMAL_POINTS):
-    #     top_max_indices = (-np.array(thermal_matrix)).argpartition(NUMBER_MAX_THERMAL_POINTS, axis=None)[:NUMBER_MAX_THERMAL_POINTS]
-    #     # measured_temp = np.max(thermal_matrix)
-    #     measured_temp = np.average(thermal_matrix[np.unravel_index(top_max_indices, thermal_matrix.shape)])
-    # else:
-    measured_temp = np.amax(thermal_matrix)
+    def calculateLocalPixels():
+        def calculateAverageTemp(y, x):
+            selected_range = thermal_matrix[max(y - 1, 0) : min(y + 2, y_end-y_start + 1), max(x - 1, 0) : min(x + 2, x_end - x_start + 1)]
+            selected_range = selected_range / 100.0
+            # thermal_reshape = thermal_matrix.reshape((thermal_matrix.shape[0], thermal_matrix.shape[1]))
+            # np.savetxt('thermal_matrix.csv', thermal_reshape, delimiter=',')
+            # print(f'Mat: {selected_range}')
+            average_temp = np.average(selected_range)
+            standard_dev = np.std(selected_range)
+            return average_temp, standard_dev
 
-    return measured_temp
+        if ((x_end - x_start)*(y_end - y_start) > NUMBER_MAX_THERMAL_POINTS):
+            average_temp_arr = []
+            top_max_indices = (-np.array(thermal_matrix)).argpartition(NUMBER_MAX_THERMAL_POINTS, axis=None)[:NUMBER_MAX_THERMAL_POINTS]
+            for i in range(NUMBER_MAX_THERMAL_POINTS):
+                idx = np.unravel_index(top_max_indices[i], thermal_matrix.shape)
+                # print(f'index: {idx}')
+                average_temp, standard_dev = calculateAverageTemp(idx[0], idx[1])
+                # print(f'kth-largest: {i} STD: {standard_dev}')
+                average_temp_arr.append(average_temp)
+            return max(average_temp_arr)
+        return np.amax(thermal_matrix)
 
+    def calculatePercentagePoints():
+        num_of_points = math.ceil(PERCENTAGE_THERMAL_POINTS * (x_end - x_start) * (y_end - y_start))
+        # print(f'Point: {num_of_points}')
+        if (num_of_points > 1):
+            top_max_indices = (-np.array(thermal_matrix)).argpartition(num_of_points, axis=None)[:num_of_points]
+            return np.average(thermal_matrix[np.unravel_index(top_max_indices, thermal_matrix.shape)]) / 100.0
+        return np.amax(thermal_matrix)
 
-
+    if TEMPERATURE_MEASURE_METHOD == 1 :
+        return calculateLocalPixels()
+    elif TEMPERATURE_MEASURE_METHOD == 2:
+        return calculatePercentagePoints()

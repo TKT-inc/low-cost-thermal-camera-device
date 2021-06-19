@@ -162,7 +162,7 @@ class WifiManager:
                 for connection in NetworkManager.Settings.ListConnections():
                     settings = connection.GetSettings()['connection']
                     if settings['id'] == ssid:
-                        break;
+                        break
                 else:
                     return 'FAILED: This connection is a new connection'
                 
@@ -184,8 +184,8 @@ class WifiManager:
                 return 'FAILED: No suitable and available {ctype} device found.'
 
             # And connect
-            if (self.wifiConnected()):
-                return 'SUCCESS'
+            # if (self.wifiConnected()):
+            #     return 'SUCCESS'
             NetworkManager.NetworkManager.ActivateConnection(conn, dev, "/")
             # print(f"Activated connection={conn_name}.")
 
@@ -208,6 +208,6 @@ class WifiManager:
     def wifiConnected(self):
         devices = NetworkManager.NetworkManager.GetDevices()
         for dev in devices:
-            if dev.DeviceType == NetworkManager.NM_DEVICE_TYPE_WIFI and dev.State == NetworkManager.NM_DEVICE_STATE_ACTIVATED:
-                return True
-        return False
+            if (dev.DeviceType == NetworkManager.NM_DEVICE_TYPE_WIFI or dev.DeviceType == NetworkManager.NM_DEVICE_TYPE_ETHERNET) and dev.State == NetworkManager.NM_DEVICE_STATE_ACTIVATED:
+                return dev.GetAppliedConnection(0)[0]['connection']['id']
+        return None

@@ -340,6 +340,7 @@ class DeviceAppFunctions():
         self.conn.restartListener(self.objects)
     
     def selectCalibrateMode(self):
+        self.selectNormalMode()
         global USER_TEMP_OFFSET
         USER_TEMP_OFFSET = 0
         self.calibrate_person_ID = None
@@ -426,6 +427,9 @@ class DeviceAppFunctions():
         ACTIVATE_DEVICE = False
         with open("user_settings.yaml", "w") as f:
             yaml.dump(user_cfg, f)
+    
+    def suspendDevice(self):
+        self.MODE = 'OFF'
         
 
 def saveRecordsOfflineMode(fileName, record):

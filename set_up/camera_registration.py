@@ -130,7 +130,7 @@ while (1):
 			a,_ = l.capture()
 			cv.normalize(a, a, 0, 65535, cv.NORM_MINMAX)
 			np.right_shift(a, 8, a)
-			thermal =   np.uint8(a)
+			thermal = np.fliplr(np.uint8(a))
 			thermal_frame = cv.resize(thermal,(640,480))
 			thermal_frame = cv.applyColorMap(thermal_frame, cv.COLORMAP_INFERNO)
 		rgb_frame = cv.resize(rgb_ori, (RGB_WIDTH, RGB_HEIGHT))
